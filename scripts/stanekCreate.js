@@ -1,3 +1,10 @@
+//imports
+import { 
+  enum_port, enum_servers, enum_scripts
+  log, info, success, warning, error, fail,
+} from "scripts/common.js"
+
+
 /** 
  * Script that will manage the placement of Stanek fragments
  * @param {NS} ns 
@@ -103,27 +110,6 @@ export async function main(ns) {
     ns.run(enum_scripts.jump, 1, enum_scripts.stanekCharge)
 }
 
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    boot: "scripts/boot.js",
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
-}
 
 /**
  * Enum describing the fragment types
