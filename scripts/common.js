@@ -2,9 +2,16 @@
 This file shows the commons used in other scripts
   script names, ports, hostnames
 */
-//import { enum_port, enum_servers, enum_scripts} from "scripts/common.js"
-//backdoor.js, gang.js
-const enum_port = {
+/*
+import { 
+  enum_port, enum_servers, enum_scripts
+  log, info, success, warning, error, fail,
+} from "scripts/common.js"
+*/
+
+
+//communication port definitions
+export const enum_port = {
   //external scripts
   reset: 1,
   hack: 2,
@@ -15,13 +22,16 @@ const enum_port = {
 }
 
 
+//no port data definition
+export const portNoData = "NULL PORT DATA"
 
-//boot.js, destroyBitNode.js, reset.js
+
+
 /**
  * enum of special servers
  * All servers will be backdoored, if possible
  */
-const enum_servers = {
+export const enum_servers = {
     home: "home",   //no effect
     worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
@@ -32,7 +42,7 @@ const enum_servers = {
 /**
  * Enum containing scripts
  */
-const enum_scripts = {
+export const enum_scripts = {
     boot: "scripts/boot.js",
     main: "scripts/main.js",
     jump: "scripts/jumpScript.js",
@@ -50,3 +60,33 @@ const enum_scripts = {
     stanekCharge: "scripts/stanekCharge.js",
     workerCharge: "scripts/workerCharge.js",
 }
+
+
+
+/**
+ * Function that enables easy logging
+ * Cost: 0
+ */
+export function log(ns, loglevel, type, message) {
+    //depending on loglevel
+    switch (loglevel) {
+        case 2: //alert
+            ns.alert(message)
+        case 1: //console log
+            ns.tprint(type + " " + message)
+        case 0: //log
+            ns.print(type + " " + message)
+        default:
+            //do nothing?
+            break
+    }
+}
+
+
+
+//log constants
+export const info = "INFO"
+export const success = "SUCCESS"
+export const warning = "WARNING"
+export const error = "ERROR"
+export const fail = "FAIL"
