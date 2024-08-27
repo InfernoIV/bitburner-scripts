@@ -1,16 +1,24 @@
+//imports
+import { 
+  enum_port, enum_servers, enum_scripts
+  log, info, success, warning, error, fail,
+} from "scripts/common.js"
+
+
+
 /** 
  * Function to be called to charge all fragments
  * @param {NS} ns 
  */
 export async function main(ns) {
-    //amount of times to charge
+    //amount of times to charge, 
+    //TODO: a better target?
     const numCharge = 10
 
     //CotMG faction
     const faction = "Church of the Machine God"
-    
-    //ns.tail()
 
+    //disable logs
     ns.disableLog("disableLog")
     ns.disableLog("sleep")
     ns.disableLog("killall")
@@ -59,6 +67,8 @@ export async function main(ns) {
     ns.run(enum_scripts.jump, 1, enum_scripts.main)
 }
 
+
+
 /**
  * Function that charges the installed fargments
  */
@@ -89,53 +99,3 @@ async function chargeFragments(ns, threads) {
         }
     }
 }
-
-
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    boot: "scripts/boot.js",
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    stanekBuy: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
-}
-
-/**
- * Function that enables easy logging
- * Cost: 0
- */
-function log(ns, loglevel, type, message) {
-    //depending on loglevel
-    switch (loglevel) {
-        case 2: //alert
-            ns.alert(message)
-        case 1: //console log
-            ns.tprint(type + " " + message)
-        case 0: //log
-            ns.print(type + " " + message)
-        default:
-            //do nothing?
-            break
-    }
-}
-
-//log constants
-const info = "INFO"
-const success = "SUCCESS"
-const warning = "WARNING"
-const error = "ERROR"
-const fail = "FAIL"
