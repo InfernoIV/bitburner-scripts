@@ -1,17 +1,10 @@
+//imports
+import { enum_port, enum_servers } from "scripts/common.js"
+
+
+
 /** @param {NS} ns */
 export async function main(ns) {
-    const serverHome = "home"
-    const portNoData = "NULL PORT DATA"
-
-    const enum_port = {
-        //external scripts
-        reset: 1,
-        hack: 2,
-        gang: 3,
-        corporation: 4,
-        stock: 5,
-        backdoor: 6,
-    }
     
     //connect to home
     ns.singularity.connect(serverHome)
@@ -27,7 +20,7 @@ export async function main(ns) {
             //create a variable to save current server, and set it to current hostname
             let step = server
             //while not found home
-            while (step != serverHome) {
+            while (step != enum_servers.home) {
                 //save the first scan result
                 let nextStep = ns.scan(step)[0]
                 //add current to the start of the list
@@ -53,7 +46,7 @@ export async function main(ns) {
                 ns.tprint(error)
             }
             //connect to home
-            ns.singularity.connect(serverHome)
+            ns.singularity.connect(enum_servers.home)
 
             //clear port
             ns.clearPort(enum_port.backdoor)
