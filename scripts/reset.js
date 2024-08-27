@@ -1,17 +1,7 @@
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-}
+//imports
+import { enum_scripts} from "scripts/common.js"
+
+
 
 /** @param {NS} ns */
 export async function main(ns) {
