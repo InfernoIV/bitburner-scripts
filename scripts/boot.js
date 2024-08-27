@@ -1,3 +1,8 @@
+//imports
+import { enum_servers, enum_scripts} from "scripts/common.js"
+
+
+
 /** @param {NS} ns */
 export async function main(ns) {
     //get reset info
@@ -34,40 +39,4 @@ export async function main(ns) {
     //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
     ns.run(enum_scripts.jump, 1,
         enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
-}
-
-
-
-/**
- * enum of special servers
- * All servers will be backdoored, if possible
- */
-const enum_servers = {
-    home: "home",   //no effect
-    worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
-    //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
-}
-
-
-
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    boot: "scripts/boot.js",
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
 }
