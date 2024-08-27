@@ -1,3 +1,8 @@
+//imports
+import { enum_scripts} from "scripts/common.js"
+
+
+
 /** @param {NS} ns */
 export async function main(ns) {
     //describe the CotMG faction
@@ -25,27 +30,4 @@ export async function main(ns) {
     */
     //run jumpscript to boot main
     ns.run(enum_scripts.jump, 1, targetScript)
-}
-
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    boot: "scripts/boot.js",
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    stanekBuy: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
 }
