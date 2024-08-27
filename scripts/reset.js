@@ -9,9 +9,9 @@ export async function main(ns) {
     //if at least 1 augment bought
     if (augmentsBougt > 0) {
         //install augments
-        ns.singularity.installAugmentations(enum_scripts.main)
+        ns.singularity.installAugmentations(enum_scripts.boot)
         //otherwise soft reset
     } else {
-        ns.singularity.softReset(enum_scripts.main)
+        ns.singularity.softReset(enum_scripts.boot)
     }
 }
