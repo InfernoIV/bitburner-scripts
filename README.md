@@ -9,7 +9,7 @@ Early-game, many will be useless because they are only enabled by late-game feat
 ## Aliases
 A few handy aliases:
 `"alias boot=killall; boot.js"` = command `boot` kills all scripts and starts the boot sequence
-`"alias update=git-pull.js"` = command `update` will get download / update the code from github
+`"alias update=scripts/git-pull.js"` = command `update` will get download / update the code from github
 
 
 ## Running the code
