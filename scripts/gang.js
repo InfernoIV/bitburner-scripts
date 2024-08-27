@@ -1,10 +1,3 @@
-//imports
-/*
-import { log, success, warning, error, info, numberFormatter } from "scripts/log.js"
-import { overWritePort, portGang, portBlockReset } from "scripts/port.js"
-//import { factionGang } from "scripts/faction.js"
-*/
-
 /*  sources: 
 https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.gang.md
 https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/tasks.ts
