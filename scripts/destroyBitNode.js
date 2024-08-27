@@ -1,21 +1,9 @@
 /** 
  * @param {NS} ns 
- * script that destroys the bitnode (saving RAM)
+ * Script that destroys the bitnode, defaults to bitnode 12 and boots with the boot script
+ * This is a seperate script to save 20 GB RAM
  */
 export async function main(ns) {
-    /*
-    try {
-        ns.tprint("Args: " + JSON.stringify(ns.args))
-        
-        //get arguments
-        let args = ns.args
-
-        
-        //destroy bitnode, with boot script
-        ns.singularity.destroyW0r1dD43m0n(12, args[0])
-    } catch (error) {
-        */
-        //destroy bitnode, without boot script
-        ns.singularity.destroyW0r1dD43m0n(12, "scripts/boot.js")
-    //}
+    //destroy bitnode
+    ns.singularity.destroyW0r1dD43m0n(12, "scripts/boot.js")
 }
