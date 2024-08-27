@@ -12,26 +12,13 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/Gang.ts
 https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Constants.ts
 */
 
-/*
-import { gangKarmaRequirement } from "scripts/gang/gangConst.js"
-*/
-/**
- * Enum describing the port numbers
- */
-const enum_port = {
-    //external scripts
-    reset: 1,
-    hack: 2,
-    gang: 3,
-    corporation: 4,
-    stock: 5,
-}
+import { enum_port, enum_servers, enum_scripts} from "scripts/common.js"
 
-
-const factionGang = "Slum Snakes"
-//export const gangKarmaRequirement = -54000
 
 const logLevel = -1
+
+//gang to join
+const factionGang = "Slum Snakes"
 
 //maximum number of gang members
 const gangMembersMax = 12
@@ -49,27 +36,14 @@ const enumGangtask = {
     money: "money",
 }
 
-
-
-
-
-
-
-
 //the focus of the gang, either hacking or combat, received from bitNode manager
 var gangFocus
 
-/*
-var gangMemberIndex = -1
-var lastGangMemberIndex = -1
-var lowerWantedMembers = 0 
-*/
 var bestPowerOfOtherGangs = 0
 var previousWantedLevel = 0
 //set train level
 const maxTrainLevel = 200//50
-//TODO: set wanted level
-//const maxWantedLevel = 1
+
 //constants
 const desiredMult = 10
 const numberOfEquipment = 15//20 //24 takes too long... //32 total, 24 combat, 8 hacking
@@ -102,7 +76,6 @@ export async function main(ns) {
             //update UI
             //updateUI(ns)
         }
-        //await ns.sleep(100)
     }
 }
 
