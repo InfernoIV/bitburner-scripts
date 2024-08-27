@@ -1,13 +1,7 @@
-const enum_port = {
-    //external scripts
-    reset: 1,
-    hack: 2,
-    gang: 3,
-    corporation: 4,
-    stock: 5,
-    backdoor: 6,
-    stopHack: 7,
-}
+//imports
+import { enum_port, enum_servers, enum_scripts} from "scripts/common.js"
+
+
 
 //log constants
 const info = "INFO"
@@ -15,25 +9,6 @@ const success = "SUCCESS"
 const warning = "WARNING"
 const error = "ERROR"
 const fail = "FAIL"
-
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-}
-
 
 const serverHome = "home"
 const enum_hackingCommands = {
