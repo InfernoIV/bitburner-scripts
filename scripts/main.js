@@ -791,7 +791,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
     //get player activity
     const playerActivity = getActivity(ns)
     //set the default focus for actions (true unless augment is installed)
-    const actionFocus = (getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
+    const actionFocus = false //when focussed, number of bought augments cannot be read out (getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
     //check if we joined bladeburner
     const joinedBladeburner = ns.bladeburner.joinBladeburnerDivision()
 
