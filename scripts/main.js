@@ -2,6 +2,7 @@
  * TODO LIST:
  * manageScripts: indicate and handle hack manager scaling up and scaling down, fill scripts
  * manageStanek: to test
+ * reactive sleeves in actions and in purchase augments and update ui
  */
 
 
@@ -34,12 +35,12 @@ export async function main(ns) {
 
 
     //number of sleeves available
-    let numSleeves = 5 //max 8 (+1 per completion of BN10)
+    let numSleeves = 8 //max 8 (+1 per completion of BN10)
     //update numSleeves
-    if (resetInfo.ownedSF.has(10)) {
+    /*if (resetInfo.ownedSF.has(10)) {
         //each level grants a additional sleeve
         numSleeves += resetInfo.ownedSF.get(10)
-    }
+    }*/
     //stanek information
     let stanekInfo = { width: 0, height: 0 }
     //keep track of launched scripts
@@ -85,7 +86,7 @@ export async function main(ns) {
         updateUI(ns, numSleeves, bitNodeMultipliers) //0 GB
 
         //reset & destruction: 18 GB
-        manageDestruction(ns)   //0 GB
+        //manageDestruction(ns)   //0 GB
         manageReset(ns, minAugs)    //0 GB
         manageAugments(ns, numSleeves)  //18 GB
 
@@ -355,6 +356,7 @@ function manageAugments(ns, numSleeves) {
             }
         }
     }
+    /*
     //for each sleeve
     for (let index = 0; index < numSleeves; index++) {
         //for each sleeve augment
@@ -369,6 +371,7 @@ function manageAugments(ns, numSleeves) {
 
         }
     }
+    */
 }
 
 
@@ -791,13 +794,13 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
     //get player activity
     const playerActivity = getActivity(ns)
     //set the default focus for actions (true unless augment is installed)
-    const actionFocus = false //when focussed, number of bought augments cannot be read out (getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
+    const actionFocus = (getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
     //check if we joined bladeburner
     const joinedBladeburner = ns.bladeburner.joinBladeburnerDivision()
 
     if (ns.getPlayer().skills.hacking < statMinHacking) {
         //get best crime for hacking
-        const bestCrime = getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
+        const bestCrime = ns.enums.CrimeType.robStore//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
         //if not performing the correct crime
         if (playerActivity.value != bestCrime) {
             //commit crime for karma
@@ -808,7 +811,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //if we have not reached target karma
     } else if (player.karma > gangKarma) {
         //get best crime for karma
-        const bestCrime = getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+        const bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
         //if not performing the correct crime
         if (playerActivity.value != bestCrime) {
             //commit crime for karma
@@ -840,7 +843,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //if bladeburner is not joined or augment for dual work is installed
         if ((!joinedBladeburner) || (actionDual)) {
             //get best crime for combat skills
-            const bestCrime = getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.skills)
+            const bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.skills)
             //if not performing the correct crime
             if (playerActivity.value != bestCrime) {
                 //commit crime for money/stats?
@@ -851,13 +854,12 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         }
     }
 
-    //temporary
-    return
     //sleeve actions
     //shock value that is wanted (96%)
     const shockMax = 0.96
     //get all max shock value
     let sleeveShockValues = []
+
     //for each sleeve
     for (let index = 0; index < numSleeves; index++) {
         //get shock value
@@ -865,6 +867,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //add the shock to the list
         sleeveShockValues.push(shock)
     }
+
     //if there is a sleeve with too much shock
     if (Math.max(sleeveShockValues) > shockMax) {
         //for each sleeve
@@ -881,7 +884,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //for each sleeve
         for (let index = 0; index < numSleeves; index++) {
             //get best crime for karma
-            let bestCrime = getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+            let bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
             //if not doing the correct work
             if (getActivity(ns, index).value != bestCrime) {
                 //perform crime for karma
@@ -894,7 +897,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //for each sleeve
         for (let index = 0; index < numSleeves; index++) {
             //get best crime for kills
-            let bestCrime = getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.kills)
+            let bestCrime = ns.enums.CrimeType.homicide//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.kills)
             //if not performing the correct work
             if (getActivity(ns, index).value != bestCrime) {
                 //perform crime
@@ -1038,7 +1041,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
                 //check if the sleeve is not assigned
                 if (!Object.hasOwn(sleeveActions, index)) {
                     //get best crime for skills
-                    let bestCrime = getBestCrime(ns, bitNodeMultipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
+                    let bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
                     //if not working on the desired crime
                     if (getActivity(ns, index).value != bestCrime) {
                         //assign to crime
@@ -1840,6 +1843,7 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
 
 
     //sleeves
+    
     for (let index = 0; index < numSleeves; index++) {
         //get sleeve activity
         const activity = getActivity(ns, index)
