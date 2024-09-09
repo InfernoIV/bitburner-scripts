@@ -10,12 +10,15 @@ Base cost 1.6 GB + references  GB =  GB
 Script that manages the corporation. 
 Starts with Agriculture then finished with Tobacco.
 TODO: not finished / still broken
+TODO: when to go for investments, and how much? Impacted by bitnode multipliers: just get the investments blindly, in a specific point in time?
+Keep blocking resets until investment 4 is done? To ensure timings
 
 # Parameters
 None
 
 # Steps
 * Initialize
+  * Clear port: portCorporation
 * Create corporation
 * Setup Agriculture
   * Start
@@ -23,22 +26,59 @@ None
     2. Unlock smartSupply
     3. Expand to every city
     4. Buy warehouse for every city
-    5. Hire employees (1,1,1)
+    5. Hire employees: 1,1,1
     6. Set Smart supply and sell options for each city
     7. Buy advert
     8. Upgrade warehouse of each city to 2
     9. Buy upgrades: focuswire 2, neural Accelerators 2, SpeechProcessorImplants 2, nuoptimalNootropicInjectorImplants 2, smartFactories
-    10. Hire employees (2,2,2)
-    11. Buy materials
-    12. Get Investment 1
+    10. Hire employees: 2,2,2
+    11. Buy materials: 125, 0, 75, 27000
+    12. Get Investment 1 (goal: $176e9) //142b is fast stable, originally 210e9 (210b)
   * Improve
-    1. TODO
+    1. Hire employees: 1,1,1,1,5
+    2. Buy upgrades: smartFactories 10, smartStorage 10
+    3. Upgrade warehouse of each city to 9
+    4. Buy Materials: 2675, 96, 2445, 119400
+    5. Hire employees: 3, 2, 2, 2
+    6. Get Investment 2: $5e12 //5t
   * Finalize
-    1. TODO
+    1. Upgrade warehouse of each city: 18
+    2. But materials: 6500, 630, 3750, 84000
 * Setup Tobacco
-  * TODO
+  * startTobacco
+   1. Expand industry to Tobacco
+   2. Expand cities
+   3. Unlock warehouses
+   4. Set smartSupply
+   5. Hire employees: 8, 9, 5, 8
+   6. Hire employees: 1, 1, 1, 1, 5
+   7. Buy upgrade: dreamSense 10)
+  * createProductTobacco
+   1. Create product
+   2. Upgrade: Dream Sense 20
+   3. Upgrade: Focus Wires 20
+   4. Upgrade: NeuralAccelerators 20
+   5. Upgrade: Speech Processor Implants 20
+   6. Upgrade: Nuoptimal Nootropic Injector Implants 20
+   7. Upgrade: ProjectInsight 10
+  * createProductTobacco2
+   1. Create product
+   2. Upgrade: Dream Sense 30
+  * getInvestment3
+   1. Upgrade: Wilson Analytics 10
+   2. Get investment 3: $800e12
+  * getInvestment4
+   1. Get investment 4: $1e15
+  * Go public
+   1. Go public
+   2. Issue dividends
 * Manage Tobacco
-  * TODO
+  * Try to buy upgrade Wilson Analytics
+  * Buy the cheapest: advert or main office upgrade
+  * Try to upgrade other offices as well
+  * Buy upgrades
+  * Keep soft stats up
+  * buy materials???
 
 # Notes
 * Valuation is determined by: ***TODO***
