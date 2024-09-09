@@ -21,4 +21,4 @@ Base cost 1.6 GB + references  GB =  GB
 # References
 | Function | Ram | Description |
 |  --- | --- | --- |
-| [ns.]() | 0 GB |  |
+| [ns.]() |  GB |  |
