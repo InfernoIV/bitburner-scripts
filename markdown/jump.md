@@ -1,5 +1,8 @@
 [Index](./index.md) > [jump.js](./jump.md)
 
+# Code
+[jump.js](/scripts/jump.js)
+
 # Ram cost
 Base cost 1.6 GB + references 1 GB = 2.6 GB
 
