@@ -13,7 +13,6 @@
 |  [stanekCreate.js](./stanekCreate.md) |  Script that creates the Stanek layout |
 |  [hack.js](./hack.md) |  Script that hacks servers |
 
-|  [jumpScript.js](./jumpScript.md) |  Script that executes other script |
 |  [boot.js](./boot.md) |  Script that initiates boot sequence |
 
 ## Secondary scripts
@@ -35,6 +34,7 @@ stock.js
 |  Package | Description |
 |  --- | --- |
 |  [jump.js](./jump.md) |  Script that is used to jump to other script |
+|  [jumpScript.js](./jumpScript.md) |  Script that executes other script |
 |  [common.js](./common.md) |  Library that hold common definitions |
 |  [farmIntelligence.js](./farmIntelligence.md) |  Script to run after all company factions are joined, farms intelligence |
 |  [ram.js](./ram.md) |  Script that display ram of main script ([main.js](./main.md)) |
