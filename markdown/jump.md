@@ -8,12 +8,11 @@ Script that launches script on **home server** with parameters.
 TODO: why 2 args? Which script uses this?
 
 # Parameters
-1+ parameters
-|  Number | Name | Description |
+|  Number | Name | Description | Optional |
 |  --- | --- | --- |
-| 0 | script | name of the script to launch |
-| 1 | arg1 | parameter 1 for the launch script | 
-| 2 | arg2 | parameter 2 for the launch script | 
+| 0 | script | name of the script to launch | Mandatory |
+| 1 | arg1 | parameter 1 for the launch script | Optional |
+| 2 | arg2 | parameter 2 for the launch script | Optional |
 
 # Steps
 Collect arguments and save to variable
