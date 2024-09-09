@@ -13,6 +13,9 @@ A few handy aliases:
 
 # TODO
 * Make [cleanup.js](/markdown/cleanup.md) start the boot sequence
-*  
+* Split scripts which have their own timings:
+  * Gang: Gang.nextUpdate()
+  * Corporation
+
 # Scripts
 See [index](/markdown/index.md)
