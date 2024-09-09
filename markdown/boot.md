@@ -1,5 +1,4 @@
 [Index](./index.md) > [boot.md](./boot.md)
-[Index](./index.md) > [](./.md)
 
 # Code
 [boot.js](/scripts/boot.js)
