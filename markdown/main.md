@@ -7,7 +7,7 @@
 Base cost 1.6 GB + references  GB =  GB
 
 # Description
-The purpose of this script is to manage the progression of the game.
+The purpose of this script is to manage the progression of the game and launch other scripts that can assist.
 
 # Parameters
 None
@@ -122,7 +122,7 @@ None
 
 ## manageAugments
 * Function that manages the buying of augments
-* If port reset is blocked by "gang" ([gang.js](./gang.md): does nothing
+* If port reset is blocked by "gang" ([gang.js](./gang.md)): this function does nothing
 * for every joined faction: for every augment of that faction: if not owned: try to buy
 * For each sleeve: for each augments available: try to buy augment
 
