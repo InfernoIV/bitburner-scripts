@@ -1,5 +1,8 @@
 [Index](./index.md) > [cleanup.js](./cleanup.md)
 
+# Code
+[cleanup.js](/scripts/cleanup.js)
+
 # Ram cost
 Base cost 1.6 GB + references 1.2 GB = 2.8 GB
 
