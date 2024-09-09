@@ -9,7 +9,7 @@ TODO: why 2 args? Which script uses this?
 
 # Parameters
 |  Number | Name | Description | Optional |
-|  --- | --- | --- |
+|  --- | --- | --- | --- |
 | 0 | script | name of the script to launch | Mandatory |
 | 1 | arg1 | parameter 1 for the launch script | Optional |
 | 2 | arg2 | parameter 2 for the launch script | Optional |
