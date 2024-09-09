@@ -18,6 +18,9 @@ Base cost 1.6 GB + references  GB =  GB
 # Steps
 * 
 
+# Notes
+
+
 # Shortcuts / ram savings
 
 
