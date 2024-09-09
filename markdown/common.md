@@ -1,21 +1,19 @@
 [Index](./index.md) > [common.js](./common.md)
 
+# Code
+[common.js](/scripts/common.js)
+
 # Ram cost
 Base cost 1.6 GB + references  GB =  GB
 
 # Description
-
+Script that is a library, to be used for other scripts
 
 # Parameters
-|  Number | Name | Description | Optional |
-|  --- | --- | --- |
-| 0 | script | name of the script to launch | Mandatory |
-
+None
 
 # Steps
-
+None
 
 # References
-| Function | Ram | Description |
-|  --- | --- | --- |
-| [ns.]() | 0 GB |  |
+None
