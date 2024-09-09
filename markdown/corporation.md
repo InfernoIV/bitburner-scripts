@@ -46,39 +46,39 @@ None
     2. But materials: 6500, 630, 3750, 84000
 * Setup Tobacco
   * startTobacco
-   1. Expand industry to Tobacco
-   2. Expand cities
-   3. Unlock warehouses
-   4. Set smartSupply
-   5. Hire employees: 8, 9, 5, 8
-   6. Hire employees: 1, 1, 1, 1, 5
-   7. Buy upgrade: dreamSense 10)
+    1. Expand industry to Tobacco
+    2. Expand cities
+    3. Unlock warehouses
+    4. Set smartSupply
+    5. Hire employees: 8, 9, 5, 8
+    6. Hire employees: 1, 1, 1, 1, 5
+    7. Buy upgrade: dreamSense 10)
   * createProductTobacco
-   1. Create product
-   2. Upgrade: Dream Sense 20
-   3. Upgrade: Focus Wires 20
-   4. Upgrade: NeuralAccelerators 20
-   5. Upgrade: Speech Processor Implants 20
-   6. Upgrade: Nuoptimal Nootropic Injector Implants 20
-   7. Upgrade: ProjectInsight 10
+    1. Create product
+    2. Upgrade: Dream Sense 20
+    3. Upgrade: Focus Wires 20
+    4. Upgrade: NeuralAccelerators 20
+    5. Upgrade: Speech Processor Implants 20
+    6. Upgrade: Nuoptimal Nootropic Injector Implants 20
+    7. Upgrade: ProjectInsight 10
   * createProductTobacco2
-   1. Create product
-   2. Upgrade: Dream Sense 30
+    1. Create product
+    2. Upgrade: Dream Sense 30
   * getInvestment3
-   1. Upgrade: Wilson Analytics 10
-   2. Get investment 3: $800e12
+    1. Upgrade: Wilson Analytics 10
+    2. Get investment 3: $800e12
   * getInvestment4
-   1. Get investment 4: $1e15
+    1. Get investment 4: $1e15
   * Go public
-   1. Go public
-   2. Issue dividends
-* Manage Tobacco
-  * Try to buy upgrade Wilson Analytics
-  * Buy the cheapest: advert or main office upgrade
-  * Try to upgrade other offices as well
-  * Buy upgrades
-  * Keep soft stats up
-  * buy materials???
+    1. Go public
+    2. Issue dividends
+* Manage Tobacco (loop)
+   1. Try to buy upgrade Wilson Analytics
+   2. Buy the cheapest: advert or main office upgrade
+   3. Try to upgrade other offices as well
+   4. Buy upgrades
+   5. Keep soft stats up
+   6. buy materials???
 
 # Notes
 * Valuation is determined by: ***TODO***
