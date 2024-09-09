@@ -19,7 +19,7 @@
 |  --- | --- |
 |  [gang.js](./gang.md) |  Script that manages gang |
 |  [corporation.js](./corporation.md) |  Script that manages gang |
-stock.js
+|  [stock.js](./stock.md) |  Script that manages stocks |
 
 ## Worker scripts
 |  Package | Parent | Description | Parameters |
