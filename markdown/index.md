@@ -12,7 +12,6 @@
 |  [stanekCharge.js](./stanekCharge.md) |  Script that charges the Stanek fragments |
 |  [stanekCreate.js](./stanekCreate.md) |  Script that creates the Stanek layout |
 |  [hack.js](./hack.md) |  Script that hacks servers |
-
 |  [boot.js](./boot.md) |  Script that initiates boot sequence |
 
 ## Secondary scripts
