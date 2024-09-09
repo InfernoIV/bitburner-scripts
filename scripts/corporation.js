@@ -201,7 +201,7 @@ async function startAgriculture(ns, targetInvestment) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.6: post advert")
+    updateUI(ns, info, "Agriculture 1.7: post advert")
 
     //if no adverts have been bought
     while (ns.corporation.getDivision(divisionMaterial).numAdVerts == 0) {
@@ -212,7 +212,7 @@ async function startAgriculture(ns, targetInvestment) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.7: upgrade warehouse")
+    updateUI(ns, info, "Agriculture 1.8: upgrade warehouse")
 
     //for each city
     for (let city of citiesAll) {
@@ -221,7 +221,7 @@ async function startAgriculture(ns, targetInvestment) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.8: buy upgrades")
+    updateUI(ns, info, "Agriculture 1.9: buy upgrades")
 
     //buy upgrades
     while (!await buyUpgrade(ns, divisionMaterial, upgrade.focusWires, 2)) { }
@@ -231,7 +231,7 @@ async function startAgriculture(ns, targetInvestment) {
     while (!await buyUpgrade(ns, divisionMaterial, upgrade.smartFactories, 2)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.9: hire more employees")
+    updateUI(ns, info, "Agriculture 1.10: hire more employees")
 
     //for each city
     for (let city of citiesAll) {
@@ -240,13 +240,13 @@ async function startAgriculture(ns, targetInvestment) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.10: buy materials")
+    updateUI(ns, info, "Agriculture 1.11: buy materials")
 
     //buy materials
     while (!await buyMaterials(ns, divisionMaterial, 125, 0, 75, 27000)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.11: investment $" + numberFormatter(targetInvestment))
+    updateUI(ns, info, "Agriculture 1.12: investment $" + numberFormatter(targetInvestment))
 
     //wait for investment
     await waitForInvestment(ns, divisionMaterial, targetInvestment)
