@@ -1,5 +1,8 @@
 [Index](./index.md) > [backdoor.js](./backdoor.md)
 
+# Code
+[backdoor.js](/scripts/backdoor.js)
+
 # Ram cost
 Base cost 1.6 GB + references  GB =  GB
 
