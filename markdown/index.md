@@ -24,7 +24,7 @@
 stock.js
 
 ## Worker scripts
-|  Package | Origin | Description | Parameters |
+|  Package | Parent | Description | Parameters |
 |  --- | --- | --- | --- |
 |  [workerCharge.js](./workerCharge.md) | stanekCharge.js | Charges stanek fragments on main server | None |
 |  [workerGrow.js](./workerGrow.md) | hack.js | Executes function 'grow()' on external server  | TBD |
