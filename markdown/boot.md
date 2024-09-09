@@ -1,3 +1,5 @@
+[Index](./index.md) > [boot.md](./boot.md)
+
 # Description
 Script that handles the startup sequence
 
