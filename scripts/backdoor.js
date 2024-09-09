@@ -48,8 +48,8 @@ export async function main(ns) {
             //connect to home
             ns.singularity.connect(enum_servers.home)
 
-            //clear port
-            ns.clearPort(enum_port.backdoor)
+            //remove the current hostname from the port
+            ns.readPort(enum_port.backdoor)
         }
         //wait a bit
         await ns.sleep(100)
