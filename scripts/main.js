@@ -356,7 +356,7 @@ function manageAugments(ns, numSleeves) {
             }
         }
     }
-    /*
+    
     //for each sleeve
     for (let index = 0; index < numSleeves; index++) {
         //for each sleeve augment
@@ -371,7 +371,6 @@ function manageAugments(ns, numSleeves) {
 
         }
     }
-    */
 }
 
 
