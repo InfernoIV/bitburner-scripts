@@ -1,6 +1,6 @@
 //imports
 import { 
-  enum_port, enum_servers, enum_scripts
+  enum_port, enum_servers, enum_scripts,
   log, info, success, warning, error, fail,
 } from "scripts/common.js"
 
