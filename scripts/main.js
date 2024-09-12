@@ -32,15 +32,9 @@ export async function main(ns) {
     const resetInfo = ns.getResetInfo()
     //get bitnode information from file
     const bitNodeMultipliers = JSON.parse(ns.read("bitNode/" + ns.getResetInfo().currentNode + ".json"))
-
-
     //number of sleeves available
-    let numSleeves = 8 //max 8 (+1 per completion of BN10)
-    //update numSleeves
-    /*if (resetInfo.ownedSF.has(10)) {
-        //each level grants a additional sleeve
-        numSleeves += resetInfo.ownedSF.get(10)
-    }*/
+    const numSleeves = 8 //max 8
+    
     //stanek information
     let stanekInfo = { width: 0, height: 0 }
     //keep track of launched scripts
@@ -52,16 +46,10 @@ export async function main(ns) {
 
     //wait a bit
     await ns.sleep(sleepTime)
-    //try to get exploits
-    //exploits(ns)
-    /*
-        if(ns.getPlayer().factions.indexOf("") == -1) {
-            ns.singularity.travelToCity("Chongqing")
-            ns.singularity.goToLocation()
-        }
-    */
 
+    //debugging?
     let counter = 1
+    
     //main loop
     while (true) {
         //main script: 3,1 GB  
@@ -79,14 +67,11 @@ export async function main(ns) {
         //player, sleeve & bladeburner: 71 GB
         manageActions(ns, numSleeves, bitNodeMultipliers)   //71 GB
 
-        //stanek:
-        //manageStanek(ns, stanekInfo) //2,9 GB
-
         //update ui
         updateUI(ns, numSleeves, bitNodeMultipliers) //0 GB
 
         //reset & destruction: 18 GB
-        //manageDestruction(ns)   //0 GB
+        manageDestruction(ns)   //0 GB
         manageReset(ns, minAugs)    //0 GB
         manageAugments(ns, numSleeves)  //18 GB
 
@@ -1008,47 +993,19 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
             }
         }
 
-        //for sleeve's left over:
-        //if bladeburner is unlocked: perform bladeburner actions
-        if (false) { //joinedBladeburner) {
-            /*
-            //check each sleeve
-            for (let index = 0; index < numSleeves; index++) {
-                //check if the sleeve is not assigned
-                if (!Object.hasOwn(sleeveActions, index)) {
-                    //get best bladeburner action
-                    let bladeburnerAction = getBladeburnerActionForSleeve(ns, index)
-                    let activity = getActivity(ns, index)
-                    //log(ns,1,info,index + " getBladeburnerActionForSleeve: " + JSON.stringify(bladeburnerAction) + ", activity: " + JSON.stringify(activity))
-                    //if the sleeve is not performing the correct bladeburner task
-                    if (activity.value != bladeburnerAction.name) {
-                        
-                        //set sleeve to action
-                        if(!ns.sleeve.setToBladeburnerAction(index, bladeburnerAction.type, bladeburnerAction.name)) {
-                            //log(ns,1,fail,"setToBladeburnerAction: '" + index + "', '" + bladeburnerAction.type + "', '" + bladeburnerAction.name + "'")
-                        }   
-                    }
-                    //save information
-                    sleeveActions[index] = { type: enum_activities.bladeburner, value: bladeburnerAction.name }
+        //check each sleeve
+        for (let index = 0; index < numSleeves; index++) {
+            //check if the sleeve is not assigned
+            if (!Object.hasOwn(sleeveActions, index)) {
+                //get best crime for skills
+                let bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
+                //if not working on the desired crime
+                if (getActivity(ns, index).value != bestCrime) {
+                    //assign to crime
+                    ns.sleeve.setToCommitCrime(index, bestCrime)
                 }
-            }
-            */
-            //bladeburner not unlocked: perform crime
-        } else {
-            //check each sleeve
-            for (let index = 0; index < numSleeves; index++) {
-                //check if the sleeve is not assigned
-                if (!Object.hasOwn(sleeveActions, index)) {
-                    //get best crime for skills
-                    let bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
-                    //if not working on the desired crime
-                    if (getActivity(ns, index).value != bestCrime) {
-                        //assign to crime
-                        ns.sleeve.setToCommitCrime(index, bestCrime)
-                    }
-                    //save information
-                    sleeveActions[index] = { type: enum_activities.crime, value: bestCrime }
-                }
+                //save information
+                sleeveActions[index] = { type: enum_activities.crime, value: bestCrime }
             }
         }
     }
