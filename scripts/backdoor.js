@@ -7,7 +7,7 @@ import { enum_port, enum_servers, portNoData } from "scripts/common.js"
 export async function main(ns) {
     
     //connect to home
-    ns.singularity.connect(serverHome)
+    ns.singularity.connect(enum_servers.home)
 
     //main loop
     while (true) {
