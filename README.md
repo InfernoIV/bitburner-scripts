@@ -16,6 +16,19 @@ A few handy aliases:
 * Split scripts which have their own timings:
   * Gang: Gang.nextUpdate()
   * Corporation
+* Fix sleeve duplicate work:
 
-# Scripts
-See [index](/markdown/index.md)
+sleeve.setToCompanyWork: Sleeve 6 cannot work for company KuaiGong International because Sleeve 5 is already working for them.
+
+Stack:
+scripts/main.js:L996@manageActions
+scripts/main.js:L80@main setToCompanyWork KuaiGong International: RUNTIME ERROR
+scripts/main.js@home (PID - 1)
+
+sleeve.setToCompanyWork: Sleeve 6 cannot work for company KuaiGong International because Sleeve 5 is already working for them.
+
+Stack:
+scripts/main.js:L996@manageActions
+scripts/main.js:L80@main
+scripts/main.js: RUNTIME ERROR
+scripts/main.js@home (PID - 1)
