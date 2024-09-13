@@ -631,12 +631,10 @@ function manageHacking(ns) {
         //if the server isn't hacknet, is not backdoored and we can backdoor
         if ((!server.startsWith("hacknet")) &&
             (ns.getServer(server).hasAdminRights) &&
-            (!ns.getServer(server).backdoorInstalled)) {
-            //if there is nothing assigned
-            if (ns.peek(enum_port.backdoor) == portNoData) {
+            (!ns.getServer(server).backdoorInstalled) && 
+            (ns.getPlayer().skills.hacking >= ns.getServer(server).requiredHackingSkill)) {
                 //write hostname
                 ns.writePort(enum_port.backdoor, server)
-            }
         }
     }
 }
