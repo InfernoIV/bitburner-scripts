@@ -19,6 +19,7 @@ export const enum_port = {
   corporation: 4,
   stock: 5,
   backdoor: 6,
+  stopHack: 7,
 }
 
 
