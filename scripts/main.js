@@ -1217,7 +1217,8 @@ function getFactionWorkTypes(faction) {
  */
 function determineBladeburnerAction(ns) {
     //target min chance before attempting bladeburner
-    const chanceMin = .50 //1 //0.75
+    const chanceMin = 1
+    const chanceMinBO = 0.5
 
     //upgrade skills
     //for each bladeburner skill
@@ -1267,7 +1268,7 @@ function determineBladeburnerAction(ns) {
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.blackOps, blackOp.name)
                 //check if we have enough rank and enough chance
                 if ((rank > blackOp.reqRank) &&
-                    (chance[0] >= chanceMin)) {
+                    (chance[0] >= chanceMinBO)) {
                     //return this information
                     return { type: enum_bladeburnerActions.type.blackOps, name: blackOp.name }
                 }
