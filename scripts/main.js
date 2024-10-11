@@ -1217,7 +1217,7 @@ function getFactionWorkTypes(faction) {
  */
 function determineBladeburnerAction(ns) {
     //target min chance before attempting bladeburner
-    const chanceMin = 1 //0.75
+    const chanceMin = .50 //1 //0.75
 
     //upgrade skills
     //for each bladeburner skill
