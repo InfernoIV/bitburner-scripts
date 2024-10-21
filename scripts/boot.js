@@ -38,5 +38,5 @@ export async function main(ns) {
 
     //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
     ns.run(enum_scripts.jump, 1,
-        enum_scripts.main stanekCreate, true) //which script to launch, kill other scripts
+        enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
 }
