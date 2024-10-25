@@ -677,12 +677,11 @@ function manageScripts(ns, launchedScripts, bitNodeMultipliers) {
     scriptsToLaunch.push(enum_scripts.hack)
 
     //check if makes sense to launch gang manager
-    /*
     if ((bitNodeMultipliers.GangSoftcap > 0) &&
         (player.karma < gangKarma)) {
         //add to list
         scriptsToLaunch.push(enum_scripts.gang)
-    }*/
+    }
 
     //check if makes sense to launch corporation manager
     if ((bitNodeMultipliers.CorporationSoftcap >= 0.15) &&
