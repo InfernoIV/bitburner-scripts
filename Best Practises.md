@@ -5,6 +5,7 @@ General
   * Correct errors as they occur.
   * Keep your code simple
   * Design code with scalability and reuse in mind.
+  * Prevent "Don't Repeat Yourself" (DRY) code
 
 Variables
   * Use snake case for naming conventions
