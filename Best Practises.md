@@ -8,6 +8,7 @@ General
 
 Variables
   * Use snake case for naming conventions
+  * Add GLOBAL if the variable is global (try to limit as much as possible)
   * only use variables when used more than 1 time
   * only use objects when:
     * Specific checks are done every time
