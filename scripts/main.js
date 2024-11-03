@@ -256,7 +256,7 @@ function manageDestruction(ns) {
     }
 
     //bladeburner is possible
-    if (ns.bladeburner.joinBladeburnerDivision()) {
+    if (false/*ns.bladeburner.joinBladeburnerDivision()*/) {
         //if operation Daedalus has been completed, do we need to check rank as well?
         if (ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.blackOps, enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
@@ -804,7 +804,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
 
     } else {
         //if bladeburner joined: work for bladeburner
-        if (joinedBladeburner) {
+        if (false/*joinedBladeburner*/) {
             //check what ae are doing for bladeburner
             const bladeburnerActionCurrent = getActivityBladeburner(ns)
             //do bladeburner stuff
