@@ -778,7 +778,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
     //set the default focus for actions (true unless augment is installed)
     const actionFocus = false //(getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
     //check if we joined bladeburner
-    const joinedBladeburner = ns.bladeburner.joinBladeburnerDivision()
+    const joinedBladeburner = false //ns.bladeburner.joinBladeburnerDivision()
 
     if (ns.getPlayer().skills.hacking < statMinHacking) {
         //get best crime for hacking
@@ -804,7 +804,7 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
 
     } else {
         //if bladeburner joined: work for bladeburner
-        if (false/*joinedBladeburner*/) {
+        if (joinedBladeburner) {
             //check what ae are doing for bladeburner
             const bladeburnerActionCurrent = getActivityBladeburner(ns)
             //do bladeburner stuff
