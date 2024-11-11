@@ -1712,12 +1712,12 @@ function update_ui(ns, sleeves_available, bit_node_multipliers) {
 
 
     //sleeves
-    
+    //want to log augments of sleeves, but this costs 4 GB...
     for (let index = 0; index < sleeves_available; index++) {
         //get sleeve activity
         const activity = get_activity(ns, index)
         //add to header
-        headers.push("Sleeve " + index)
+        headers.push("Sleeve " + index + "(" + ns.sleeve.getSleeve(index).shock + ")")
         //add specifics to data
         values.push(activity.type.charAt(0) + activity.type.slice(1).toLowerCase() + ": " + activity.value)
     }
