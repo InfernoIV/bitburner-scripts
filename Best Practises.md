@@ -10,7 +10,13 @@ General
 Variables
   * Use snake case for naming conventions
   * Add GLOBAL if the variable is global (try to limit as much as possible)
-  * only use variables when used more than 1 time
+  * Use variables when value is used more than 1 time
   * only use objects when:
     * Specific checks are done every time
     * used multiple times
+
+Functions
+  * Keep all functions in 1 file
+   * Main purpose is to create a clear calculation for RAM (visible from within bitburner, doesn't require extra steps)
+   * Scope is clear (only for specific file)
+   * Findability since all functions are in the same file 
