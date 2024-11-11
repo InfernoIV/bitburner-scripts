@@ -66,7 +66,7 @@ export async function main(ns) {
     //initialize
     init(ns, bit_node_multipliers, stanek_grid, challenge_flags) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
-    restart_player_activity(ns)
+    restart_player_actions(ns)
     
     //wait a bit for first iteration
     await ns.sleep(time_between_loops)
@@ -748,7 +748,7 @@ function restart_player_actions(ns) {
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < stat_minimum_hacking) {
         //get best crime for hacking
-        const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.hacking)
+        const crime_best = ns.enums.CrimeType.robStore
         //commit crime for karma
         if (!ns.singularity.commitCrime(crime_best, action_focus)) {
             log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
@@ -757,7 +757,7 @@ function restart_player_actions(ns) {
         //if we have not reached target karma
     } else if (player.karma > requirement.karma_for_gang) {
         //get best crime for karma
-        const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
+        const crime_best = ns.enums.CrimeType.mug
         //commit crime for karma
         if (!ns.singularity.commitCrime(crime_best, action_focus)) {
             log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
@@ -782,7 +782,7 @@ function restart_player_actions(ns) {
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
             //get best crime for combat skills
-            const crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.skills)
+            const crime_best = ns.enums.CrimeType.grandTheftAuto
             //commit crime for money/stats?
             if (ns.singularity.commitCrime(crime_best, action_focus)) {
                 log(ns, 1, warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
