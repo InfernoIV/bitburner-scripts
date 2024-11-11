@@ -10,100 +10,105 @@ import {
  * @param {NS} ns 
 */
 export async function main(ns) {
-    //CotMG faction
-    const faction = "Church of the Machine God"
-    ns.stanek.acceptGift()
-    ns.singularity.joinFaction(faction)
-    //if not joined
-    /*
-    if(ns.getPlayer().factions.indexOf(faction) == -1) {
-        ns.singularity.travelToCity("Chongqing")
-        ns.singularity.goToLocation(ns.enums.LocationName.ChongqingChurchOfTheMachineGod)
-        
-        //try to join stanek
-        if(ns.singularity.joinFaction(faction)) {
-            ns.tprint("SUCCESS" + " Joined " + faction + "!")
-        }
-    }*/
-    
-    //if we can place fragments (faction COTMG is joined)
-    if (ns.getPlayer().factions.indexOf(faction) > -1) {
-        ns.tprint("ActiveFragments: " + ns.stanek.activeFragments().length)
-        //if not yet created a layout
-        if (ns.stanek.activeFragments().length == 0 ) {
-            ns.tprint("Current node: " + ns.getResetInfo().currentNode)
-            //hardcoded for 5x6 using excel and https://github.com/bitburner-official/bitburner-src/blob/dev/src/CotMG/Fragment.ts
-            //TODO: what is the rootX and rootY position? Top left position, even if it is 'false'?
-
-            //create list to fill
-            let fragmentList = []
-            //placeFragment(rootX: number, rootY: number, rotation: number, fragmentId: number): boolean
-            //fill depending on bitnode focus
-            switch (ns.getResetInfo().currentNode) {
-                //2x3
-                case 8:     //Stocks
-                    break
-
-                //3x3 <-> 4x3
-                case 2:     //Gang
-                    break
-
-                //4x4 <-> 5x5
-                case 10:    //Sleeve, graft
-                    break
-
-                //5x4 <-> 6x5
-                case 3:     //Corporation
-                    break
-
-                //5x5 <->6x6
-                case 7:     //Bladeburners
-                case 14:    //IPvGO
-                    break
-
-                //6x5 <-> 7x6
-                case 1:     //Genesis
-                case 4:     //Singularity
-                case 5:     //Intelligence
-                case 11:    //Sleeve, graft
-                    break
-
-                //6x6 <-> 7x7
-                case 12:    //Neuroflux
-                case 13:    //CotMG
-                    ns.tprint("6x6 grid")
-                    fragmentList.push([3, 3, 0, 12]) //Defense
-                    fragmentList.push([3, 1, 0, 105]) //Booster 1 (Tilted W)
-                    fragmentList.push([3, 0, 0, 30]) //Bladeburner
-                    fragmentList.push([1, 2, 0, 100]) //Booster 2 (Shifted T)
-
-                    fragmentList.push([0, 0, 1, 16]) //Agility
-                    fragmentList.push([1, 0, 0, 10]) //Strength
-                    fragmentList.push([0, 2, 1, 14]) //Dexterity
-                    
-                    
-                    break
-
-                //7x6 <-> 8x7
-                case 6:     //Bladeburners
-                case 9:     //Hacknet
-                    break
-            }
-
-            //for each fragment
-            for (let fragmentInfo of fragmentList) {
-                const x = fragmentInfo[0]
-                const y = fragmentInfo[1]
-                const rotation = fragmentInfo[2]
-                const id = fragmentInfo[3]
-                //place fragment
-                if(!ns.stanek.placeFragment(x, y, rotation, id)) {
-                    ns.tprint("ERROR " + fragmentInfo)
-                    ns.run(enum_scripts.jump, 1, enum_scripts.main)
-                    return
-                }
-            }
-        }
+    //get challenge config
+    const challenge_flags = JSON.parse(ns.read("challenge.json"))
+    //if not disabled
+    if (!challenge_flags.disable_stanek) {
+      //CotMG faction
+      const faction = "Church of the Machine God"
+      ns.stanek.acceptGift()
+      ns.singularity.joinFaction(faction)
+      //if not joined
+      /*
+      if(ns.getPlayer().factions.indexOf(faction) == -1) {
+          ns.singularity.travelToCity("Chongqing")
+          ns.singularity.goToLocation(ns.enums.LocationName.ChongqingChurchOfTheMachineGod)
+          
+          //try to join stanek
+          if(ns.singularity.joinFaction(faction)) {
+              ns.tprint("SUCCESS" + " Joined " + faction + "!")
+          }
+      }*/
+      
+      //if we can place fragments (faction COTMG is joined)
+      if (ns.getPlayer().factions.indexOf(faction) > -1) {
+          ns.tprint("ActiveFragments: " + ns.stanek.activeFragments().length)
+          //if not yet created a layout
+          if (ns.stanek.activeFragments().length == 0 ) {
+              ns.tprint("Current node: " + ns.getResetInfo().currentNode)
+              //hardcoded for 5x6 using excel and https://github.com/bitburner-official/bitburner-src/blob/dev/src/CotMG/Fragment.ts
+              //TODO: what is the rootX and rootY position? Top left position, even if it is 'false'?
+  
+              //create list to fill
+              let fragmentList = []
+              //placeFragment(rootX: number, rootY: number, rotation: number, fragmentId: number): boolean
+              //fill depending on bitnode focus
+              switch (ns.getResetInfo().currentNode) {
+                  //2x3
+                  case 8:     //Stocks
+                      break
+  
+                  //3x3 <-> 4x3
+                  case 2:     //Gang
+                      break
+  
+                  //4x4 <-> 5x5
+                  case 10:    //Sleeve, graft
+                      break
+  
+                  //5x4 <-> 6x5
+                  case 3:     //Corporation
+                      break
+  
+                  //5x5 <->6x6
+                  case 7:     //Bladeburners
+                  case 14:    //IPvGO
+                      break
+  
+                  //6x5 <-> 7x6
+                  case 1:     //Genesis
+                  case 4:     //Singularity
+                  case 5:     //Intelligence
+                  case 11:    //Sleeve, graft
+                      break
+  
+                  //6x6 <-> 7x7
+                  case 12:    //Neuroflux
+                  case 13:    //CotMG
+                      ns.tprint("6x6 grid")
+                      fragmentList.push([3, 3, 0, 12]) //Defense
+                      fragmentList.push([3, 1, 0, 105]) //Booster 1 (Tilted W)
+                      fragmentList.push([3, 0, 0, 30]) //Bladeburner
+                      fragmentList.push([1, 2, 0, 100]) //Booster 2 (Shifted T)
+  
+                      fragmentList.push([0, 0, 1, 16]) //Agility
+                      fragmentList.push([1, 0, 0, 10]) //Strength
+                      fragmentList.push([0, 2, 1, 14]) //Dexterity
+                      
+                      
+                      break
+  
+                  //7x6 <-> 8x7
+                  case 6:     //Bladeburners
+                  case 9:     //Hacknet
+                      break
+              }
+  
+              //for each fragment
+              for (let fragmentInfo of fragmentList) {
+                  const x = fragmentInfo[0]
+                  const y = fragmentInfo[1]
+                  const rotation = fragmentInfo[2]
+                  const id = fragmentInfo[3]
+                  //place fragment
+                  if(!ns.stanek.placeFragment(x, y, rotation, id)) {
+                      ns.tprint("ERROR " + fragmentInfo)
+                      ns.run(enum_scripts.jump, 1, enum_scripts.main)
+                      return
+                  }
+              }
+          }
+      }
     }
     
     //run jumpscript to boot main
