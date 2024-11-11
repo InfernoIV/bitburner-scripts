@@ -4,7 +4,12 @@
  * manageStanek: to test
  * reactive sleeves in actions and in purchase augments and update ui
  */
-
+//log constants
+const info = "INFO"
+const success = "SUCCESS"
+const warning = "WARNING"
+const error = "ERROR"
+const fail = "FAIL"
 
 
 //target karma for gang
@@ -13,6 +18,15 @@ const gangKarma = -54000
 const killsFactions = 30
 
 const statMinHacking = 25//50 //?
+
+//constants used for challenges, true = trying challenge, disabled feature 
+//TODO: attach limit_home_server, disable_gang, disable_corporation
+const challenge_flags = {
+    limit_home_server: false, //limits the home server to 128GB and 1 core (challenge bitnode 1)
+    disable_bladeburner: true, //disables bladeburner (challenge bitnode 6 and 7)
+    disable_gang: false, //disables gang (challenge bitnode x)
+    disable_corporation: false, //disables corporation (challenge bitnode x)
+}
 
 /**
  * Function that handles everything
@@ -24,6 +38,9 @@ const statMinHacking = 25//50 //?
  *  getResetInfo (1)
  */
 export async function main(ns) {
+    
+
+    
     //set time to wait after each main loop
     const sleepTime = 1 * 1000
     //minimum amount of augments before resetting
@@ -33,7 +50,7 @@ export async function main(ns) {
     //get bitnode information from file
     const bitNodeMultipliers = JSON.parse(ns.read("bitNode/" + ns.getResetInfo().currentNode + ".json"))
     //number of sleeves available
-    const numSleeves = 8 //max 8
+    const numSleeves = 8
     
     //stanek information
     let stanekInfo = { width: 0, height: 0 }
@@ -44,6 +61,9 @@ export async function main(ns) {
     //initialize
     init(ns, bitNodeMultipliers, stanekInfo) //1,5 GB
 
+    //restart work (to ensure it is set to non-focussed in case of restarting the game)
+    restart_player_activity(ns)
+    
     //wait a bit
     await ns.sleep(sleepTime)
     
@@ -251,7 +271,7 @@ function manageDestruction(ns) {
     }
 
     //bladeburner is possible
-    if (false/*ns.bladeburner.joinBladeburnerDivision()*/) {
+    if (get_bladeburner_access(ns)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
         if (ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.blackOps, enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
@@ -636,12 +656,7 @@ function manageHacking(ns) {
 
 
 
-//log constants
-const info = "INFO"
-const success = "SUCCESS"
-const warning = "WARNING"
-const error = "ERROR"
-const fail = "FAIL"
+
 
 
 
@@ -737,6 +752,69 @@ function manageScripts(ns, launchedScripts, bitNodeMultipliers) {
 
 
 /**
+ * Function that restarts player activity
+ * Used to ensure player focus is false, to enable resets after resuming play (restarting of game)
+ * Quick and dirty copy of the determine player actions
+ */
+function restart_player_actions(ns) {
+    //get player
+    const player = ns.getPlayer()
+    //get player activity
+    const playerActivity = getActivity(ns)
+    //set the default focus for actions (always false)
+    const actionFocus = false
+    //check if we joined bladeburner (default is false
+    const joinedBladeburner = get_bladeburner_access(ns) 
+
+    //if not enough hacking skill
+    if (ns.getPlayer().skills.hacking < statMinHacking) {
+        //get best crime for hacking
+        const bestCrime = ns.enums.CrimeType.robStore//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
+        //commit crime for karma
+        if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
+            log(ns, 1, warning, "manageActions failed 1. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+        }
+        
+        //if we have not reached target karma
+    } else if (player.karma > gangKarma) {
+        //get best crime for karma
+        const bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+        //commit crime for karma
+        if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
+            log(ns, 1, warning, "manageActions failed 2. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+        }
+        
+    } else {
+        //if bladeburner joined: work for bladeburner
+        if (joinedBladeburner) {
+            //check what ae are doing for bladeburner
+            const bladeburnerActionCurrent = getActivityBladeburner(ns)
+            //do bladeburner stuff
+            const bladeburnerActionWanted = determineBladeburnerAction(ns, player)
+            //start bladeburner action
+            if (!ns.bladeburner.startAction(bladeburnerActionWanted.type, bladeburnerActionWanted.name)) {
+                log(ns, 1, warning, "manageActions failed bladeburner.startAction(" + bladeburnerActionWanted.type + ", " + bladeburnerActionWanted.name + ")")
+            }
+        }
+
+        //check if we can do both bladeburner and normal work
+        const actionDual = (getInstalledAugmentations(ns).indexOf(enum_augments.bladesSimulacrum) > -1)
+
+        //if bladeburner is not joined or augment for dual work is installed
+        if ((!joinedBladeburner) || (actionDual)) {
+            //get best crime for combat skills
+            const bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.skills)
+            //commit crime for money/stats?
+            if (ns.singularity.commitCrime(bestCrime, actionFocus)) {
+                log(ns, 1, warning, "manageActions failed 3. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+            }
+        }
+    }
+}
+
+
+
+/**
  * Function that determines the best action to take, according to a set priority
  * It also handles duplicate actions of sleeves (faction, company)
  * Player: either crime and/or bladeburner
@@ -770,11 +848,12 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
     const player = ns.getPlayer()
     //get player activity
     const playerActivity = getActivity(ns)
-    //set the default focus for actions (true unless augment is installed)
-    const actionFocus = false //(getInstalledAugmentations(ns).indexOf(enum_augments.neuroreceptorManager) == -1)
-    //check if we joined bladeburner
-    const joinedBladeburner = false //ns.bladeburner.joinBladeburnerDivision()
+    //set the default focus for actions (always false)
+    const actionFocus = false
+    //check if we joined bladeburner (default is false
+    const joinedBladeburner = get_bladeburner_access(ns) 
 
+    //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < statMinHacking) {
         //get best crime for hacking
         const bestCrime = ns.enums.CrimeType.robStore//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
@@ -1804,7 +1883,9 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
     }
 
     //bladeburner
-    if (ns.bladeburner.joinBladeburnerDivision()) {
+    
+    
+    if (get_bladeburner_access(ns)) {
         //stamina
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
@@ -2830,4 +2911,18 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
     */
 }
 
+
+/**
+ * Function to do a check for bladeburner access 
+ */
+function get_bladeburner_access(ns) {
+    //if performing the challenge
+    if(challenge_flags.disable_bladeburner == true {
+        //no access
+        return false
+        
+    } else {
+        return ns.bladeburner.joinBladeburnerDivision()
+    }
+}
 
