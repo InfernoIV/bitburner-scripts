@@ -51,6 +51,7 @@ const challenge_flags = {
     disable_s4_market_data: false, //disables S4 market data (challenge bitnode 8)
     disable_hacknet_servers: false, //disables hacknet servers (challenge bitnode 9)
     disable_sleeves: false, //disables sleeves (challenge bitnode 10)
+    //TODO: how to handle disabling of stanek's gift for challenge bitnode 13? (central JSON file to read configuration from?)
 }
 
 
