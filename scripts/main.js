@@ -68,7 +68,7 @@ export async function main(ns) {
     //set time to wait after each main loop
     const time_between_loops = 1 * 1000
     //minimum amount of augments before resetting
-    const augments_minimum_for_reset = 4
+    const augments_minimum_for_reset = 4 //to be set to 40 for achievement
     //get reset info
     const reset_info = ns.getreset_info()
     //get bitnode information from file
