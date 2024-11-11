@@ -6,21 +6,15 @@
  */
 import { info, success, warning, error, fail } from "scripts/common.js"
 
-//target karma for gang
-const karma_required_for_gang = -54000
-//target kills for factions
-const kills_required_for_factions = 30
-
-//description of netburner requirements 
-const faction_netburners_requirements = {
-    levels: 100,
-    ram: 8,
-    cores: 4,
-}
+//requirements to be fulfilled
 const requirement = {
     karma_for_gang: -54000, //-54k
     kills_for_factions: 30,
-    
+    faction_netburners: { 
+        levels: 100,
+        ram: 8,
+        cores: 4,
+    },
 }
 
 //from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
@@ -41,21 +35,6 @@ const enum_hashUpgrades = {
 //minimum stat for hacking (todo: struct format?)
 const stat_minimum_hacking = 25//50 //?
 
-//constants used for challenges, true = trying challenge, disabled feature 
-//TODO: attach limit_home_server, disable_gang, disable_corporation, disable_s4_market_data, disable_hacknet_server, disable_sleeves
-const challenge_flags = {
-    limit_home_server: false, //limits the home server to 128GB and 1 core (challenge bitnode 1)
-    disable_gang: false, //disables gang (challenge bitnode 2)
-    disable_corporation: false, //disables corporation (challenge bitnode 3)
-    disable_bladeburner: true, //disables bladeburner (challenge bitnode 6 and 7)
-    disable_s4_market_data: false, //disables S4 market data (challenge bitnode 8)
-    disable_hacknet_servers: false, //disables hacknet servers (challenge bitnode 9)
-    disable_sleeves: false, //disables sleeves (challenge bitnode 10)
-    //TODO: how to handle disabling of stanek's gift for challenge bitnode 13? (central JSON file to read configuration from?)
-}
-
-
-
 /**
  * Function that handles everything
  * @param {NS} ns
@@ -74,6 +53,8 @@ export async function main(ns) {
     const reset_info = ns.getreset_info()
     //get bitnode information from file
     const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + ns.getreset_info().currentNode + ".json"))
+    //get challenge config
+    const challenge_flags = JSON.parse(ns.read("challenge.json"))
     //number of sleeves available
     const sleeves_available = 8
     
@@ -553,13 +534,13 @@ function manage_servers(ns) {
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.cores < faction_netburners_requirements.cores) {
+            if (hacknet_stats.cores < requirement.faction_netburners.cores) {
                 //upgrade cores
                 ns.hacknet.upgradeCore(server_index)
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.level < faction_netburners_requirements.levels) {
+            if (hacknet_stats.level < requirement.faction_netburners.levels) {
                 //upgrade level
                 ns.hacknet.upgradeLevel(server_index)
             }
@@ -682,7 +663,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     //check if makes sense to launch gang manager
     if ((!challenge_flags.disable_gang) && //if not performing a challenge
         (bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
-        (player.karma < karma_required_for_gang)) { //and if karma threshold is reached
+        (player.karma < requirement.karma_for_gang)) { //and if karma threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.gang)
     }
@@ -769,7 +750,7 @@ function restart_player_actions(ns) {
         }
         
         //if we have not reached target karma
-    } else if (player.karma > karma_required_for_gang) {
+    } else if (player.karma > requirement.karma_for_gang) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
         //commit crime for karma
@@ -865,7 +846,7 @@ function manage_actions_player(ns, bit_node_multipliers) {
             }
         }
         //if we have not reached target karma
-    } else if (player.karma > karma_required_for_gang) {
+    } else if (player.karma > requirement.karma_for_gang) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
         //if not performing the correct crime
@@ -938,7 +919,7 @@ manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //if we have not reached target karma
-    } else if (player.karma > karma_required_for_gang) {
+    } else if (player.karma > requirement.karma_for_gang) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for karma
@@ -951,7 +932,7 @@ manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //not reached target kills
-    } else if (player.numPeopleKilled < kills_required_for_factions) {
+    } else if (player.numPeopleKilled < requirement.kills_for_factions) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for kills
@@ -1682,11 +1663,11 @@ function update_ui(ns, sleeves_available, bit_node_multipliers) {
 
     //karma
     headers.push("Karma")
-    values.push(number_formatter(player.karma) + "/" + number_formatter(karma_required_for_gang))
+    values.push(number_formatter(player.karma) + "/" + number_formatter(requirement.karma_for_gang))
 
     //kills
     headers.push("Kills")
-    values.push(number_formatter(player.numPeopleKilled) + "/" + kills_required_for_factions)
+    values.push(number_formatter(player.numPeopleKilled) + "/" + requirement.kills_for_factions)
 
     //hack tools
     const hacking = player.skills.hacking
