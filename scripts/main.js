@@ -1,6 +1,6 @@
 /**
  * TODO LIST:
- * manageScripts: indicate and handle hack manager scaling up and scaling down, fill scripts
+ * manage_scripts: indicate and handle hack manager scaling up and scaling down, fill scripts
  * manageStanek: to test
  * reactive sleeves in actions and in purchase augments and update ui
  */
@@ -13,19 +13,23 @@ const fail = "FAIL"
 
 
 //target karma for gang
-const gangKarma = -54000
+const karma_required_for_gang = -54000
 //target kills for factions
-const killsFactions = 30
+const kills_required_for_factions = 30
 
-const statMinHacking = 25//50 //?
+//minimum stat for hacking (todo: struct format?)
+const stat_minimum_hacking = 25//50 //?
 
 //constants used for challenges, true = trying challenge, disabled feature 
-//TODO: attach limit_home_server, disable_gang, disable_corporation
+//TODO: attach limit_home_server, disable_gang, disable_corporation, disable_s4_market_data, disable_hacknet_server, disable_sleeves
 const challenge_flags = {
     limit_home_server: false, //limits the home server to 128GB and 1 core (challenge bitnode 1)
+    disable_gang: false, //disables gang (challenge bitnode 2)
+    disable_corporation: false, //disables corporation (challenge bitnode 3)
     disable_bladeburner: true, //disables bladeburner (challenge bitnode 6 and 7)
-    disable_gang: false, //disables gang (challenge bitnode x)
-    disable_corporation: false, //disables corporation (challenge bitnode x)
+    disable_s4_market_data: false, //disables S4 market data (challenge bitnode 8)
+    disable_hacknet_server: false, //disables hacknet servers (challenge bitnode 9)
+    disable_sleeves: false, //disables sleeves (challenge bitnode 10)
 }
 
 /**
@@ -35,37 +39,32 @@ const challenge_flags = {
  * Costs: 3,1 GB
  *  Base cost (1,6)
  *  killall (0,5) (inherited from init)
- *  getResetInfo (1)
+ *  getreset_info (1)
  */
-export async function main(ns) {
-    
-
-    
+export async function main(ns) {    
     //set time to wait after each main loop
-    const sleepTime = 1 * 1000
+    const time_between_loops = 1 * 1000
     //minimum amount of augments before resetting
-    const minAugs = 4
+    const augments_minimum_for_reset = 4
     //get reset info
-    const resetInfo = ns.getResetInfo()
+    const reset_info = ns.getreset_info()
     //get bitnode information from file
-    const bitNodeMultipliers = JSON.parse(ns.read("bitNode/" + ns.getResetInfo().currentNode + ".json"))
+    const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + ns.getreset_info().currentNode + ".json"))
     //number of sleeves available
-    const numSleeves = 8
+    const sleeves_available = 8
     
     //stanek information
-    let stanekInfo = { width: 0, height: 0 }
+    let stanek_grid = { width: 0, height: 0 }
     //keep track of launched scripts
-    let launchedScripts = []
-
+    let launched_scripts = []
 
     //initialize
-    init(ns, bitNodeMultipliers, stanekInfo) //1,5 GB
-
+    init(ns, bit_node_multipliers, stanek_grid) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
     restart_player_activity(ns)
     
-    //wait a bit
-    await ns.sleep(sleepTime)
+    //wait a bit for first iteration
+    await ns.sleep(time_between_loops)
     
     //main loop
     while (true) {
@@ -73,51 +72,30 @@ export async function main(ns) {
         //init: 1,5 GB
 
         //factions & companies: 13 GB
-        manageFactions(ns)  //10 GB
-        manageCompanies(ns) //3 GB
+        manage_factions(ns)  //10 GB
+        manage_companies(ns) //3 GB
 
         //servers & scripts: 18,5 GB
-        manageServers(ns)   //10 GB
-        manageHacking(ns)   //4,3 GB
-        manageScripts(ns, launchedScripts, bitNodeMultipliers)  //4,2 GB
+        manage_servers(ns)   //10 GB
+        manage_hacking(ns)   //4,3 GB
+        manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,2 GB
 
         //player, sleeve & bladeburner: 71 GB
-        manageActions(ns, numSleeves, bitNodeMultipliers)   //71 GB
+        manage_actions(ns, sleeves_available, bit_node_multipliers)   //71 GB
 
         //update ui
-        updateUI(ns, numSleeves, bitNodeMultipliers) //0 GB
+        update_ui(ns, sleeves_available, bit_node_multipliers) //0 GB
 
         //reset & destruction: 18 GB
-        manageDestruction(ns)   //0 GB
-        manageReset(ns, minAugs)    //0 GB
-        manageAugments(ns, numSleeves)  //18 GB
+        execute_bit_node_destruction(ns)   //0 GB
+        buy_augments(ns, sleeves_available)  //18 GB
+        install_augments(ns, augments_minimum_for_reset)    //0 GB
+        
 
         //wait a bit
-        await ns.sleep(sleepTime)
+        await ns.sleep(time_between_loops)
     }
     //123,6 GB RAM used of 128 GB, 4,4 GB left
-}
-
-
-
-
-/**
- * Function that tries to unlock exploits
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/NetscriptFunctions/Extra.ts
- * @param {NS} ns
- * 
- * Cost: 0?
- *  functions are undoucmented?
- */
-function exploits(ns) {
-    //for achievement
-    ns.exploit()
-    //TODO: check on how to bypass
-    ns.bypass(true)
-    //alterReality?
-    ns.alterReality()
-    //rainbow, needs to be decrypted by bcrypt?
-    ns.rainbow("guess")
 }
 
 
@@ -128,10 +106,10 @@ function exploits(ns) {
  * 
  * Costs: 1,5 GB
  *  killAll (0,5)
- *  getResetInfo (1)
+ *  getreset_info (1)
  *  read (0)
  */
-function init(ns, bitNodeMultipliers, stanekInfo) {
+function init(ns, bit_node_multipliers, stanek_grid) {
 
     //disable unwanted logs
     ns.disableLog("disableLog")
@@ -170,21 +148,21 @@ function init(ns, bitNodeMultipliers, stanekInfo) {
     ns.clearPort(enum_port.reset)
 
     //for each server
-    for (let server of getServers(ns)) {
+    for (let server of get_servers(ns)) {
         //check if it is home
-        let isServerHome = (server == enum_servers.home)
+        const is_server_home = (server == enum_servers.home)
         //kill all scripts
-        ns.killall(server, isServerHome)
+        ns.killall(server, is_server_home)
     }
 
     //get reset info
-    const resetInfo = ns.getResetInfo()
+    const reset_info = ns.getreset_info()
 
     //log information
-    logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo)
+    log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid)
 
     //signal hackManager to stop
-    overWritePort(ns, enum_port.stopHack, enum_hackingCommands.stop)
+    over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
 
     //get the UI
     const doc = eval('document')
@@ -206,33 +184,32 @@ function init(ns, bitNodeMultipliers, stanekInfo) {
 /**
  * Function that returns the installed augments
  */
-function getInstalledAugmentations(ns) {
+function get_augmentations_installed(ns) {
     //owned augments
-    const ownedAugs = ns.getResetInfo().ownedAugs
+    const augments_owned = ns.getreset_info().ownedAugs
     //create return value
-    let array = []
+    let augments_list = []
     //for each augment
-    for (let key of ownedAugs) {
+    for (let key of augments_owned) {
         //use only the name
-        array.push(key[0])
+        augments_list.push(key[0])
     }
     //return the list
-    return array
+    return augments_list
 }
 
 
 
 /**
- * Function that gets the number of installed augments, using the UI
+ * Function that gets the number of augments to be installed, using the UI
  */
-function getNumberToBeInstalledAugments() {
+function get_augments_to_be_installed() {
     //value to return
-    let installedAugs = 0
-
+    let augments_ready_for_install = 0
     //get all svg
-    const elements = eval('document').getElementsByTagName("svg")
+    const elements = eval("document").getElementsByTagName("svg")
     //for each SVG
-    for (let element of elements) {
+    for (const element of elements) {
         //if it is the target
         if (element.ariaLabel == "Augmentations") {
             //get the parent, then the last child, then the value of the child
@@ -240,14 +217,14 @@ function getNumberToBeInstalledAugments() {
             //check if it is set
             if (value.length > 0) {
                 //use this value
-                installedAugs = value
+                augments_ready_for_install = value
             }
             //stop looking 
             break
         }
     }
     //return the value
-    return installedAugs
+    return augments_ready_for_install
 }
 
 
@@ -257,39 +234,38 @@ function getNumberToBeInstalledAugments() {
  * Cost: none
  * TODO: launch script for bitnode destruction
  */
-function manageDestruction(ns) {
+function execute_bit_node_destruction(ns) {
     //set a flag for desctruction
-    let flagDestruction = false
+    let can_execute_destruction = false
 
     //if the red pill is installed
-    if (getInstalledAugmentations(ns).indexOf(enum_augments.theRedPill) > -1) {
+    if (get_augmentations_installed(ns).indexOf(enum_augments.theRedPill) > -1) {
         //then we can check the world daemon backdoor (otherwise the server doesn't exist)
         if (ns.getServer(enum_servers.worldDaemon).backdoorInstalled) {
             //backdoor is installed, proceed with destruction
-            flagDestruction = true
+            can_execute_destruction = true
         }
     }
 
     //bladeburner is possible
     if (get_bladeburner_access(ns)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
-        if (ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.blackOps, enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
+        if (ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.blackOps, enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
-            flagDestruction = true
+            can_execute_destruction = true
         }
     }
 
     //if destruction is possible
-    if (flagDestruction) {
+    if (can_execute_destruction) {
         //always travel to bitNode 12
-        const bitNodeTarget = 12
-        //TODO: launch script that handles bitnode destruction
+        const bit_node_next = 12
         //kill all other scripts on home
         ns.killall()
         //launch script to destroy bitnode
         ns.exec(enum_scripts.jump, enum_servers.home, 1,
             enum_scripts.destroyBitNode, true, //which script to launch, kill other scripts
-            enum_scripts.main, bitNodeTarget) //arguments
+            enum_scripts.main, bit_node_next) //arguments (TODO: not boot to STANEK?)
     }
 }
 
@@ -300,30 +276,28 @@ function manageDestruction(ns) {
  * Cost: none
  * TODO: attach script for external reset
  */
-function manageReset(ns, minAugs) {
+function install_augments(ns, augments_minimum_for_reset) {
     //get number of bought augments
-    const augmentsBoughts = getNumberToBeInstalledAugments()
-
+    const augments_to_be_installed = get_augments_to_be_installed()
+    //TODO: check for bonus time? (if applicable)
     //if enough augments bought for a reset
-    if (augmentsBoughts >= minAugs) {
+    if (augments_to_be_installed >= augments_minimum_for_reset) {
         //read the port if we need to wait
-        const reasonWait = ns.peek(enum_port.reset)
-        //check if it is set
-        if (reasonWait == portNoData) {
+        const reason_to_wait = ns.peek(enum_port.reset)
+        //check if there is no reason to wait
+        if (reason_to_wait == portNoData) {
+            //TODO: better way to go over the factions? Check each faction and start with the faction with the smallest difference between rep cost and rep have? 
             //for every joined faction
-            for (let faction of ns.getPlayer().factions) {
+            for (const faction of ns.getPlayer().factions) {
                 //buy as much neuro as possible
                 while (ns.singularity.purchaseAugmentation(faction, enum_augments.neuroFluxGovernor)) { /* Do nothing */ }
             }
-            //set installed to 0
-            //augmentsBought = 0
             //kill all other scripts on home
             ns.killall()
             //start reset script
             ns.exec(enum_scripts.jump, enum_servers.home, 1,
                 enum_scripts.reset, true) //which script to launch, kill other scripts
         }
-
     }
 }
 
@@ -337,20 +311,20 @@ function manageReset(ns, minAugs) {
  *  purchaseSleeveAug (4)
  *  getSleevePurchasableAugs (4)
  */
-function manageAugments(ns, numSleeves) {
-    //if gang is busy with growing (and thus blocking resets)
+function buy_augments(ns, sleeves_available) {
+    //if gang is busy with growing (and thus requiring money and blocking resets)
     if (ns.peek(enum_port.reset) == "gang") {
         //do not buy augments
         return
     }
     //get owned augments (to include bought?)
-    let augmentsOwned = getInstalledAugmentations(ns)
+    let augments_installed = get_augmentations_installed(ns)
     //for every joined faction
-    for (let faction of ns.getPlayer().factions) {
+    for (const faction of ns.getPlayer().factions) {
         //for each augment of the faction
-        for (let augment of ns.singularity.getAugmentationsFromFaction(faction)) {
+        for (const augment of ns.singularity.getAugmentationsFromFaction(faction)) {
             //if not owned
-            if (augmentsOwned.indexOf(augment) == -1) {
+            if (augments_installed.indexOf(augment) == -1) {
                 //try to buy
                 ns.singularity.purchaseAugmentation(faction, augment)
             }
@@ -358,17 +332,17 @@ function manageAugments(ns, numSleeves) {
     }
     
     //for each sleeve
-    for (let index = 0; index < numSleeves; index++) {
+    for (let index = 0; index < sleeves_available; index++) {
         //for each sleeve augment
         //TODO: possible to hardcode the augment list?
-        for (let augment of ns.sleeve.getSleevePurchasableAugs(index)) {
+        //TODO: get rid of try / catch
+        for (const augment of ns.sleeve.getSleevePurchasableAugs(index)) {
             try {
                 //buy augment
                 ns.sleeve.purchaseSleeveAug(index, augment.name)
             } catch (error) {
                 break
             }
-
         }
     }
 }
@@ -382,57 +356,58 @@ function manageAugments(ns, numSleeves) {
  *  travelToCity (2)
  *  getOwnedAugmentations (5)
  */
-function manageFactions(ns) {
+function manage_factions(ns) {
     //get the player
-    let player = ns.getPlayer()
+    const player = ns.getPlayer()
     //get the player factions
-    let factions = player.factions
-
+    const factions = player.factions
     //get the owned augments (not bought)
-    let augmentsOwned = getInstalledAugmentations(ns)//ns.singularity.getOwnedAugmentations(false)
-
+    const augments_installed = get_augmentations_installed(ns)
     //check for multual exlusive factions
-    const cityGroup1 = [enum_cities.sector12, enum_cities.aevum]
-    const joinGroup1 = (augmentsOwned.indexOf("CashRoot") == -1) || (augmentsOwned.indexOf("PCMatrix") == -1)
-    const cityGroup2 = [enum_cities.chongqing, enum_cities.newTokyo, enum_cities.ishima]
-    const joinGroup2 = (augmentsOwned.indexOf("Neuregen") == -1) || (augmentsOwned.indexOf("NutriGen") == -1) || (augmentsOwned.indexOf("INFRARet") == -1)
-    const cityGroup3 = [enum_cities.volhaven]
-    const joinGroup3 = (augmentsOwned.indexOf("DermaForce") == -1)
+    //TODO: are the city_group names (cities) the same as the faction names?
+    const city_group_1 = [enum_cities.sector12, enum_cities.aevum]
+    const augments_missing_of_city_group_1 = (augments_installed.indexOf("CashRoot") == -1) || (augments_installed.indexOf("PCMatrix") == -1)
+   
+    const city_group_2 = [enum_cities.chongqing, enum_cities.newTokyo, enum_cities.ishima]
+    const augments_missing_of_city_group_2 = (augments_installed.indexOf("Neuregen") == -1) || (augments_installed.indexOf("NutriGen") == -1) || (augments_installed.indexOf("INFRARet") == -1)
+    
+    const city_group_3 = [enum_cities.volhaven]
+    const augments_missing_of_city_group_3 = (augments_installed.indexOf("DermaForce") == -1)
 
     //create a location
-    let cityTarget = ""
+    let city_to_travel_to = ""
     //check if we need to travel
-    if (joinGroup1) {
+    if (augments_missing_of_city_group_1) {
         //if sector 12 is not joined
         if (factions.indexOf(enum_factions.sector12.name) == -1) {
             //travel to sector 12
-            cityTarget = enum_cities.sector12
+            city_to_travel_to = enum_cities.sector12
             //if aevum is not joined
         } else if (factions.indexOf(enum_factions.aevum.name) == -1) {
             //travel to aevum
-            cityTarget = enum_cities.aevum
+            city_to_travel_to = enum_cities.aevum
         }
 
-    } else if (joinGroup2) {
+    } else if (augments_missing_of_city_group_2) {
         //if chongqing is not joined
         if (factions.indexOf(enum_factions.chongqing.name) == -1) {
             //travel to chongqing
-            cityTarget = enum_cities.chongqing
+            city_to_travel_to = enum_cities.chongqing
             //if New tokyo is not joined
         } else if (factions.indexOf(enum_factions.newTokyo.name) == -1) {
             //travel to aevum
-            cityTarget = enum_cities.newTokyo
+            city_to_travel_to = enum_cities.newTokyo
             //if Ishima is not joined    
         } else if (factions.indexOf(enum_factions.ishima.name) == -1) {
             //travel to aevum
-            cityTarget = enum_cities.ishima
+            city_to_travel_to = enum_cities.ishima
         }
 
-    } else if (joinGroup3) {
+    } else if (augments_missing_of_city_group_3) {
         //if Volhaven is not joined
         if (factions.indexOf(enum_factions.volhaven.name) == -1) {
             //travel to Volhaven
-            cityTarget = enum_cities.volhaven
+            city_to_travel_to = enum_cities.volhaven
         }
     } else {
         //default to sector-12, no travel should be needed
@@ -447,47 +422,47 @@ function manageFactions(ns) {
     }
 
     //if no target set: check other travel factions
-    if (cityTarget == "") {
+    if (city_to_travel_to == "") {
 
         //if Tian Di Hui not joined
         if ((factions.indexOf(enum_factions.tianDiHui.name) == -1) && (stats.hacking >= 50)) {
             //travel to chongqing
-            cityTarget = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
+            city_to_travel_to = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
             //if Tetrads not joined
         } else if ((factions.indexOf(enum_factions.tetrads.name) == -1) && (stats.combat >= 75) && (stats.karma <= -18)) {
             //travel to chongqing
-            cityTarget = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
+            city_to_travel_to = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
             //if The Syndicate not joined
         } else if ((factions.indexOf(enum_factions.theSyndicate.name) == -1) && (stats.hacking >= 200) && (stats.combat >= 200) && (stats.karma <= -90)) {
             //travel to sector 12
-            cityTarget = enum_cities.sector12 //either Aevum, Sector-12 --> sector 12 is the default
+            city_to_travel_to = enum_cities.sector12 //either Aevum, Sector-12 --> sector 12 is the default
         }
 
         //if The Dark Army not joined
     } else if ((factions.indexOf(enum_factions.theDarkArmy.name) == -1) && (stats.hacking >= 300) && (stats.combat >= 300) && (stats.karma <= -45) && (stats.kills >= 5)) {
         //travel to chongqing
-        cityTarget = enum_cities.chongqing //only Chongqing
+        city_to_travel_to = enum_cities.chongqing //only Chongqing
     }
 
     //check if we need to travel
-    if ((cityTarget != "") && (player.city != cityTarget)) {
+    if ((city_to_travel_to != "") && (player.city != city_to_travel_to)) {
         //travel to city
-        ns.singularity.travelToCity(cityTarget)
+        ns.singularity.travelToCity(city_to_travel_to)
     }
 
     //for EVERY faction
-    for (let factionEntry in enum_factions) {
+    for (const faction_index in enum_factions) {
         //get faction name
-        const faction = enum_factions[factionEntry].name
+        const faction = enum_factions[faction_index].name
 
         //if the faction is allowed (need to join group x and faction is not in group y or group z)
-        if (((joinGroup1) && (cityGroup2.indexOf(faction) == -1) && (cityGroup3.indexOf(faction) == -1)) ||
-            ((joinGroup2) && (cityGroup1.indexOf(faction) == -1) && (cityGroup3.indexOf(faction) == -1)) ||
-            ((joinGroup3) && (cityGroup1.indexOf(faction) == -1) && (cityGroup2.indexOf(faction) == -1)) ||
+        if (((augments_missing_of_city_group_1) && (city_group_2.indexOf(faction) == -1) && (city_group_3.indexOf(faction) == -1)) ||
+            ((augments_missing_of_city_group_2) && (city_group_1.indexOf(faction) == -1) && (city_group_3.indexOf(faction) == -1)) ||
+            ((augments_missing_of_city_group_3) && (city_group_1.indexOf(faction) == -1) && (city_group_2.indexOf(faction) == -1)) ||
             //or if no MUX groups need joining
-            (!joinGroup1 && !joinGroup2 && !joinGroup3)) {
+            (!augments_missing_of_city_group_1 && !augments_missing_of_city_group_2 && !augments_missing_of_city_group_3)) {
             //TRY to join
             try { ns.singularity.joinFaction(faction) } catch (error) { }
         }
@@ -501,9 +476,9 @@ function manageFactions(ns) {
  * Cost: 3 GB
  *  applyToCompany (3)
  */
-function manageCompanies(ns) {
+function manage_companies(ns) {
     //for each company
-    for (let company in enum_companyFactions) {
+    for (let company in enum_company_factions) {
         //just try to join the company, default to "software"
         //also works for getting promotion
         ns.singularity.applyToCompany(company, "Software")
@@ -521,9 +496,9 @@ function manageCompanies(ns) {
  *  upgradeHomeRam (3)
  *  hacknet (4)
  */
-function manageServers(ns) {
+function manage_servers(ns) {
     //description of netburner requirements 
-    const factionNetburnersRequirments = {
+    const faction_netburners_requirements = {
         levels: 100,
         ram: 8,
         cores: 4,
@@ -539,32 +514,32 @@ function manageServers(ns) {
     }
 
     //for each owned server
-    for (let index = 0; index < ns.hacknet.numNodes(); index++) {
+    for (let server_index = 0; server_index < ns.hacknet.numNodes(); server_index++) {
         //upgrade ram
-        ns.hacknet.upgradeRam(index)
+        ns.hacknet.upgradeRam(server_index)
 
         //get the stats of the network (which are important to check)      
-        let netStats = { level: 0, cores: 0, }
+        let hacknet_stats = { level: 0, cores: 0, }
         //for each owned node
-        for (let index2 = 0; index2 < ns.hacknet.numNodes(); index2++) {
+        for (let node_index = 0; node_index < ns.hacknet.numNodes(); node_index++) {
             //get the stats
-            let nodeStats = ns.hacknet.getNodeStats(index2)
+            let nodeStats = ns.hacknet.getNodeStats(node_index)
             //add the level
-            netStats.level += nodeStats.level
+            hacknet_stats.level += nodeStats.level
             //add the cores
-            netStats.cores += nodeStats.cores
+            hacknet_stats.cores += nodeStats.cores
         }
 
         //only conditionally level the cores
-        if (netStats.cores < factionNetburnersRequirments.cores) {
+        if (hacknet_stats.cores < faction_netburners_requirements.cores) {
             //upgrade cores
-            ns.hacknet.upgradeCore(index)
+            ns.hacknet.upgradeCore(server_index)
         }
 
         //only conditionally level the cores
-        if (netStats.level < factionNetburnersRequirments.levels) {
+        if (hacknet_stats.level < faction_netburners_requirements.levels) {
             //upgrade level
-            ns.hacknet.upgradeLevel(index)
+            ns.hacknet.upgradeLevel(server_index)
         }
     }
 
@@ -607,7 +582,7 @@ function manageServers(ns) {
  * 
  * TODO: manager backdoor external script
  */
-function manageHacking(ns) {
+function manage_hacking(ns) {
     //get player hacking stat
     let hacking = ns.getPlayer().skills.hacking
 
@@ -615,24 +590,24 @@ function manageHacking(ns) {
     if (ns.singularity.purchaseTor()) {
         //buy the tools by only checking if it is usefull to do so
         if (hacking >= 50) {
-            ns.singularity.purchaseProgram(enum_hackTools.bruteSSH)
+            ns.singularity.purchaseProgram(enum_hack_tools.bruteSSH)
         }
         if (hacking >= 100) {
-            ns.singularity.purchaseProgram(enum_hackTools.fTPCrack)
+            ns.singularity.purchaseProgram(enum_hack_tools.fTPCrack)
         }
         if (hacking >= 300) {
-            ns.singularity.purchaseProgram(enum_hackTools.relaySMTP)
+            ns.singularity.purchaseProgram(enum_hack_tools.relaySMTP)
         }
         if (hacking >= 400) {
-            ns.singularity.purchaseProgram(enum_hackTools.hTTPWorm)
+            ns.singularity.purchaseProgram(enum_hack_tools.hTTPWorm)
         }
         if (hacking >= 725) {
-            ns.singularity.purchaseProgram(enum_hackTools.sQLInject)
+            ns.singularity.purchaseProgram(enum_hack_tools.sQLInject)
         }
     }
 
     //get all servers
-    for (let server of getServers(ns)) {
+    for (let server of get_servers(ns)) {
         //if no admin rights (should resolve owned servers automatically)
         if (!ns.getServer(server).hasAdminRights) {
             //just try all tools (without checking if we have them...) and nuke
@@ -663,73 +638,74 @@ function manageHacking(ns) {
 /**
  * Function that manages the launching of scripts
  * Cost: 4,2 GB
- *  getScriptRam (0,1)
- *  scan (0.2) (inherited from getServerSpecific)
+ *  getscript_ram (0,1)
+ *  scan (0.2) (inherited from get_server_specific)
  *  scp (0.6)
  *  exec (1.3)
  *  getServer (2)
  */
-function manageScripts(ns, launchedScripts, bitNodeMultipliers) {
-    //money that is needed for corporation
-    const corporationMoneyRequirement = 150e9
-
+function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
+    //get player
     const player = ns.getPlayer()
-    //list that keeps track if which scripts to launch
-    let scriptsToLaunch = []
     //get money
-    let moneyOwned = ns.getServer(enum_servers.home).moneyAvailable
-
+    const money_available = ns.getServer(enum_servers.home).moneyAvailable
+    //money that is needed for corporation
+    const corporation_money_requirement = 150e9
+    //check if makes sense to launch stock manager
+    const stock_4s_api_cost = bit_node_multipliers.FourSigmaMarketDataApiCost * 25e9 //24.000.000.000 = 25b
+    const stock_4s_market_data_cost = bit_node_multipliers.FourSigmaMarketDataCost * 1e9  //1.000.000.000 = 1b
+    
+    //list that keeps track if which scripts to launch
+    let scripts_to_launch = []
+    
     //check which scripts we need to launch
 
     //launch script
-    scriptsToLaunch.push(enum_scripts.backdoor)
+    scripts_to_launch.push(enum_scripts.backdoor)
     //hackmanager is always wanted?
-    scriptsToLaunch.push(enum_scripts.hack)
+    scripts_to_launch.push(enum_scripts.hack)
 
     //check if makes sense to launch gang manager
-    if ((bitNodeMultipliers.GangSoftcap > 0) &&
-        (player.karma < gangKarma)) {
+    if ((bit_node_multipliers.GangSoftcap > 0) &&
+        (player.karma < karma_required_for_gang)) {
         //add to list
-        scriptsToLaunch.push(enum_scripts.gang)
+        scripts_to_launch.push(enum_scripts.gang)
     }
 
     //check if makes sense to launch corporation manager
-    if ((bitNodeMultipliers.CorporationSoftcap >= 0.15) &&
-        (moneyOwned > corporationMoneyRequirement)) {
+    if ((bit_node_multipliers.CorporationSoftcap >= 0.15) &&
+        (money_available > corporation_money_requirement)) {
         //add to list
-        scriptsToLaunch.push(enum_scripts.corporation)
+        scripts_to_launch.push(enum_scripts.corporation)
     }
 
-    //check if makes sense to launch stock manager
-    const stockCost4SApiCost = bitNodeMultipliers.FourSigmaMarketDataApiCost * 25e9 //24.000.000.000 = 25b
-    const stockCost4SMarketData = bitNodeMultipliers.FourSigmaMarketDataCost * 1e9  //1.000.000.000 = 1b
     //calculate money needed for stock manager
-    if (moneyOwned > (stockCost4SApiCost + stockCost4SMarketData)) { //26b
+    if (money_available > (stock_4s_api_cost + stock_4s_market_data_cost)) { //26b
         //add to list
-        scriptsToLaunch.push(enum_scripts.stock)
+        scripts_to_launch.push(enum_scripts.stock)
     }
 
     //if there are scripts to launch
-    if (scriptsToLaunch.length > 0) {
+    if (scripts_to_launch.length > 0) {
         //TODO: how to handle the scaling down of the hack manager?
         //use ports to indicate pause, then keep reading until message is changed
 
         //for each script to launch
-        for (let script of scriptsToLaunch) {
+        for (const script of scripts_to_launch) {
             //if not already launched
-            if (launchedScripts.indexOf(script) == -1) {
+            if (launched_scripts.indexOf(script) == -1) {
                 //signal hackManager to stop
-                overWritePort(ns, enum_port.stopHack, enum_hackingCommands.stop)
+                over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
                 //get all servers that can run scripts
-                let serversExecute = getServerSpecific(ns, true)
+                const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
-                let scriptRam = ns.getScriptRam(script)
+                const script_ram = ns.getscript_ram(script)
                 //for each server
-                for (let server of serversExecute) {
+                for (const server of servers_that_can_execute) {
                     //calculate available ram
-                    const ramAvailable = server.maxRam - server.ramUsed
+                    const ram_available = server.maxRam - server.ramUsed
                     //if enough ram
-                    if (ramAvailable >= scriptRam) {
+                    if (ram_available >= script_ram) {
                         //copy the script
                         if (ns.scp(script, enum_servers.home, server.hostname)) {
                             //execute the script
@@ -737,7 +713,7 @@ function manageScripts(ns, launchedScripts, bitNodeMultipliers) {
                                 //log information
                                 log(ns, 1, success, "Launched '" + script + "'")
                                 //add script to list of launched scripts
-                                launchedScripts.push(script)
+                                launched_scripts.push(script)
                             }
                         }
                     }
@@ -745,7 +721,7 @@ function manageScripts(ns, launchedScripts, bitNodeMultipliers) {
             }
         }
         //indicate to hack manager that it can resume
-        overWritePort(ns, enum_port.stopHack, enum_hackingCommands.start)
+        over_write_port(ns, enum_port.stopHack, enum_hackingCommands.start)
     }
 }
 
@@ -760,53 +736,53 @@ function restart_player_actions(ns) {
     //get player
     const player = ns.getPlayer()
     //get player activity
-    const playerActivity = getActivity(ns)
+    const player_activity = get_activity(ns)
     //set the default focus for actions (always false)
-    const actionFocus = false
+    const action_focus = false
     //check if we joined bladeburner (default is false
-    const joinedBladeburner = get_bladeburner_access(ns) 
+    const bladeburner_joined = get_bladeburner_access(ns) 
 
     //if not enough hacking skill
-    if (ns.getPlayer().skills.hacking < statMinHacking) {
+    if (ns.getPlayer().skills.hacking < stat_minimum_hacking) {
         //get best crime for hacking
-        const bestCrime = ns.enums.CrimeType.robStore//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
+        const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.hacking)
         //commit crime for karma
-        if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
-            log(ns, 1, warning, "manageActions failed 1. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+        if (!ns.singularity.commitCrime(crime_best, action_focus)) {
+            log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
         }
         
         //if we have not reached target karma
-    } else if (player.karma > gangKarma) {
+    } else if (player.karma > karma_required_for_gang) {
         //get best crime for karma
-        const bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+        const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
         //commit crime for karma
-        if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
-            log(ns, 1, warning, "manageActions failed 2. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+        if (!ns.singularity.commitCrime(crime_best, action_focus)) {
+            log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
         }
         
     } else {
         //if bladeburner joined: work for bladeburner
-        if (joinedBladeburner) {
+        if (bladeburner_joined) {
             //check what ae are doing for bladeburner
-            const bladeburnerActionCurrent = getActivityBladeburner(ns)
+            const bladeburner_action_current = bladeburner_get_activity(ns)
             //do bladeburner stuff
-            const bladeburnerActionWanted = determineBladeburnerAction(ns, player)
+            const bladeburner_action_wanted = bladeburner_determine_action(ns, player)
             //start bladeburner action
-            if (!ns.bladeburner.startAction(bladeburnerActionWanted.type, bladeburnerActionWanted.name)) {
-                log(ns, 1, warning, "manageActions failed bladeburner.startAction(" + bladeburnerActionWanted.type + ", " + bladeburnerActionWanted.name + ")")
+            if (!ns.bladeburner.startAction(bladeburner_action_wanted.type, bladeburner_action_wanted.name)) {
+                log(ns, 1, warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
             }
         }
 
         //check if we can do both bladeburner and normal work
-        const actionDual = (getInstalledAugmentations(ns).indexOf(enum_augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(enum_augments.bladesSimulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
-        if ((!joinedBladeburner) || (actionDual)) {
+        if ((!bladeburner_joined) || (can_perform_dual_actions)) {
             //get best crime for combat skills
-            const bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.skills)
+            const crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.skills)
             //commit crime for money/stats?
-            if (ns.singularity.commitCrime(bestCrime, actionFocus)) {
-                log(ns, 1, warning, "manageActions failed 3. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+            if (ns.singularity.commitCrime(crime_best, action_focus)) {
+                log(ns, 1, warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
     }
@@ -824,14 +800,14 @@ function restart_player_actions(ns) {
  *      getPlayer (0.5)
  *      commitCrime (5)
  *      Inherited: 0,5 GB
- *          getActivity (0,5)
+ *          get_activity (0,5)
  * 
  *  Bladeburner: 37 GB
  *      joinBladeburnerDivision(4)
  *      startAction (4)
  *      Inherited: 29 GB
- *          getActivityBladeburner (1)
- *          determineBladeburnerAction (28)
+ *          bladeburner_get_activity (1)
+ *          bladeburner_determine_action (28)
  * 
  *  Sleeve: 28 GB
  *      setToCommitCrime (4)
@@ -841,70 +817,70 @@ function restart_player_actions(ns) {
  *      getSleeve (4)
  *      setToShockRecovery (4)
  *      Inherited: 4 GB
- *          getActivity (4)       
+ *          get_activity (4)       
  */
-function manageActions(ns, numSleeves, bitNodeMultipliers) {
+function manage_actions(ns, sleeves_available, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //get player activity
-    const playerActivity = getActivity(ns)
+    const player_activity = get_activity(ns)
     //set the default focus for actions (always false)
-    const actionFocus = false
+    const action_focus = false
     //check if we joined bladeburner (default is false
-    const joinedBladeburner = get_bladeburner_access(ns) 
+    const bladeburner_joined = get_bladeburner_access(ns) 
 
     //if not enough hacking skill
-    if (ns.getPlayer().skills.hacking < statMinHacking) {
+    if (ns.getPlayer().skills.hacking < stat_minimum_hacking) {
         //get best crime for hacking
-        const bestCrime = ns.enums.CrimeType.robStore//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.hacking)
+        const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.hacking)
         //if not performing the correct crime
-        if (playerActivity.value != bestCrime) {
+        if (player_activity.value != crime_best) {
             //commit crime for karma
-            if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
-                log(ns, 1, warning, "manageActions failed 1. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+            if (!ns.singularity.commitCrime(crime_best, action_focus)) {
+                log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
         //if we have not reached target karma
-    } else if (player.karma > gangKarma) {
+    } else if (player.karma > karma_required_for_gang) {
         //get best crime for karma
-        const bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+        const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
         //if not performing the correct crime
-        if (playerActivity.value != bestCrime) {
+        if (player_activity.value != crime_best) {
             //commit crime for karma
-            if (!ns.singularity.commitCrime(bestCrime, actionFocus)) {
-                log(ns, 1, warning, "manageActions failed 2. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+            if (!ns.singularity.commitCrime(crime_best, action_focus)) {
+                log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
 
     } else {
         //if bladeburner joined: work for bladeburner
-        if (joinedBladeburner) {
+        if (bladeburner_joined) {
             //check what ae are doing for bladeburner
-            const bladeburnerActionCurrent = getActivityBladeburner(ns)
+            const bladeburner_action_current = bladeburner_get_activity(ns)
             //do bladeburner stuff
-            const bladeburnerActionWanted = determineBladeburnerAction(ns, player)
-            //log(ns, 1, info, "determineBladeburnerAction: " + JSON.stringify(bladeburnerActionWanted))
+            const bladeburner_action_wanted = bladeburner_determine_action(ns, player)
+            //log(ns, 1, info, "bladeburner_determine_action: " + JSON.stringify(bladeburner_action_wanted))
             //if not the same (type and value is not the same)
-            if (bladeburnerActionCurrent.value != bladeburnerActionWanted.name) {
+            if (bladeburner_action_current.value != bladeburner_action_wanted.name) {
                 //start bladeburner action
-                if (!ns.bladeburner.startAction(bladeburnerActionWanted.type, bladeburnerActionWanted.name)) {
-                    log(ns, 1, warning, "manageActions failed bladeburner.startAction(" + bladeburnerActionWanted.type + ", " + bladeburnerActionWanted.name + ")")
+                if (!ns.bladeburner.startAction(bladeburner_action_wanted.type, bladeburner_action_wanted.name)) {
+                    log(ns, 1, warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
                 }
             }
         }
 
         //check if we can do both bladeburner and normal work
-        const actionDual = (getInstalledAugmentations(ns).indexOf(enum_augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(enum_augments.bladesSimulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
-        if ((!joinedBladeburner) || (actionDual)) {
+        if ((!bladeburner_joined) || (can_perform_dual_actions)) {
             //get best crime for combat skills
-            const bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.skills)
+            const crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.skills)
             //if not performing the correct crime
-            if (playerActivity.value != bestCrime) {
+            if (player_activity.value != crime_best) {
                 //commit crime for money/stats?
-                if (ns.singularity.commitCrime(bestCrime, actionFocus)) {
-                    log(ns, 1, warning, "manageActions failed 3. singularity.commitCrime(" + bestCrime + ", " + actionFocus + ")")
+                if (ns.singularity.commitCrime(crime_best, action_focus)) {
+                    log(ns, 1, warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
                 }
             }
         }
@@ -912,100 +888,100 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
 
     //sleeve actions
     //shock value that is wanted (96%)
-    const shockMax = 0.96
+    const sleeve_shock_desired_maximum = 0.96
     //get all max shock value
-    let sleeveShockValues = []
+    let sleeve_shock = []
 
     //for each sleeve
-    for (let index = 0; index < numSleeves; index++) {
+    for (let index = 0; index < sleeves_available; index++) {
         //get shock value
         const shock = ns.sleeve.getSleeve(index).shock
         //add the shock to the list
-        sleeveShockValues.push(shock)
+        sleeve_shock.push(shock)
     }
 
     //if there is a sleeve with too much shock
-    if (Math.max(sleeveShockValues) > shockMax) {
+    if (Math.max(sleeve_shock) > sleeve_shock_desired_maximum) {
         //for each sleeve
-        for (let index = 0; index < numSleeves; index++) {
+        for (let index = 0; index < sleeves_available; index++) {
             //if not doing the correct work
-            if (getActivity(ns, index).type != enum_activities.recovery) {
+            if (get_activity(ns, index).type != enum_activities.recovery) {
                 //perform recovery
                 ns.sleeve.setToShockRecovery(index)
             }
         }
 
         //if we have not reached target karma
-    } else if (player.karma > gangKarma) {
+    } else if (player.karma > karma_required_for_gang) {
         //for each sleeve
-        for (let index = 0; index < numSleeves; index++) {
+        for (let index = 0; index < sleeves_available; index++) {
             //get best crime for karma
-            let bestCrime = ns.enums.CrimeType.mug//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.karma)
+            let crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
             //if not doing the correct work
-            if (getActivity(ns, index).value != bestCrime) {
+            if (get_activity(ns, index).value != crime_best) {
                 //perform crime for karma
-                ns.sleeve.setToCommitCrime(index, bestCrime)
+                ns.sleeve.setToCommitCrime(index, crime_best)
             }
         }
 
         //not reached target kills
-    } else if (player.numPeopleKilled < killsFactions) {
+    } else if (player.numPeopleKilled < kills_required_for_factions) {
         //for each sleeve
-        for (let index = 0; index < numSleeves; index++) {
+        for (let index = 0; index < sleeves_available; index++) {
             //get best crime for kills
-            let bestCrime = ns.enums.CrimeType.homicide//getBestCrime(ns, bitNodeMultipliers, player, enum_crimeFocus.kills)
+            let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.kills)
             //if not performing the correct work
-            if (getActivity(ns, index).value != bestCrime) {
+            if (get_activity(ns, index).value != crime_best) {
                 //perform crime
-                ns.sleeve.setToCommitCrime(index, bestCrime)
+                ns.sleeve.setToCommitCrime(index, crime_best)
             }
         }
 
         //sleeves to be divided over work
     } else {
         //keep track of sleeve actions
-        let sleeveActions = {}
+        let sleeve_actions = {}
 
         //factions
         //get available factions
         for (const faction of player.factions) {
             //get work types
-            const workTypes = getFactionWorkTypes(faction)
-            //if the faction has worktypes
-            if (workTypes.length > 0) {
-                //log(ns,1,info,"Faction has " + ns.singularity.getAugmentationsFromFaction(faction).length + " augments")
+            const work_types = get_faction_work_types(faction)
+            //if the faction has work_types
+            if (work_types.length > 0) {
                 //if there are still augments available
-                if (shouldWorkForFaction(ns, faction)) {
+                if (should_work_for_faction(ns, faction)) {
                     //set a flag to check
-                    let flagAlreadyWorkingFaction = false
+                    let already_working_for_faction = false
                     //check other sleeves
-                    for (let index = 0; index < numSleeves; index++) {
+                    for (let index = 0; index < sleeves_available; index++) {
                         //get activity
-                        const activity = getActivity(ns, index)
+                        const activity = get_activity(ns, index)
                         //if a sleeve is already working for this faction
                         if ((activity.type == enum_activities.faction) &&
                             (activity.value == faction)) {
                             //assign this job to the sleeve
-                            sleeveActions[index] = activity
+                            sleeve_actions[index] = activity
                             //set flag to indicate someone is already working on this
-                            flagAlreadyWorkingFaction = true
+                            already_working_for_faction = true
                             //stop searching
                             break
                         }
                     }
                     //if flag is not set
-                    if (!flagAlreadyWorkingFaction) {
+                    if (!already_working_for_faction) {
                         //check each sleeve
-                        for (let index = 0; index < numSleeves; index++) {
+                        for (let index = 0; index < sleeves_available; index++) {
                             //check if the sleeve is not assigned
-                            if (!Object.hasOwn(sleeveActions, index)) {
+                            if (!Object.hasOwn(sleeve_actions, index)) {
                                 //get best faction work
-                                let bestFactionWork = determineBestFactionWork(ns.sleeve.getSleeve(index), workTypes)
+                                const faction_work_best = determine_faction_work(ns.sleeve.getSleeve(index), work_types)
+                                //try to start
                                 try {
                                     //work for this faction
-                                    if (ns.sleeve.setToFactionWork(index, faction, bestFactionWork)) {
+                                    if (ns.sleeve.setToFactionWork(index, faction, faction_work_best)) {
                                         //save information
-                                        sleeveActions[index] = { type: enum_activities.faction, value: faction }
+                                        sleeve_actions[index] = { type: enum_activities.faction, value: faction }
                                         //stop
                                         break
                                     }
@@ -1023,38 +999,38 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         //create list of companies and their factions
         for (const company in player.jobs) {
             //get faction of the company
-            let companyFaction = enum_companyFactions[company]
+            let company_faction = enum_company_factions[company]
             //if not joined
-            if (player.factions.indexOf(companyFaction) == -1) {
+            if (player.factions.indexOf(company_faction) == -1) {
                 //check if other sleeves are working for the company
                 //set a flag to check
-                let flagAlreadyWorkingCompany = false
+                let company_already_working = false
                 //check other sleeves
-                for (let index = 0; index < numSleeves; index++) {
+                for (let index = 0; index < sleeves_available; index++) {
                     //get activity
-                    let activity = getActivity(ns, index)
+                    const activity = get_activity(ns, index)
                     //if a sleeve is already working for this company
                     if ((activity.type == enum_activities.company) &&
                         (activity.value == company)) {
                         //assign this job to the sleeve
-                        sleeveActions[index] = activity
+                        sleeve_actions[index] = activity
                         //set flag to indicate someone is already working on this
-                        flagAlreadyWorkingCompany = true
+                        company_already_working = true
                         //stop searching
                         break
                     }
                 }
                 //if flag is not set
-                if (!flagAlreadyWorkingCompany) {
+                if (!company_already_working) {
                     //check each sleeve
-                    for (let index = 0; index < numSleeves; index++) {
+                    for (let index = 0; index < sleeves_available; index++) {
                         //check if the sleeve is not assigned
-                        if (!Object.hasOwn(sleeveActions, index)) {
+                        if (!Object.hasOwn(sleeve_actions, index)) {
                             try {
                                 //work for company
                                 ns.sleeve.setToCompanyWork(index, company)
                                 //save information
-                                sleeveActions[index] = { type: enum_activities.company, value: company }
+                                sleeve_actions[index] = { type: enum_activities.company, value: company }
 
                             } catch (error) {
                                 log(ns, 1, error, "setToCompanyWork " + company + ": " + error)
@@ -1066,18 +1042,18 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
         }
 
         //check each sleeve
-        for (let index = 0; index < numSleeves; index++) {
+        for (let index = 0; index < sleeves_available; index++) {
             //check if the sleeve is not assigned
-            if (!Object.hasOwn(sleeveActions, index)) {
+            if (!Object.hasOwn(sleeve_actions, index)) {
                 //get best crime for skills
-                let bestCrime = ns.enums.CrimeType.grandTheftAuto//getBestCrime(ns, bitNodeMultipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
+                let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
                 //if not working on the desired crime
-                if (getActivity(ns, index).value != bestCrime) {
+                if (get_activity(ns, index).value != crime_best) {
                     //assign to crime
-                    ns.sleeve.setToCommitCrime(index, bestCrime)
+                    ns.sleeve.setToCommitCrime(index, crime_best)
                 }
                 //save information
-                sleeveActions[index] = { type: enum_activities.crime, value: bestCrime }
+                sleeve_actions[index] = { type: enum_activities.crime, value: crime_best }
             }
         }
     }
@@ -1094,37 +1070,36 @@ function manageActions(ns, numSleeves, bitNodeMultipliers) {
  */
 function getBladeburnerActionForSleeve(ns, sleeveIndex) {
     //set min chance = 100%
-    const chanceMin = 1
-
-
+    const bladeburner_success_chance_minimum = 1
+    //describe other actions
     const enum_sleeveBladeburnerActions = {
         fieldAnalysis: "Field Analysis",
         infiltratesynthoids: "Infiltrate synthoids",
     }
 
     //keep track of action count
-    let totalActionCount = 0
+    let bladeburner_total_action_count = 0
 
     //contracts
     //for each contract
-    for (const op in enum_bladeburnerActions.contracts) {
+    for (const operation in enum_bladeburnerActions.contracts) {
         //get contract information
-        const contract = enum_bladeburnerActions.contracts[op]
+        const contract = enum_bladeburnerActions.contracts[operation]
         //get action count
-        const actionCount = ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.contracts, contract)
+        const action_count = ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.contracts, contract)
         //get chance
         const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.contracts, contract, sleeveIndex)
         //if this action can be performed and we have enough chance
-        if ((actionCount > 0) && (chance[0] >= chanceMin)) {
+        if ((action_count > 0) && (chance[0] >= bladeburner_success_chance_minimum)) {
             //return this information
             return { type: enum_sleeveBladeburnerActions.takeonContracts, name: contract }
         }
         //add count to total actions available
-        totalActionCount += actionCount
+        bladeburner_total_action_count += action_count
     }
 
     //if no operations or contracts available
-    if (totalActionCount == 0) {
+    if (bladeburner_total_action_count == 0) {
         //set to create contracts
         return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.inciteViolence }
     }
@@ -1141,7 +1116,7 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Constants.ts
  * @param {NS} ns
  */
-function getBestCrime(ns, bitNodeMultipliers, person, focus) {
+function get_crime_best(ns, bit_node_multipliers, person, focus) {
 
     switch (focus) {
         default:
@@ -1151,11 +1126,11 @@ function getBestCrime(ns, bitNodeMultipliers, person, focus) {
         case "hacking": return ns.enums.CrimeType.robStore
     }
 
-    //log(ns,1,info,bitNodeMultipliers + ", " + person + ", " + focus)
+    //log(ns,1,info,bit_node_multipliers + ", " + person + ", " + focus)
     //constants
-    const intelligenceCrimeWeight = 0.025
-    const maxSkillLevel = 975
-    const minChance = 0.75
+    const crime_weight_intelligence = 0.025
+    const crime_skill_level_maximum = 975
+    const crime_chance_minimum = 0.75
 
     //keep track of values
     let best = {
@@ -1165,46 +1140,46 @@ function getBestCrime(ns, bitNodeMultipliers, person, focus) {
     }
 
     //for each crime
-    for (let crimeEntry in enum_crimes) {
+    for (let crime_index in enum_crimes) {
         //get the data
-        const crimeData = enum_crimes[crimeEntry]
+        const crime_data = enum_crimes[crime_index]
 
 
         //calculate the chance
         let chance = 0
         //for every skill weight
-        for (let skill in crimeData.weight) {
+        for (let skill in crime_data.weight) {
             //add calculation for the skill
-            chance += crimeData.weight[skill] * person.skills[skill]
+            chance += crime_data.weight[skill] * person.skills[skill]
         }
-        chance += intelligenceCrimeWeight * person.skills.intelligence
-        chance /= maxSkillLevel
-        chance /= crimeData.difficulty
+        chance += crime_weight_intelligence * person.skills.intelligence
+        chance /= crime_skill_level_maximum
+        chance /= crime_data.difficulty
         chance *= person.mults.crime_success
-        chance *= bitNodeMultipliers.CrimeSuccessRate
-        chance *= calculateIntelligenceBonus(person.skills.intelligence, 1)
+        chance *= bit_node_multipliers.CrimeSuccessRate
+        chance *= calculate_intelligence_bonus(person.skills.intelligence, 1)
         //cap chance to 100%
         chance = Math.min(chance, 1)
         //chance = ns.get
-        //log(ns,1,info,"crimeData: " + crimeData.type + ", chance:" + chance + ", actual chance:" + ns.singularity.getCrimeChance(crimeData.type))
-        //chance = ns.singularity.getCrimeChance(crimeData.type)
+        //log(ns,1,info,"crime_data: " + crime_data.type + ", chance:" + chance + ", actual chance:" + ns.singularity.getCrimeChance(crime_data.type))
+        //chance = ns.singularity.getCrimeChance(crime_data.type)
         //log(ns,1,info," chance)
-        //if (chance >= minChance) {
+        //if (chance >= crime_chance_minimum) {
         //create multiplier to apply to each type
-        const multiplier = chance / crimeData.time
+        const multiplier = chance / crime_data.time
 
         //calculate for each type      
-        const karma = crimeData.karma * multiplier
-        const kills = crimeData.kills * multiplier
+        const karma = crime_data.karma * multiplier
+        const kills = crime_data.kills * multiplier
 
 
 
         //calculate all exp
         let skills = 0
         //for each exp
-        for (let skill in crimeData.exp) {
+        for (let skill in crime_data.exp) {
             //add the skill to the toal
-            skills += crimeData.exp[skill]
+            skills += crime_data.exp[skill]
         }
         //add multuplier
         skills *= multiplier
@@ -1213,21 +1188,21 @@ function getBestCrime(ns, bitNodeMultipliers, person, focus) {
         if (karma > best.karma.value) {
 
             //save name
-            best.karma.name = crimeData.type
+            best.karma.name = crime_data.type
             //save value
             best.karma.value = karma
         }
         //check if kills is higher
         if (kills > best.kills.value) {
             //save name
-            best.kills.name = crimeData.type
+            best.kills.name = crime_data.type
             //save value
             best.kills.value = kills
         }
         //check if skills is higher
         if (skills > best.skills.value) {
             //save name
-            best.skills.name = crimeData.type
+            best.skills.name = crime_data.type
             //save value
             best.skills.value = skills
         }
@@ -1244,7 +1219,7 @@ function getBestCrime(ns, bitNodeMultipliers, person, focus) {
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/formulas/intelligence.ts
  * Cost: 0
  */
-function calculateIntelligenceBonus(intelligence, weight = 1) {
+function calculate_intelligence_bonus(intelligence, weight = 1) {
     return 1 + (weight * Math.pow(intelligence, 0.8)) / 600
 }
 
@@ -1254,17 +1229,17 @@ function calculateIntelligenceBonus(intelligence, weight = 1) {
  * Function that returns an array of available work types
  * Sadly, no easy way to directly link with using destroying the option to easily link
  */
-function getFactionWorkTypes(faction) {
+function get_faction_work_types(faction) {
     //for each faction
-    for (const factionEntry in enum_factions) {
+    for (const faction_index in enum_factions) {
         //get the faction data
-        const data = enum_factions[factionEntry]
+        const data = enum_factions[faction_index]
         //if the names match
         if (data.name == faction) {
-            //if it has worktypes
-            if (Object.hasOwn(data, "workTypes")) {
+            //if it has work_types
+            if (Object.hasOwn(data, "work_types")) {
                 //return the work types
-                return data.workTypes
+                return data.work_types
             } else {
                 //return empty list
                 return []
@@ -1286,14 +1261,18 @@ function getFactionWorkTypes(faction) {
  *  switchCity(4)
  *  getStamina (4)
  *  getRank (4)
- *  getActionCountRemaining (4)
+ *  getaction_countRemaining (4)
  *  getActionEstimatedSuccessChance (4)
  */
-function determineBladeburnerAction(ns) {
+function bladeburner_determine_action(ns) {
     //target min chance before attempting bladeburner
-    const chanceMin = 1
-    const chanceMinBO = 0.5
-
+    const bladeburner_success_chance_minimum = 1
+    const bladeburner_success_chance_minimumBO = 0.5
+    
+    //go to lowest chaos city (lower chaos = higher success chances)
+    //keep track of previous chaos
+    let bladeburner_chaos_lowest = 999999
+    
     //upgrade skills
     //for each bladeburner skill
     for (const skill in enum_bladeburnerSkills) {
@@ -1301,9 +1280,6 @@ function determineBladeburnerAction(ns) {
         ns.bladeburner.upgradeSkill(enum_bladeburnerSkills[skill])
     }
 
-    //go to lowest chaos city (lower chaos = higher success chances)
-    //keep track of previous chaos
-    let lowestChaos = 999999
     //check the lowest chaos city
     for (const cityEntry in enum_cities) {
         //get city
@@ -1313,36 +1289,36 @@ function determineBladeburnerAction(ns) {
         //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
         //and actions will default to Field analysis, which will do nothing...
         //if lower than previous and there is synthoids in the city
-        if (cityChaos < lowestChaos && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
+        if (cityChaos < bladeburner_chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
             //switch city
             ns.bladeburner.switchCity(city)
             //update lowest chaos
-            lowestChaos = cityChaos
+            bladeburner_chaos_lowest = cityChaos
         }
     }
 
     //keep track of action count
-    let totalActionCount = -1
+    let bladeburner_total_action_count = -1
     //get stamina
-    const stamina = ns.bladeburner.getStamina()
+    const bladeburner_stamina = ns.bladeburner.getStamina()
     //if current stamina is higher than half max stamina (no penalties)
-    if (stamina[0] > (stamina[1] / 2)) {
+    if (bladeburner_stamina[0] > (bladeburner_stamina[1] / 2)) {
         //set to 0. then it will be checked
-        totalActionCount = 0
+        bladeburner_total_action_count = 0
         //blackops
         //get current rank
-        const rank = ns.bladeburner.getRank()
+        const bladeburner_rank = ns.bladeburner.getRank()
         //for each black operation
-        for (const op in enum_bladeburnerActions.blackOps) {
+        for (const activity in enum_bladeburnerActions.blackOps) {
             //get blackOp information
-            const blackOp = enum_bladeburnerActions.blackOps[op]
+            const blackOp = enum_bladeburnerActions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.blackOps, blackOp.name) > 0) {
+            if (ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.blackOps, blackOp.name) > 0) {
                 //get chance
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.blackOps, blackOp.name)
                 //check if we have enough rank and enough chance
-                if ((rank > blackOp.reqRank) &&
-                    (chance[0] >= chanceMinBO)) {
+                if ((bladeburner_rank > blackOp.reqRank) &&
+                    (chance[0] >= bladeburner_success_chance_minimumBO)) {
                     //return this information
                     return { type: enum_bladeburnerActions.type.blackOps, name: blackOp.name }
                 }
@@ -1355,51 +1331,51 @@ function determineBladeburnerAction(ns) {
 
         //operations
         //for each operation
-        for (const op in enum_bladeburnerActions.operations) {
+        for (const activity in enum_bladeburnerActions.operations) {
             //get operation information
-            const operation = enum_bladeburnerActions.operations[op]
+            const operation = enum_bladeburnerActions.operations[activity]
             //get action count
-            const actionCount = ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.operations, operation)
+            const action_count = ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.operations, operation)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.operations, operation)
             //if this action can be performed and we have enough chance
-            if ((actionCount >= 1) && (chance[0] >= chanceMin)) {
+            if ((action_count >= 1) && (chance[0] >= bladeburner_success_chance_minimum)) {
                 //return this information
                 return { type: enum_bladeburnerActions.type.operations, name: operation }
             }
             //add count to total actions available
-            totalActionCount += actionCount
+            bladeburner_total_action_count += action_count
         }
 
         //contracts
         //for each contract
-        for (const op in enum_bladeburnerActions.contracts) {
+        for (const activity in enum_bladeburnerActions.contracts) {
             //get contract information
-            const contract = enum_bladeburnerActions.contracts[op]
+            const contract = enum_bladeburnerActions.contracts[activity]
             //get action count
-            const actionCount = ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.contracts, contract)
+            const action_count = ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.contracts, contract)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.contracts, contract)
             //if this action can be performed and we have enough chance
-            if ((actionCount >= 1) && (chance[0] >= chanceMin)) {
+            if ((action_count >= 1) && (chance[0] >= bladeburner_success_chance_minimum)) {
                 //return this information
                 return { type: enum_bladeburnerActions.type.contracts, name: contract }
             }
             //add count to total actions available
-            totalActionCount += actionCount
+            bladeburner_total_action_count += action_count
         }
     }
 
     //general
     //threshold on which chaos will effect actions (only done when chance for other actions is too low)
-    const chaosthreshold = 50
+    const bladeburner_chaos_threshold = 50
     //if over threshold
-    if (lowestChaos > chaosthreshold) {
+    if (bladeburner_chaos_lowest > bladeburner_chaos_threshold) {
         //lower chaos
         return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.diplomacy }
     }
     //if no operations or contracts available
-    if (totalActionCount == 0) {
+    if (bladeburner_total_action_count == 0) {
         //generate operations and contracts
         return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.inciteViolence }
     }
@@ -1414,22 +1390,22 @@ function determineBladeburnerAction(ns) {
  * From: https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/formulas/reputation.ts
  * Cost: 0 GB
  */
-function determineBestFactionWork(person, workTypes) {
+function determine_faction_work(person, work_types) {
     //set max skill level
-    const maxSkillLevel = 975
+    const crime_skill_level_maximum = 975
 
     //save best rep
-    let bestRep = -1
+    let best_rep = -1
     //save best work type
-    let bestWorkType = workTypes[0]
+    let best_work_type = work_types[0]
 
-    //for each worktype
-    for (let workType of workTypes) {
+    //for each work_type
+    for (let work_type of work_types) {
         //create variable to check later
         let rep = -1
 
         //check how to calculate
-        switch (workType) {
+        switch (work_type) {
             case "field":
                 rep = (0.9 *
                     (person.skills.strength +
@@ -1437,11 +1413,11 @@ function determineBestFactionWork(person, workTypes) {
                         person.skills.dexterity +
                         person.skills.agility +
                         person.skills.charisma +
-                        (person.skills.hacking + person.skills.intelligence))) / maxSkillLevel / 5.5
+                        (person.skills.hacking + person.skills.intelligence))) / crime_skill_level_maximum / 5.5
                 break
 
             case "hacking":
-                rep = (person.skills.hacking + person.skills.intelligence / 3) / maxSkillLevel
+                rep = (person.skills.hacking + person.skills.intelligence / 3) / crime_skill_level_maximum
                 break
 
             case "security":
@@ -1450,20 +1426,20 @@ function determineBestFactionWork(person, workTypes) {
                         person.skills.defense +
                         person.skills.dexterity +
                         person.skills.agility +
-                        (person.skills.hacking + person.skills.intelligence))) / maxSkillLevel / 4.5
+                        (person.skills.hacking + person.skills.intelligence))) / crime_skill_level_maximum / 4.5
                 break
 
             default:
-                log(ns, 1, warning, "determineBestFactionWork - uncaught condition: " + workType);
+                log(ns, 1, warning, "determine_faction_work - uncaught condition: " + work_type);
                 break
         }
         //if the rep is better than what is saved
-        if (rep > bestRep) {
+        if (rep > best_rep) {
             //save the work type
-            bestWorkType = workType
+            best_work_type = work_type
         }
     }
-    return bestWorkType
+    return best_work_type
 }
 
 
@@ -1478,32 +1454,32 @@ function determineBestFactionWork(person, workTypes) {
  * Sleeve: 4 GB
  *  getTask (4)
  */
-function getActivity(ns, index = -1) {
+function get_activity(ns, index = -1) {
     //create a return value
     //type is work type, value is the specific name of the work
     let activity = { type: "", value: "" }
     //if player
     if (index == -1) {
         //get current activity
-        let activityPlayer = ns.singularity.getCurrentWork()
+        let player_activity = ns.singularity.getCurrentWork()
         //check if player is maybe performing work
-        if (activityPlayer != null) {
+        if (player_activity != null) {
             //depending on the type
-            switch (activityPlayer.type) {
-                case enum_activities.study: activity.value = activityPlayer.classType; break
-                case enum_activities.company: activity.value = activityPlayer.companyName; break
-                //case enum_activities.createProgram: activity.value = activityPlayer.programName; break
-                case enum_activities.crime: activity.value = activityPlayer.crimeType; break
-                case enum_activities.faction: activity.value = activityPlayer.factionName; break
-                //case enum_activities.grafting: activity.value = activityPlayer.augmentation; break
+            switch (player_activity.type) {
+                case enum_activities.study: activity.value = player_activity.classType; break
+                case enum_activities.company: activity.value = player_activity.companyName; break
+                //case enum_activities.createProgram: activity.value = player_activity.programName; break
+                case enum_activities.crime: activity.value = player_activity.crimeType; break
+                case enum_activities.faction: activity.value = player_activity.factionName; break
+                //case enum_activities.grafting: activity.value = player_activity.augmentation; break
                 default:
                     //log information
-                    log(ns, 1, info, "getActivity - Uncaught condition: " + activityPlayer.type)
+                    log(ns, 1, info, "get_activity - Uncaught condition: " + player_activity.type)
                     //return immediately!
                     return activity
             }
             //set the type
-            activity.type = activityPlayer.type
+            activity.type = player_activity.type
 
             //may be doing bladeburner work or doing nothing
         }
@@ -1511,17 +1487,17 @@ function getActivity(ns, index = -1) {
         //if sleeve
     } else {
         //get activity of sleeve
-        let activitySleeve = ns.sleeve.getTask(index)
+        let sleeve_activity = ns.sleeve.getTask(index)
         //if set
-        if (activitySleeve != null) {
+        if (sleeve_activity != null) {
             //depending on the type
-            switch (activitySleeve.type) {
-                case enum_activities.study: activity.value = activitySleeve.classType; break
-                case enum_activities.company: activity.value = activitySleeve.companyName; break
-                case enum_activities.crime: activity.value = activitySleeve.crimeType; break
-                case enum_activities.faction: activity.value = activitySleeve.factionName; break
+            switch (sleeve_activity.type) {
+                case enum_activities.study: activity.value = sleeve_activity.classType; break
+                case enum_activities.company: activity.value = sleeve_activity.companyName; break
+                case enum_activities.crime: activity.value = sleeve_activity.crimeType; break
+                case enum_activities.faction: activity.value = sleeve_activity.factionName; break
                 //bladeburner?
-                case enum_activities.bladeburner: activity.value = activitySleeve.actionName; break
+                case enum_activities.bladeburner: activity.value = sleeve_activity.actionName; break
                 case enum_activities.infiltrate: activity.value = ""; break //only type property
                 case enum_activities.support: activity.value = ""; break //only type property
                 //sleeve only
@@ -1529,12 +1505,12 @@ function getActivity(ns, index = -1) {
                 case enum_activities.synchro: activity.value = ""; break //only type property                
                 default:
                     //log information
-                    log(ns, 1, info, "getActivity - Uncaught condition: " + activitySleeve.type)
+                    log(ns, 1, info, "get_activity - Uncaught condition: " + sleeve_activity.type)
                     //return immediately!
                     return activity
             }
             //set the type
-            activity.type = activitySleeve.type
+            activity.type = sleeve_activity.type
         }
     }
 
@@ -1549,169 +1525,23 @@ function getActivity(ns, index = -1) {
  * Cost: 1 GB
  *  getCurrentAction (1)
  */
-function getActivityBladeburner(ns) {
+function bladeburner_get_activity(ns) {
     //create a return value
     //type is work type, value is the specific name of the work
     let activity = { type: "", value: "" }
     //if bladeburner work
-    let activityPlayer = ns.bladeburner.getCurrentAction()
+    let player_activity = ns.bladeburner.getCurrentAction()
     //if not null: player is doing bladeburner work
-    if (activityPlayer != null) {
+    if (player_activity != null) {
         //set type
         activity.type = enum_activities.bladeburner
         //save action (to be looked up later)
-        activity.value = activityPlayer.name
+        activity.value = player_activity.name
     }
     //return the value
     return activity
 }
 
-
-
-/**
- * Function that manages stanek
- * @param {NS} ns
- * Cost: 2,9 GB
- *  fragmentDefinitions (0)
- *  clearGift (0)
- *  chargeFragment (0,4)
- *  placeFragment (0,5)
- *  acceptGift (2)
- */
-/*
-function manageStanek(ns, stanekInfo) {
-
-    //if the gift is accepted
-    if (ns.stanek.acceptGift()) {
-        //if grid has not been made
-        if (!Object.hasOwn(stanekInfo, "grid")) {
-            //create grid
-            stanekInfo.grid = []
-            //fill grid
-            for (let height = 0; height < stanekInfo.height; height++) {
-                let line = []
-                for (let width = 0; width < stanekInfo.width; width++) {
-                    line.push(false)
-                }
-                stanekInfo.grid.push(line)
-            }
-        }
-
-        //get all fragment definitions
-        for (let fragment of ns.stanek.fragmentDefinitions()) {
-            var coordinates = getPlacableIndex(ns, stanekInfo.grid, fragment)
-            if ((coordinates.x != -1) && (coordinates.y != -1)) {
-                //place fragment
-                ns.stanek.placeFragment(coordinates.x, coordinates.y, 0, fragment.id)
-                insertFragment(stanekInfo.grid, fragment, coordinates.x, coordinates.y)
-            }
-            //log(ns,1,info,fragment + ":" + JSON.stringify(fragment))
-        }
-        //sizes from parameters
-        //stanekInfo
-
-
-        log(ns, 1, info, "Grid after: ")
-        for (let row of stanekInfo.grid) {
-            log(ns, 1, info, row)
-        }
-
-    }
-}
-*/
-
-
-
-/**
- * Function that determines if the fragment can be placed
- * TODO: handle rotaions
- */
-/*
-function getPlacableIndex(ns, grid = [[]], fragment) {
-    //get height and width of the fragment
-    const fragmentHeight = fragment.shape.length
-    const fragmentWidth = fragment.shape[0].length
-    log(ns, 1, info, "Fragment: " + fragmentHeight + " x " + fragmentWidth)
-    log(ns, 1, info, "Grid: ")
-    for (let row of grid) {
-        log(ns, 1, info, row)
-    }
-
-    //for each row
-    for (let rowIndex in grid) {
-
-        let row = grid[rowIndex]
-        log(ns, 1, info, "grid.length: " + grid.length + ", row.length: " + row.length)
-        //if fits vertically
-        if ((parseInt(rowIndex) + fragmentHeight) < grid.length) {
-            //for each index (left to right)
-            for (let valueindex in row) {
-                //if it fits sideways
-                if ((parseInt(valueindex) + fragmentWidth) < row.length) {
-                    //set flag to check
-                    let flagFits = true
-                    //for the height of the fragment
-                    for (let height = 0; height < fragmentHeight; height++) {
-                        //for the width of the fragment
-                        for (let width = 0; width < fragmentWidth; width++) {
-                            log(ns, 1, info, "value [" + parseInt(rowIndex) + height + "][" + parseInt(valueindex) + width + "]")
-                            let valueGrid = grid[parseInt(rowIndex) + height][parseInt(valueindex) + width]
-                            let valueFragment = fragment.shape[height][width]
-                            //is this takes a slot
-                            if (valueFragment == true) {
-                                //and the slot is not opeb
-                                if (valueGrid == true) {
-                                    //set flag to false
-                                    flagFits = false
-                                    //stop looking                                
-                                    break
-                                }
-                            }
-
-                        }
-                        //if doesn't fit horizontally
-                        if (flagFits == false) {
-                            //stop checking
-                            break
-                        }
-                    }
-                    //if all values were false (therefore it fits)
-                    if (flagFits) {
-                        //return the index
-                        return { x: parseInt(valueindex), y: parseInt(rowIndex) }
-                    }
-                } else {
-                    //stop looking
-                    break
-                }
-            }
-        } else {
-            //stop looking
-            break
-        }
-    }
-    return { x: -1, y: -1 }
-}
-*/
-
-
-
-/**
- * Function that inserts the fragment into the grid of Stanek
- */
-/*
-function insertFragment(grid, fragment, x, y) {
-    const fragmentHeight = fragment.shape.length
-    const fragmentWidth = fragment.shape[0].length
-    for (let height = 0; height < fragmentHeight; height++) {
-        for (let width = 0; width < fragmentWidth; width++) {
-            if (fragment.shape[height][width] == true) {
-                grid[y + height][x + width] = true
-            }
-        }
-    }
-}
-*/
 
 
 
@@ -1722,26 +1552,26 @@ function insertFragment(grid, fragment, x, y) {
  * Cost: 2
  *  getServer (2)
  */
-function getServerSpecific(ns, ramServer = false) {
+function get_server_specific(ns, server_has_ram = false) {
     //create a list (of objects) to return
-    let serverList = []
+    let server_list = []
     //get all servers
-    const allServers = getServers(ns)
+    const servers_all = get_servers(ns)
     //for each server
-    for (let index = 0; index < allServers.length; index++) {
+    for (let index = 0; index < servers_all.length; index++) {
         //get server information
-        let server = ns.getServer(allServers[index])
+        let server = ns.getServer(servers_all[index])
         //if we have admin rights
         if (server.hasAdminRights) {
             //if we need to check ram and there is ram, or if we need to check money and there is money
-            if (((ramServer) && (server.maxRam > 0)) || ((!ramServer) && (server.moneyMax > 0))) {
+            if (((server_has_ram) && (server.maxRam > 0)) || ((!server_has_ram) && (server.moneyMax > 0))) {
                 //add the server object to the list
-                serverList.push(server)
+                server_list.push(server)
             }
         }
     }
     //return server list
-    return serverList
+    return server_list
 }
 
 
@@ -1750,33 +1580,33 @@ function getServerSpecific(ns, ramServer = false) {
  * Function that will retrieve all server hostnames
  * Cost: none
  */
-function getServers(ns) {
+function get_servers(ns) {
     //create list to save hostnames into
-    let serverList = []
+    let server_list = []
     //start scanning from home
-    scanServer(ns, enum_servers.home, serverList)
+    scan_server(ns, enum_servers.home, server_list)
     //return the server list
-    return serverList
+    return server_list
 }
 
 
 
 /**
- * Function that will retrieve all servers, sub function of getServers
+ * Function that will retrieve all servers, sub function of get_servers
  * Cost: 
  *  scan (0,2)
  */
-function scanServer(ns, hostname, serverList) {
+function scan_server(ns, hostname, server_list) {
     //get the neighbours of the server
-    let neighbours = ns.scan(hostname)
+    const neighbours = ns.scan(hostname)
     //for each neighbour
-    for (let neighbour of neighbours) {
+    for (const neighbour of neighbours) {
         //if not in the list
-        if (serverList.indexOf(neighbour) == -1) {
+        if (server_list.indexOf(neighbour) == -1) {
             //add to list
-            serverList.push(neighbour)
+            server_list.push(neighbour)
             //start scanning
-            scanServer(ns, neighbour, serverList)
+            scan_server(ns, neighbour, server_list)
         }
     }
 }
@@ -1787,7 +1617,7 @@ function scanServer(ns, hostname, serverList) {
  * Function that overwrites the specified port with new data
  * Cost: 0
  */
-function overWritePort(ns, port, data) {
+function over_write_port(ns, port, data) {
     //clear port
     ns.clearPort(port)
     //write data
@@ -1801,7 +1631,7 @@ function overWritePort(ns, port, data) {
  * @param {NS} ns
  * Cost: 0 GB
  */
-function updateUI(ns, numSleeves, bitNodeMultipliers) {
+function update_ui(ns, sleeves_available, bit_node_multipliers) {
     //get the UI
     const doc = eval('document')
     //left side
@@ -1819,63 +1649,63 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
 
     //entropy
     headers.push("Entropy")
-    values.push(numberFormatter(player.entropy))
+    values.push(number_formatter(player.entropy))
 
 
     //karma
     headers.push("Karma")
-    values.push(numberFormatter(player.karma) + "/" + numberFormatter(gangKarma))
+    values.push(number_formatter(player.karma) + "/" + number_formatter(karma_required_for_gang))
 
     //kills
     headers.push("Kills")
-    values.push(numberFormatter(player.numPeopleKilled) + "/" + killsFactions)
+    values.push(number_formatter(player.numPeopleKilled) + "/" + kills_required_for_factions)
 
     //hack tools
     const hacking = player.skills.hacking
-    let hackTools = 0
+    let hack_tools = 0
     if (hacking >= 50) {
-        if (ns.singularity.purchaseProgram(enum_hackTools.bruteSSH)) {
-            hackTools++
+        if (ns.singularity.purchaseProgram(enum_hack_tools.bruteSSH)) {
+            hack_tools++
         }
     }
     if (hacking >= 100) {
-        if (ns.singularity.purchaseProgram(enum_hackTools.fTPCrack)) {
-            hackTools++
+        if (ns.singularity.purchaseProgram(enum_hack_tools.fTPCrack)) {
+            hack_tools++
         }
     }
     if (hacking >= 300) {
-        if (ns.singularity.purchaseProgram(enum_hackTools.relaySMTP)) {
-            hackTools++
+        if (ns.singularity.purchaseProgram(enum_hack_tools.relaySMTP)) {
+            hack_tools++
         }
     }
     if (hacking >= 400) {
-        if (ns.singularity.purchaseProgram(enum_hackTools.hTTPWorm)) {
-            hackTools++
+        if (ns.singularity.purchaseProgram(enum_hack_tools.hTTPWorm)) {
+            hack_tools++
         }
     }
     if (hacking >= 725) {
-        if (ns.singularity.purchaseProgram(enum_hackTools.sQLInject)) {
-            hackTools++
+        if (ns.singularity.purchaseProgram(enum_hack_tools.sQLInject)) {
+            hack_tools++
         }
     }
     //add to header
     headers.push("Hack tools")
     //add specifics to data
-    values.push(hackTools + "/" + 5)
+    values.push(hack_tools + "/" + 5)
 
     //augments bought
     headers.push("Augments bought")
 
     //add global
-    values.push(getInstalledAugmentations(ns).length + "+" + getNumberToBeInstalledAugments() + "/" + bitNodeMultipliers["DaedalusAugsRequirement"])
+    values.push(get_augmentations_installed(ns).length + "+" + get_augments_to_be_installed() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
 
 
     //sleeves
     
-    for (let index = 0; index < numSleeves; index++) {
+    for (let index = 0; index < sleeves_available; index++) {
         //get sleeve activity
-        const activity = getActivity(ns, index)
+        const activity = get_activity(ns, index)
         //add to header
         headers.push("Sleeve " + index)
         //add specifics to data
@@ -1889,11 +1719,11 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
         //stamina
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
-        const percentage = Math.round(stamina[0] / stamina[1] * 100)
-        values.push(numberFormatter(stamina[0]) + "/" + numberFormatter(stamina[1]) + " (" + percentage + "%)")
+        const stamina_percentage = Math.round(stamina[0] / stamina[1] * 100)
+        values.push(number_formatter(stamina[0]) + "/" + number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
         //rank
         headers.push("Bladeburner rank")
-        values.push(numberFormatter(Math.floor(ns.bladeburner.getRank())) + "/" + numberFormatter(400e3))
+        values.push(number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + number_formatter(400e3))
 
         //blackOps completed
         let blackOpsCompleted = 0
@@ -1901,7 +1731,7 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
             //get blackop name
             const blackOp = enum_bladeburnerActions.blackOps[blackOpEntry]
             //if completed
-            if (ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.blackOps, blackOp.name) == 0) {
+            if (ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.blackOps, blackOp.name) == 0) {
                 //add to the counter
                 blackOpsCompleted++
             } else {
@@ -1910,7 +1740,7 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
             }
         }
         headers.push("Bladeburner BlackOps")
-        values.push(blackOpsCompleted + "/21")
+        values.push(blackOpsCompleted + "/"+ (enum_bladeburnerActions.blackOps-1) ) //was 21 (this should be dynamic
     }
 
 
@@ -1941,9 +1771,9 @@ function updateUI(ns, numSleeves, bitNodeMultipliers) {
  * Function that enables easy logging
  * Cost: 0
  */
-function log(ns, loglevel, type, message) {
-    //depending on loglevel
-    switch (loglevel) {
+function log(ns, log_level, type, message) {
+    //depending on log_level
+    switch (log_level) {
         case 2: //alert
             ns.alert(message)
         case 1: //console log
@@ -1962,15 +1792,15 @@ function log(ns, loglevel, type, message) {
  * Function that formats numbers
  * Cost: 0
  */
-function numberFormatter(number) {
-    let fractionDigits = 3
+function number_formatter(number) {
+    const fraction_digits = 3
     if (number == 0) {
         return 0
     }
     //round the number
     number = Math.round(number)
 
-    let symbols = ["", "k", "m", "b", "t"]
+    const symbols = ["", "k", "m", "b", "t"]
     let largestIndex = 0
     for (let index = 0; index < symbols.length; index++) {
         if (Math.abs(number) >= Math.pow(1000, index)) {
@@ -1981,7 +1811,7 @@ function numberFormatter(number) {
     }
     let numberReturn = number
     if (largestIndex > 0) {
-        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fractionDigits))
+        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
     }
     return numberReturn + symbols[largestIndex]
 }
@@ -1992,22 +1822,22 @@ function numberFormatter(number) {
  * Function that a boolean if enough rep is reached for a faction
  * @param {NS} ns
  */
-function shouldWorkForFaction(ns, faction) {
+function should_work_for_faction(ns, faction) {
     //check if we need to work for faction
     if (ns.singularity.getAugmentationsFromFaction(faction).length > 0) {
         //keep track of the highest rep
-        let highestRep = -1
+        let rep_highest = -1
         //get owned augments
-        let ownedAugs = getInstalledAugmentations(ns)
+        let ownedAugs = get_augmentations_installed(ns)
         //for each augment of the faction
         for (let augment of ns.singularity.getAugmentationsFromFaction(faction)) {
             //if augment is not owned
             if (ownedAugs.indexOf(augment) == -1) {
                 //update the highest rep if needed
-                highestRep = Math.max(highestRep, ns.singularity.getAugmentationRepReq(augment)) //enum_augmentsRep[augment])
+                rep_highest = Math.max(rep_highest, ns.singularity.getAugmentationRepReq(augment)) //enum_augmentsRep[augment])
             }
         }
-        return highestRep >= ns.singularity.getFactionRep(faction)
+        return rep_highest >= ns.singularity.getFactionRep(faction)
     }
     return false
 }
@@ -2035,7 +1865,7 @@ const enum_servers = {
 
 /**
  * Enum of all factions with their work types
- * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no workTypes
+ * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
  * Work types: "field", "hacking", "security" 	
  */
 const enum_factions = {
@@ -2046,46 +1876,46 @@ const enum_factions = {
     shadowsOfAnarchy: { name: "Shadows of Anarchy" },
 
     //important factions
-    daedalus: { name: "Daedalus", workTypes: ["field", "hacking"] },
-    illuminati: { name: "Illuminati", workTypes: ["field", "hacking"] },
-    theCovenant: { name: "The Covenant", workTypes: ["field", "hacking"] },
+    daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
+    illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
+    theCovenant: { name: "The Covenant", work_types: ["field", "hacking"] },
 
     //company factions
-    eCorp: { name: "ECorp", workTypes: ["field", "hacking", "security"] },
-    megaCorp: { name: "MegaCorp", workTypes: ["field", "hacking", "security"] },
-    bachmanAssociates: { name: "Bachman & Associates", workTypes: ["field", "hacking", "security"] },
-    bladeIndustries: { name: "Blade Industries", workTypes: ["field", "hacking", "security"] },
-    nWO: { name: "NWO", workTypes: ["field", "hacking", "security"] },
-    clarkeIncorporated: { name: "Clarke Incorporated", workTypes: ["field", "hacking", "security"] },
-    omniTekIncorporated: { name: "OmniTek Incorporated", workTypes: ["field", "hacking", "security"] },
-    fourSigma: { name: "Four Sigma", workTypes: ["field", "hacking", "security"] },
-    kuaiGongInternational: { name: "KuaiGong International", workTypes: ["field", "hacking", "security"] },
-    fulcrumSecretTechnologies: { name: "Fulcrum Secret Technologies", workTypes: ["hacking", "security"] },
+    eCorp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
+    megaCorp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
+    bachmanAssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
+    bladeIndustries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
+    nWO: { name: "NWO", work_types: ["field", "hacking", "security"] },
+    clarkeIncorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
+    omniTekIncorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
+    fourSigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
+    kuaiGongInternational: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
+    fulcrumSecretTechnologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
 
     //hacking factions
-    bitRunners: { name: "BitRunners", workTypes: ["hacking"] },
-    theBlackHand: { name: "The Black Hand", workTypes: ["field", "hacking"] },
-    niteSec: { name: "NiteSec", workTypes: ["hacking"] },
-    cyberSec: { name: "CyberSec", workTypes: ["hacking"] },
+    bitRunners: { name: "BitRunners", work_types: ["hacking"] },
+    theBlackHand: { name: "The Black Hand", work_types: ["field", "hacking"] },
+    niteSec: { name: "NiteSec", work_types: ["hacking"] },
+    cyberSec: { name: "CyberSec", work_types: ["hacking"] },
 
     //location factions
-    aevum: { name: "Aevum", workTypes: ["field", "hacking", "security"] },
-    chongqing: { name: "Chongqing", workTypes: ["field", "hacking", "security"] },
-    ishima: { name: "Ishima", workTypes: ["field", "hacking", "security"] },
-    newTokyo: { name: "New Tokyo", workTypes: ["field", "hacking", "security"] },
-    sector12: { name: "Sector-12", workTypes: ["field", "hacking", "security"] },
-    volhaven: { name: "Volhaven", workTypes: ["field", "hacking", "security"] },
+    aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
+    chongqing: { name: "Chongqing", work_types: ["field", "hacking", "security"] },
+    ishima: { name: "Ishima", work_types: ["field", "hacking", "security"] },
+    newTokyo: { name: "New Tokyo", work_types: ["field", "hacking", "security"] },
+    sector12: { name: "Sector-12", work_types: ["field", "hacking", "security"] },
+    volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
 
     //crime factions
-    speakersForTheDead: { name: "Speakers for the Dead", workTypes: ["field", "hacking", "security"] },
-    theDarkArmy: { name: "The Dark Army", workTypes: ["field", "hacking"] },
-    theSyndicate: { name: "The Syndicate", workTypes: ["field", "hacking", "security"] },
-    silhouette: { name: "Silhouette", workTypes: ["field", "hacking"] },
-    tetrads: { name: "Tetrads", workTypes: ["field", "security"] },
+    speakersForTheDead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
+    theDarkArmy: { name: "The Dark Army", work_types: ["field", "hacking"] },
+    theSyndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
+    silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
+    tetrads: { name: "Tetrads", work_types: ["field", "security"] },
 
     //other factions
-    netburners: { name: "Netburners", workTypes: ["hacking"] },
-    tianDiHui: { name: "Tian Di Hui", workTypes: ["hacking", "security"] },
+    netburners: { name: "Netburners", work_types: ["hacking"] },
+    tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
 }
 
 
@@ -2128,7 +1958,7 @@ const enum_activities = {
     company: "COMPANY", //properties: type, companyName, cyclesWorked (player)
     //createProgram: "CREATE_PROGRAM", //properties: type, programName, cyclesWorked
     crime: "CRIME", //properties: type, crimeType, cyclesWorked, cyclesNeeded (sleeve), tasksCompleted (sleeve)
-    faction: "FACTION", //properties: type, factionName, factionWorkType, cyclesWorked (player)		
+    faction: "FACTION", //properties: type, factionName, factionwork_type, cyclesWorked (player)		
     grafting: "GRAFTING", //properties: type, augmentation, completion, cyclesWorked
     //bladeburner (player)
     //properties: type, name
@@ -2389,7 +2219,7 @@ const enum_sleeveBladeburnerActions = {
  * Enum that describes the companies we want to join, and the faction behind it
  * Only fulcrum has a different faction name
  */
-const enum_companyFactions = {
+const enum_company_factions = {
     //225 stat(s) required
     "Bachman & Associates": "Bachman and Associates",
     "KuaiGong International": "KuaiGong International",
@@ -2413,7 +2243,7 @@ const enum_companyFactions = {
 /**
  * description of all hack tools
  */
-const enum_hackTools = {
+const enum_hack_tools = {
     bruteSSH: "BruteSSH.exe",   //500e3
     fTPCrack: "FTPCrack.exe",   //1500e3
     relaySMTP: "relaySMTP.exe", //5e6
@@ -2470,15 +2300,15 @@ const enum_scripts = {
 /**
  * Function that will output bitnode multipliers in a formatted way
  */
-function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
+function log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid) {
     //get the bitnode
-    let bitnode = resetInfo.currentNode
+    let bitnode = reset_info.currentNode
     //set level
     let sourceFile = 1
     //if we have source file
-    if (resetInfo.ownedSF.has(bitnode)) {
+    if (reset_info.ownedSF.has(bitnode)) {
         //add the owned level to the source file
-        sourceFile += resetInfo.ownedSF.get(bitnode)
+        sourceFile += reset_info.ownedSF.get(bitnode)
         //if bitnode is not 12 (which is unlimited)
         if (bitnode != 12) {
             //limit if needed
@@ -2488,7 +2318,7 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
     //set log type
     let logType = info
     //get difficulty
-    const difficulty = bitNodeMultipliers["WorldDaemonDifficulty"]
+    const difficulty = bit_node_multipliers["WorldDaemonDifficulty"]
     //get default hacking skill required for world deamon
     const worldDeamonHackingSkill = 3000
     //log bitnode information
@@ -2498,13 +2328,13 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //stats
     const stats = {
-        "Hack exp": bitNodeMultipliers.HackExpGain,
-        "Hack": bitNodeMultipliers.HackingLevelMultiplier,
-        "Strength": bitNodeMultipliers.StrengthLevelMultiplier,
-        "Defense": bitNodeMultipliers.DefenseLevelMultiplier,
-        "Dexterity": bitNodeMultipliers.DexterityLevelMultiplier,
-        "Agility": bitNodeMultipliers.AgilityLevelMultiplier,
-        "Charisma": bitNodeMultipliers.CharismaLevelMultiplier,
+        "Hack exp": bit_node_multipliers.HackExpGain,
+        "Hack": bit_node_multipliers.HackingLevelMultiplier,
+        "Strength": bit_node_multipliers.StrengthLevelMultiplier,
+        "Defense": bit_node_multipliers.DefenseLevelMultiplier,
+        "Dexterity": bit_node_multipliers.DexterityLevelMultiplier,
+        "Agility": bit_node_multipliers.AgilityLevelMultiplier,
+        "Charisma": bit_node_multipliers.CharismaLevelMultiplier,
     }
     logType = info
     for (const stat in stats) {
@@ -2531,9 +2361,9 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //augments
     const augments = {
-        "Rep cost": bitNodeMultipliers.AugmentationRepCost,
-        "Money cost": bitNodeMultipliers.AugmentationMoneyCost,
-        "Deadalus augment requirement": bitNodeMultipliers.DaedalusAugsRequirement,
+        "Rep cost": bit_node_multipliers.AugmentationRepCost,
+        "Money cost": bit_node_multipliers.AugmentationMoneyCost,
+        "Deadalus augment requirement": bit_node_multipliers.DaedalusAugsRequirement,
     }
     logType = info
     if (augments["Rep cost"] > 1 || augments["Money cost"] > 1) {
@@ -2559,8 +2389,8 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //bladeburner
     const bladeburner = {
-        "Rank gain": bitNodeMultipliers.BladeburnerRank,
-        "Skill cost": bitNodeMultipliers.BladeburnerSkillCost
+        "Rank gain": bit_node_multipliers.BladeburnerRank,
+        "Skill cost": bit_node_multipliers.BladeburnerSkillCost
     }
     logType = info
     if (bladeburner["Rank gain"] < 1 || bladeburner["Skill cost"] > 1) {
@@ -2587,26 +2417,26 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Stanek
     const stanek = {
-        "Power multiplier": bitNodeMultipliers.StaneksGiftPowerMultiplier,
-        "Extra size": bitNodeMultipliers.StaneksGiftExtraSize,
+        "Power multiplier": bit_node_multipliers.StaneksGiftPowerMultiplier,
+        "Extra size": bit_node_multipliers.StaneksGiftExtraSize,
     }
     //set base size
     let stanekBaseSize = 9 + stanek["Extra size"]
     //update stanek information
-    if (resetInfo.ownedSF.has(13)) {
+    if (reset_info.ownedSF.has(13)) {
         //each level grants a additional size
-        stanekBaseSize += resetInfo.ownedSF.get(13)
+        stanekBaseSize += reset_info.ownedSF.get(13)
     }
     //from return Math.max(2, Math.min(Math.floor(this.baseSize() / 2 + 1), StanekConstants.MaxSize));
     //calculate width
-    stanekInfo.width = Math.max(2, Math.min(Math.floor(stanekBaseSize / 2 + 1), 25))
+    stanek_grid.width = Math.max(2, Math.min(Math.floor(stanekBaseSize / 2 + 1), 25))
     //calculate height 
-    stanekInfo.height = Math.max(3, Math.min(Math.floor(stanekBaseSize / 2 + 0.6), 25))
+    stanek_grid.height = Math.max(3, Math.min(Math.floor(stanekBaseSize / 2 + 0.6), 25))
     //check log type
     logType = info
     if (stanek["Power multiplier"] < 1 || stanek["Extra size"] < 1) {
         logType = warning
-        if (stanekInfo.width <= 0 || stanekInfo.height <= 0) {
+        if (stanek_grid.width <= 0 || stanek_grid.height <= 0) {
             logType = error
         }
     }
@@ -2624,21 +2454,21 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
             }
         }
     }
-    message += ", total width: " + stanekInfo.width + ", total height: " + stanekInfo.height
+    message += ", total width: " + stanek_grid.width + ", total height: " + stanek_grid.height
     log(ns, 1, logType, message)
 
 
 
     //hacking
     const hack = {
-        "Money": bitNodeMultipliers.ScriptHackMoney,
-        "Money gain": bitNodeMultipliers.ScriptHackMoneyGain,
-        "Growth rate": bitNodeMultipliers.ServerGrowthRate,
-        "Max money": bitNodeMultipliers.ServerMaxMoney,
-        "Server starting money": bitNodeMultipliers.ServerStartingMoney,
-        "Server starting security": bitNodeMultipliers.ServerStartingSecurity,
-        "Weaken rate": bitNodeMultipliers.ServerWeakenRate,
-        "Hacking speed": bitNodeMultipliers.HackingSpeedMultiplier,
+        "Money": bit_node_multipliers.ScriptHackMoney,
+        "Money gain": bit_node_multipliers.ScriptHackMoneyGain,
+        "Growth rate": bit_node_multipliers.ServerGrowthRate,
+        "Max money": bit_node_multipliers.ServerMaxMoney,
+        "Server starting money": bit_node_multipliers.ServerStartingMoney,
+        "Server starting security": bit_node_multipliers.ServerStartingSecurity,
+        "Weaken rate": bit_node_multipliers.ServerWeakenRate,
+        "Hacking speed": bit_node_multipliers.HackingSpeedMultiplier,
     }
     logType = info
     for (const key in hack) {
@@ -2672,8 +2502,8 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //gang
     const gang = {
-        "Soft cap": bitNodeMultipliers.GangSoftcap,
-        "Unique augments": bitNodeMultipliers.GangUniqueAugs,
+        "Soft cap": bit_node_multipliers.GangSoftcap,
+        "Unique augments": bit_node_multipliers.GangUniqueAugs,
     }
     logType = info
     for (const key in gang) {
@@ -2702,9 +2532,9 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Corporation
     const corporation = {
-        "Softcap": bitNodeMultipliers.CorporationSoftcap,
-        "Valuation": bitNodeMultipliers.CorporationValuation,
-        "Divisions": bitNodeMultipliers.CorporationDivisions,
+        "Softcap": bit_node_multipliers.CorporationSoftcap,
+        "Valuation": bit_node_multipliers.CorporationValuation,
+        "Divisions": bit_node_multipliers.CorporationDivisions,
     }
     logType = info
     for (const key in corporation) {
@@ -2732,12 +2562,12 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Servers
     const server = {
-        "Home RAM cost": bitNodeMultipliers.HomeComputerRamCost,
-        "Server cost": bitNodeMultipliers.PurchasedServerCost,
-        "Server soft cap": bitNodeMultipliers.PurchasedServerSoftcap,
-        "Server limit": bitNodeMultipliers.PurchasedServerLimit,
-        "Server max RAM": bitNodeMultipliers.PurchasedServerMaxRam,
-        "Hacknet money": bitNodeMultipliers.HacknetNodeMoney,
+        "Home RAM cost": bit_node_multipliers.HomeComputerRamCost,
+        "Server cost": bit_node_multipliers.PurchasedServerCost,
+        "Server soft cap": bit_node_multipliers.PurchasedServerSoftcap,
+        "Server limit": bit_node_multipliers.PurchasedServerLimit,
+        "Server max RAM": bit_node_multipliers.PurchasedServerMaxRam,
+        "Hacknet money": bit_node_multipliers.HacknetNodeMoney,
     }
     logType = info
     for (const key in server) {
@@ -2768,10 +2598,10 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Faction
     const faction = {
-        "Passive rep gain": bitNodeMultipliers.FactionPassiveRepGain,
-        "Work exp gain": bitNodeMultipliers.FactionWorkExpGain,
-        "Work rep gain": bitNodeMultipliers.FactionWorkRepGain,
-        "Rep to donate": bitNodeMultipliers.RepToDonateToFaction,
+        "Passive rep gain": bit_node_multipliers.FactionPassiveRepGain,
+        "Work exp gain": bit_node_multipliers.FactionWorkExpGain,
+        "Work rep gain": bit_node_multipliers.FactionWorkRepGain,
+        "Rep to donate": bit_node_multipliers.RepToDonateToFaction,
     }
 
     logType = info
@@ -2801,9 +2631,9 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //company
     const company = {
-        "Work exp gain": bitNodeMultipliers.CompanyWorkExpGain,
-        "Work money": bitNodeMultipliers.CompanyWorkMoney,
-        "Work rep gain": bitNodeMultipliers.CompanyWorkRepGain,
+        "Work exp gain": bit_node_multipliers.CompanyWorkExpGain,
+        "Work money": bit_node_multipliers.CompanyWorkMoney,
+        "Work rep gain": bit_node_multipliers.CompanyWorkRepGain,
     }
     logType = info
     for (const key in company) {
@@ -2829,8 +2659,8 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //stock
     const stock = {
-        "4S Data cost": bitNodeMultipliers.FourSigmaMarketDataApiCost,
-        "4S api cost": bitNodeMultipliers.FourSigmaMarketDataCost,
+        "4S Data cost": bit_node_multipliers.FourSigmaMarketDataApiCost,
+        "4S api cost": bit_node_multipliers.FourSigmaMarketDataCost,
     }
     logType = info
     for (const key in stock) {
@@ -2858,9 +2688,9 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Crime
     const crime = {
-        "Exp gain": bitNodeMultipliers.CrimeExpGain,
-        "Money": bitNodeMultipliers.CrimeMoney,
-        "Success rate": bitNodeMultipliers.CrimeSuccessRate,
+        "Exp gain": bit_node_multipliers.CrimeExpGain,
+        "Money": bit_node_multipliers.CrimeMoney,
+        "Success rate": bit_node_multipliers.CrimeSuccessRate,
     }
     logType = info
     for (const key in crime) {
@@ -2886,7 +2716,7 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     //Go
     const go = {
-        "Power": bitNodeMultipliers.GoPower,
+        "Power": bit_node_multipliers.GoPower,
     }
     if (go["Power"] < 1) {
         log(ns, 1, warning, "Go: " + "Power: " + go["Power"])
@@ -2894,7 +2724,7 @@ function logBitnodeInformation(ns, bitNodeMultipliers, resetInfo, stanekInfo) {
 
     log(ns, 1, info, "------------------------------------")
     message = "Owned Augments: "
-    for (let augment of resetInfo.ownedAugs.keys()) {
+    for (let augment of reset_info.ownedAugs.keys()) {
         if (message != "Owned Augments: ") {
             message += ", "
         }
