@@ -4,13 +4,7 @@
  * manageStanek: to test
  * reactive sleeves in actions and in purchase augments and update ui
  */
-//log constants
-const info = "INFO"
-const success = "SUCCESS"
-const warning = "WARNING"
-const error = "ERROR"
-const fail = "FAIL"
-
+import { info, success, warning, error, fail } from "scripts/common.js"
 
 //target karma for gang
 const karma_required_for_gang = -54000
@@ -30,6 +24,12 @@ const challenge_flags = {
     disable_s4_market_data: false, //disables S4 market data (challenge bitnode 8)
     disable_hacknet_server: false, //disables hacknet servers (challenge bitnode 9)
     disable_sleeves: false, //disables sleeves (challenge bitnode 10)
+}
+
+const requirement = {
+    karma_for_gang: -54000, //-54k
+    kills_for_factions: 30,
+    
 }
 
 /**
