@@ -10,25 +10,3 @@ Early-game, many will be useless because they are only enabled by late-game feat
 A few handy aliases:
 `alias "boot=home; cls; killall; scripts/boot.js"` = command `boot` kills all scripts and starts the boot sequence
 `alias "update=home; cls; killall; git-pull.js"` = command `update` will get download / update the code from github
-
-# TODO
-* Make [cleanup.js](/markdown/cleanup.md) start the boot sequence
-* Split scripts which have their own timings:
-  * Gang: Gang.nextUpdate()
-  * Corporation
-* Fix sleeve duplicate work:
-
-sleeve.setToCompanyWork: Sleeve 6 cannot work for company KuaiGong International because Sleeve 5 is already working for them.
-
-Stack:
-scripts/main.js:L996@manageActions
-scripts/main.js:L80@main setToCompanyWork KuaiGong International: RUNTIME ERROR
-scripts/main.js@home (PID - 1)
-
-sleeve.setToCompanyWork: Sleeve 6 cannot work for company KuaiGong International because Sleeve 5 is already working for them.
-
-Stack:
-scripts/main.js:L996@manageActions
-scripts/main.js:L80@main
-scripts/main.js: RUNTIME ERROR
-scripts/main.js@home (PID - 1)
