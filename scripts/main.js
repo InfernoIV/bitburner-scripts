@@ -332,7 +332,9 @@ function buy_augments(ns, sleeves_available) {
             //if not owned
             if (augments_installed.indexOf(augment) == -1) {
                 //try to buy
-                ns.singularity.purchaseAugmentation(faction, augment)
+                if(ns.singularity.purchaseAugmentation(faction, augment)) {
+                    log(ns,1,success,"Bought augment '" + augment + "' for player")
+                }
             }
         }
     }
@@ -345,7 +347,9 @@ function buy_augments(ns, sleeves_available) {
         for (const augment of ns.sleeve.getSleevePurchasableAugs(index)) {
             try {
                 //buy augment
-                ns.sleeve.purchaseSleeveAug(index, augment.name)
+                if(ns.sleeve.purchaseSleeveAug(index, augment.name)) {
+                    log(ns,1,success,"Bought augment '" + augment.name + "' for sleeve " + index)
+                }
             } catch (error) {
                 break
             }
