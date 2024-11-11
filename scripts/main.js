@@ -11,6 +11,33 @@ const karma_required_for_gang = -54000
 //target kills for factions
 const kills_required_for_factions = 30
 
+//description of netburner requirements 
+const faction_netburners_requirements = {
+    levels: 100,
+    ram: 8,
+    cores: 4,
+}
+const requirement = {
+    karma_for_gang: -54000, //-54k
+    kills_for_factions: 30,
+    
+}
+
+//from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
+const enum_hashUpgrades = {
+    money: "Sell for Money",
+    corporationFunds: "Sell for Corporation Funds",
+    corporationResearch: "Exchange for Corporation Research",
+    serverSecurityMin: "Reduce Minimum Security",
+    serverMoneyMax: "Increase Maximum Money", // Use hashes to increase the maximum amount of money on a single server by 2%. This effect persists until you install Augmentations (since servers are reset at that time). Note that a server's maximum money is soft capped above <Money money={10e12}
+    trainingStudying: "Improve Studying",
+    trainingGym: "Improve Gym Training",
+    bladeburnerRank: "Exchange for Bladeburner Rank",
+    bladeburnerSkillPoints: "Exchange for Bladeburner SP",
+    codingContract: "Generate Coding Contract",
+    companyFavor: "Company Favor",
+}
+
 //minimum stat for hacking (todo: struct format?)
 const stat_minimum_hacking = 25//50 //?
 
@@ -22,15 +49,11 @@ const challenge_flags = {
     disable_corporation: false, //disables corporation (challenge bitnode 3)
     disable_bladeburner: true, //disables bladeburner (challenge bitnode 6 and 7)
     disable_s4_market_data: false, //disables S4 market data (challenge bitnode 8)
-    disable_hacknet_server: false, //disables hacknet servers (challenge bitnode 9)
+    disable_hacknet_servers: false, //disables hacknet servers (challenge bitnode 9)
     disable_sleeves: false, //disables sleeves (challenge bitnode 10)
 }
 
-const requirement = {
-    karma_for_gang: -54000, //-54k
-    kills_for_factions: 30,
-    
-}
+
 
 /**
  * Function that handles everything
@@ -497,73 +520,63 @@ function manage_companies(ns) {
  *  hacknet (4)
  */
 function manage_servers(ns) {
-    //description of netburner requirements 
-    const faction_netburners_requirements = {
-        levels: 100,
-        ram: 8,
-        cores: 4,
+    //if not limiting home for challenge
+    if(!challenge_flags.limit_home_server) {
+        //try to upgrade home RAM first
+        ns.singularity.upgradeHomeRam()
     }
 
-    //try to upgrade home RAM first
-    ns.singularity.upgradeHomeRam()
-
-    //for each buyable server possible
-    for (let index = ns.hacknet.numNodes(); index < ns.hacknet.maxNumNodes(); index++) {
-        //buy server
-        ns.hacknet.purchaseNode()
-    }
-
-    //for each owned server
-    for (let server_index = 0; server_index < ns.hacknet.numNodes(); server_index++) {
-        //upgrade ram
-        ns.hacknet.upgradeRam(server_index)
-
-        //get the stats of the network (which are important to check)      
-        let hacknet_stats = { level: 0, cores: 0, }
-        //for each owned node
-        for (let node_index = 0; node_index < ns.hacknet.numNodes(); node_index++) {
-            //get the stats
-            let nodeStats = ns.hacknet.getNodeStats(node_index)
-            //add the level
-            hacknet_stats.level += nodeStats.level
-            //add the cores
-            hacknet_stats.cores += nodeStats.cores
+    //if not hacknet disabled for challenge
+    if(!challenge_flags.disable_hacknet_servers) {
+        //for each buyable server possible
+        for (let index = ns.hacknet.numNodes(); index < ns.hacknet.maxNumNodes(); index++) {
+            //buy server
+            ns.hacknet.purchaseNode()
         }
-
-        //only conditionally level the cores
-        if (hacknet_stats.cores < faction_netburners_requirements.cores) {
-            //upgrade cores
-            ns.hacknet.upgradeCore(server_index)
-        }
-
-        //only conditionally level the cores
-        if (hacknet_stats.level < faction_netburners_requirements.levels) {
-            //upgrade level
-            ns.hacknet.upgradeLevel(server_index)
+    
+        //for each owned server
+        for (let server_index = 0; server_index < ns.hacknet.numNodes(); server_index++) {
+            //upgrade ram
+            ns.hacknet.upgradeRam(server_index)
+    
+            //get the stats of the network (which are important to check)      
+            let hacknet_stats = { level: 0, cores: 0, }
+            //for each owned node
+            for (let node_index = 0; node_index < ns.hacknet.numNodes(); node_index++) {
+                //get the stats
+                let nodeStats = ns.hacknet.getNodeStats(node_index)
+                //add the level
+                hacknet_stats.level += nodeStats.level
+                //add the cores
+                hacknet_stats.cores += nodeStats.cores
+            }
+    
+            //only conditionally level the cores
+            if (hacknet_stats.cores < faction_netburners_requirements.cores) {
+                //upgrade cores
+                ns.hacknet.upgradeCore(server_index)
+            }
+    
+            //only conditionally level the cores
+            if (hacknet_stats.level < faction_netburners_requirements.levels) {
+                //upgrade level
+                ns.hacknet.upgradeLevel(server_index)
+            }
         }
     }
-
-    //upgrade home cores
-    ns.singularity.upgradeHomeCores()
-
-    //manage hashes
-    //from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
-    const enum_hashUpgrades = {
-        money: "Sell for Money",
-        corporationFunds: "Sell for Corporation Funds",
-        corporationResearch: "Exchange for Corporation Research",
-        serverSecurityMin: "Reduce Minimum Security",
-        serverMoneyMax: "Increase Maximum Money", // Use hashes to increase the maximum amount of money on a single server by 2%. This effect persists until you install Augmentations (since servers are reset at that time). Note that a server's maximum money is soft capped above <Money money={10e12}
-        trainingStudying: "Improve Studying",
-        trainingGym: "Improve Gym Training",
-        bladeburnerRank: "Exchange for Bladeburner Rank",
-        bladeburnerSkillPoints: "Exchange for Bladeburner SP",
-        codingContract: "Generate Coding Contract",
-        companyFavor: "Company Favor",
+    
+    //if not limiting home for challenge
+    if(!challenge_flags.limit_home_server) {
+        //upgrade home cores
+        ns.singularity.upgradeHomeCores()
     }
 
-    //just spend hashes on money
-    ns.hacknet.spendHashes(enum_hashUpgrades.money)
+    //if not hacknet disabled for challenge
+    if(!challenge_flags.disable_hacknet_servers) {
+        //manage hashes
+        //just spend hashes on money
+        ns.hacknet.spendHashes(enum_hashUpgrades.money)
+    }
 }
 
 
@@ -666,20 +679,23 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     scripts_to_launch.push(enum_scripts.hack)
 
     //check if makes sense to launch gang manager
-    if ((bit_node_multipliers.GangSoftcap > 0) &&
-        (player.karma < karma_required_for_gang)) {
+    if ((!challenge_flags.disable_gang) && //if not performing a challenge
+        (bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
+        (player.karma < karma_required_for_gang)) { //and if karma threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.gang)
     }
 
     //check if makes sense to launch corporation manager
-    if ((bit_node_multipliers.CorporationSoftcap >= 0.15) &&
-        (money_available > corporation_money_requirement)) {
+    if ((!challenge_flags.disable_corporation) && //if not perfoming a challenge
+        (bit_node_multipliers.CorporationSoftcap >= 0.15) && //and if the bitnode allows
+        (money_available > corporation_money_requirement)) { //and if money threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.corporation)
     }
 
     //calculate money needed for stock manager
+    //TODO: how to handle challenge_flags.disable_s4_market_data ?
     if (money_available > (stock_4s_api_cost + stock_4s_market_data_cost)) { //26b
         //add to list
         scripts_to_launch.push(enum_scripts.stock)
@@ -820,6 +836,13 @@ function restart_player_actions(ns) {
  *          get_activity (4)       
  */
 function manage_actions(ns, sleeves_available, bit_node_multipliers) {
+    //first manage player
+    manage_actions_player(ns, bit_node_multipliers)
+    //then manange sleeves
+    manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers)
+}
+
+function manage_actions_player(ns, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //get player activity
@@ -885,7 +908,9 @@ function manage_actions(ns, sleeves_available, bit_node_multipliers) {
             }
         }
     }
-
+}
+    
+manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
     //sleeve actions
     //shock value that is wanted (96%)
     const sleeve_shock_desired_maximum = 0.96
@@ -1068,6 +1093,7 @@ function manage_actions(ns, sleeves_available, bit_node_multipliers) {
  * @param {NS} ns
  * Cost: 0 GB
  */
+    /*
 function getBladeburnerActionForSleeve(ns, sleeveIndex) {
     //set min chance = 100%
     const bladeburner_success_chance_minimum = 1
@@ -1107,6 +1133,7 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
     //failsafe: just train
     return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.training }
 }
+*/
 
 
 
@@ -1267,7 +1294,7 @@ function get_faction_work_types(faction) {
 function bladeburner_determine_action(ns) {
     //target min chance before attempting bladeburner
     const bladeburner_success_chance_minimum = 1
-    const bladeburner_success_chance_minimumBO = 0.5
+    const bladeburner_black_op_success_chance_minimum = 0.5
     
     //go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
@@ -1318,7 +1345,7 @@ function bladeburner_determine_action(ns) {
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.blackOps, blackOp.name)
                 //check if we have enough rank and enough chance
                 if ((bladeburner_rank > blackOp.reqRank) &&
-                    (chance[0] >= bladeburner_success_chance_minimumBO)) {
+                    (chance[0] >= bladeburner_black_op_success_chance_minimum)) {
                     //return this information
                     return { type: enum_bladeburnerActions.type.blackOps, name: blackOp.name }
                 }
