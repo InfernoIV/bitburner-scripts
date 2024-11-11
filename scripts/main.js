@@ -46,9 +46,6 @@ export async function main(ns) {
 
     //wait a bit
     await ns.sleep(sleepTime)
-
-    //debugging?
-    let counter = 1
     
     //main loop
     while (true) {
@@ -74,8 +71,6 @@ export async function main(ns) {
         manageDestruction(ns)   //0 GB
         manageReset(ns, minAugs)    //0 GB
         manageAugments(ns, numSleeves)  //18 GB
-
-        //log(ns, 1, info, "End of loop " + counter++)
 
         //wait a bit
         await ns.sleep(sleepTime)
