@@ -64,7 +64,7 @@ export async function main(ns) {
     let launched_scripts = []
 
     //initialize
-    init(ns, bit_node_multipliers, stanek_grid) //1,5 GB
+    init(ns, bit_node_multipliers, stanek_grid, challenge_flags) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
     restart_player_activity(ns)
     
@@ -114,7 +114,7 @@ export async function main(ns) {
  *  getreset_info (1)
  *  read (0)
  */
-function init(ns, bit_node_multipliers, stanek_grid) {
+function init(ns, bit_node_multipliers, stanek_grid, challenge_flags) {
 
     //disable unwanted logs
     ns.disableLog("disableLog")
@@ -165,6 +165,7 @@ function init(ns, bit_node_multipliers, stanek_grid) {
 
     //log information
     log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid)
+    log_challenge_information(ns, challenge_flags)
 
     //signal hackManager to stop
     over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
@@ -2749,6 +2750,23 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_g
     CodingContractMoney 1
     */
 }
+
+
+
+/**
+ * Function that will output challenge in a formatted way
+ */
+function log_challenge_information(ns, challenge_flags) {    
+    //for each challenge
+    for (challenge in challenge_flags) {
+        //if challenge is active
+        if(challenge_flags[challenge]) {
+            //log challenge information
+            log(ns, 1, warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
+        }
+    }
+}
+
 
 
 /**
