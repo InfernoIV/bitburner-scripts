@@ -1,10 +1,24 @@
 //imports
-import { enum_servers, enum_scripts} from "scripts/common.js"
+import { 
+    enum_servers, enum_scripts,
+    log, info, success, warning, error, fail,
+} from "scripts/common.js"
 
 
 
 /** @param {NS} ns */
 export async function main(ns) {
+    //get challenge config
+    const challenge_flags = JSON.parse(ns.read("challenge.json"))
+     //for each challenge
+    for (const challenge in challenge_flags) {
+        //if challenge is active
+        if(challenge_flags[challenge]) {
+            //log challenge information
+            log(ns, 1, warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
+        }
+    }
+    
     //get reset info
     const resetInfo = ns.getResetInfo()
     //create filename
