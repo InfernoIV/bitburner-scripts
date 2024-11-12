@@ -2,6 +2,8 @@
  * Function that get's the player in debt
  * Used all actions (player and sleeves (if unlocked) to keep on training
  * Exits when debt is reached
+ * 
+ * @param {NS} ns
  */
 export async function main(ns) {
     //set target of debt
@@ -32,7 +34,7 @@ export async function main(ns) {
     //set each sleeve action
     for (let sleeve_index = 0; sleeve_index < num_sleeves; sleeve_index++) {
         //set to action
-        setToUniversityCourse(sleeve_index, target_university, target_class)
+        ns.sleeve.setToUniversityCourse(sleeve_index, target_university, target_class)
     }
 
     //any other ways to spend money (while in negative)???
@@ -48,6 +50,6 @@ export async function main(ns) {
             return
         }
         //wait a bit
-        ns.sleep(100)
+        await ns.sleep(100)
     }
 }
