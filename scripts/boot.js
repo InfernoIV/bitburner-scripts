@@ -8,6 +8,7 @@ import {
 
 /** @param {NS} ns */
 export async function main(ns) {
+    
     //get challenge config
     const challenge_flags = JSON.parse(ns.read("challenge.json"))
      //for each challenge
@@ -18,6 +19,8 @@ export async function main(ns) {
             log(ns, 1, warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
         }
     }
+    
+    
     
     //get reset info
     const resetInfo = ns.getResetInfo()
@@ -50,7 +53,16 @@ export async function main(ns) {
     //write data to file
     ns.write(filenameAugmentsOwned, JSON.stringify(ns.singularity.getOwnedAugmentations(false)), "w")
 
-    //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
-    ns.run(enum_scripts.jump, 1,
-        enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
+
+    //if not disabled
+    if (challenge_flags.disable_stanek != true) {
+        //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
+        ns.run(enum_scripts.jump, 1,
+            enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
+    } else {
+        //launch directly to main
+        //run jumpscript to boot main
+        ns.run(enum_scripts.jump, 1, 
+        enum_scripts.main, true)
+    } 
 }
