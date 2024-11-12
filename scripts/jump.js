@@ -1,11 +1,8 @@
 /** @param {NS} ns */
 export async function main(ns) {
-    const serverHome = "home"
     let script = ""
-    let killAll = false
-    //let parameters = []
 
-    ns.tprint("args: " + JSON.stringify(ns.args))
+    //ns.tprint("args: " + JSON.stringify(ns.args))
     await ns.sleep(100)
     try {
         //1st arg is script
@@ -25,10 +22,10 @@ export async function main(ns) {
             ns.run(script)
         }
     } catch (error) {
-        ns.tprint("1. " + error)
+        //ns.tprint("1. " + error)
     }
     /*while(true) {
         await ns.sleep(100)
     }*/
-    ns.tprint("Exit: " + script)
+    //ns.tprint("Exit: " + script)
 }
