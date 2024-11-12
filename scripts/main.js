@@ -1729,7 +1729,7 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
             //get sleeve activity
             const activity = get_activity(ns, index)
             //add to header
-            headers.push("Sleeve " + index + "(" + ns.sleeve.getSleeve(index).shock + ")")
+            headers.push("Sleeve " + index + " (" + Math.ceil(ns.sleeve.getSleeve(index).shock) + "%)")
             //add specifics to data
             values.push(activity.type.charAt(0) + activity.type.slice(1).toLowerCase() + ": " + activity.value)
         }
