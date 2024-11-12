@@ -42,7 +42,7 @@ const stat_minimum_hacking = 25//50 //?
  * Costs: 3,1 GB
  *  Base cost (1,6)
  *  killall (0,5) (inherited from init)
- *  getreset_info (1)
+ *  getResetInfo (1)
  */
 export async function main(ns) {    
     //set time to wait after each main loop
@@ -50,23 +50,23 @@ export async function main(ns) {
     //minimum amount of augments before resetting
     const augments_minimum_for_reset = 4 //to be set to 40 for achievement
     //get reset info
-    const reset_info = ns.getreset_info()
+    const reset_info = ns.getResetInfo()
     //get bitnode information from file
-    const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + ns.getreset_info().currentNode + ".json"))
+    const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + reset_info.currentNode + ".json"))
     //get challenge config
     const challenge_flags = JSON.parse(ns.read("challenge.json"))
     //number of sleeves available
     const sleeves_available = 8
-    
+
     //stanek information
     let stanek_grid = { width: 0, height: 0 }
     //keep track of launched scripts
     let launched_scripts = []
 
     //initialize
-    init(ns, bit_node_multipliers, stanek_grid, challenge_flags) //1,5 GB
+    init(ns, bit_node_multipliers, stanek_grid) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
-    restart_player_actions(ns)
+    restart_player_actions(ns, challenge_flags)
     
     //wait a bit for first iteration
     await ns.sleep(time_between_loops)
@@ -81,19 +81,19 @@ export async function main(ns) {
         manage_companies(ns) //3 GB
 
         //servers & scripts: 18,5 GB
-        manage_servers(ns)   //10 GB
+        manage_servers(ns, challenge_flags)   //10 GB
         manage_hacking(ns)   //4,3 GB
-        manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,2 GB
+        manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,2 GB
 
         //player, sleeve & bladeburner: 71 GB
-        manage_actions(ns, sleeves_available, bit_node_multipliers)   //71 GB
+        manage_actions(ns, sleeves_available, bit_node_multipliers, challenge_flags)   //71 GB
 
         //update ui
-        update_ui(ns, sleeves_available, bit_node_multipliers) //0 GB
+        update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags) //0 GB
 
         //reset & destruction: 18 GB
-        execute_bit_node_destruction(ns)   //0 GB
-        buy_augments(ns, sleeves_available)  //18 GB
+        execute_bit_node_destruction(ns, challenge_flags)   //0 GB
+        buy_augments(ns, sleeves_available, challenge_flags)  //18 GB
         install_augments(ns, augments_minimum_for_reset)    //0 GB
         
 
@@ -114,7 +114,7 @@ export async function main(ns) {
  *  getreset_info (1)
  *  read (0)
  */
-function init(ns, bit_node_multipliers, stanek_grid, challenge_flags) {
+function init(ns, bit_node_multipliers, stanek_grid) {
 
     //disable unwanted logs
     ns.disableLog("disableLog")
@@ -161,11 +161,10 @@ function init(ns, bit_node_multipliers, stanek_grid, challenge_flags) {
     }
 
     //get reset info
-    const reset_info = ns.getreset_info()
+    const reset_info = ns.getResetInfo()
 
     //log information
     log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid)
-    log_challenge_information(ns, challenge_flags)
 
     //signal hackManager to stop
     over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
@@ -192,7 +191,7 @@ function init(ns, bit_node_multipliers, stanek_grid, challenge_flags) {
  */
 function get_augmentations_installed(ns) {
     //owned augments
-    const augments_owned = ns.getreset_info().ownedAugs
+    const augments_owned = ns.getResetInfo().ownedAugs
     //create return value
     let augments_list = []
     //for each augment
@@ -240,7 +239,7 @@ function get_augments_to_be_installed() {
  * Cost: none
  * TODO: launch script for bitnode destruction
  */
-function execute_bit_node_destruction(ns) {
+function execute_bit_node_destruction(ns, challenge_flags) {
     //set a flag for desctruction
     let can_execute_destruction = false
 
@@ -254,7 +253,7 @@ function execute_bit_node_destruction(ns) {
     }
 
     //bladeburner is possible
-    if (get_bladeburner_access(ns)) {
+    if (get_bladeburner_access(ns, challenge_flags)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
         if (ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.blackOps, enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
@@ -317,7 +316,7 @@ function install_augments(ns, augments_minimum_for_reset) {
  *  purchaseSleeveAug (4)
  *  getSleevePurchasableAugs (4)
  */
-function buy_augments(ns, sleeves_available) {
+function buy_augments(ns, sleeves_available, challenge_flags) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
     if (ns.peek(enum_port.reset) == "gang") {
         //do not buy augments
@@ -338,20 +337,23 @@ function buy_augments(ns, sleeves_available) {
             }
         }
     }
-    
-    //for each sleeve
-    for (let index = 0; index < sleeves_available; index++) {
-        //for each sleeve augment
-        //TODO: possible to hardcode the augment list?
-        //TODO: get rid of try / catch
-        for (const augment of ns.sleeve.getSleevePurchasableAugs(index)) {
-            try {
-                //buy augment
-                if(ns.sleeve.purchaseSleeveAug(index, augment.name)) {
-                    log(ns,1,success,"Bought augment '" + augment.name + "' for sleeve " + index)
+
+    //if sleeves are not disabled
+    if(challenge_flags.disable_sleeves != true) {
+        //for each sleeve
+        for (let index = 0; index < sleeves_available; index++) {
+            //for each sleeve augment
+            //TODO: possible to hardcode the augment list?
+            //TODO: get rid of try / catch
+            for (const augment of ns.sleeve.getSleevePurchasableAugs(index)) {
+                try {
+                    //buy augment
+                    if(ns.sleeve.purchaseSleeveAug(index, augment.name)) {
+                        log(ns,1,success,"Bought augment '" + augment.name + "' for sleeve " + index)
+                    }
+                } catch (error) {
+                    break
                 }
-            } catch (error) {
-                break
             }
         }
     }
@@ -506,7 +508,7 @@ function manage_companies(ns) {
  *  upgradeHomeRam (3)
  *  hacknet (4)
  */
-function manage_servers(ns) {
+function manage_servers(ns, challenge_flags) {
     //if not limiting home for challenge
     if(!challenge_flags.limit_home_server) {
         //try to upgrade home RAM first
@@ -644,7 +646,7 @@ function manage_hacking(ns) {
  *  exec (1.3)
  *  getServer (2)
  */
-function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
+function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags) {
     //get player
     const player = ns.getPlayer()
     //get money
@@ -702,7 +704,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
                 //get all servers that can run scripts
                 const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
-                const script_ram = ns.getscript_ram(script)
+                const script_ram = ns.getScriptRam(script)
                 //for each server
                 for (const server of servers_that_can_execute) {
                     //calculate available ram
@@ -735,7 +737,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
  * Used to ensure player focus is false, to enable resets after resuming play (restarting of game)
  * Quick and dirty copy of the determine player actions
  */
-function restart_player_actions(ns) {
+function restart_player_actions(ns, challenge_flags) {
     //get player
     const player = ns.getPlayer()
     //get player activity
@@ -743,7 +745,7 @@ function restart_player_actions(ns) {
     //set the default focus for actions (always false)
     const action_focus = false
     //check if we joined bladeburner (default is false
-    const bladeburner_joined = get_bladeburner_access(ns) 
+    const bladeburner_joined = get_bladeburner_access(ns, challenge_flags) 
 
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < stat_minimum_hacking) {
@@ -822,14 +824,18 @@ function restart_player_actions(ns) {
  *      Inherited: 4 GB
  *          get_activity (4)       
  */
-function manage_actions(ns, sleeves_available, bit_node_multipliers) {
+function manage_actions(ns, sleeves_available, bit_node_multipliers, challenge_flags) {
     //first manage player
-    manage_actions_player(ns, bit_node_multipliers)
-    //then manange sleeves
-    manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers)
+    manage_actions_player(ns, bit_node_multipliers, challenge_flags)
+
+    //if sleeves are not disabled
+    if(challenge_flags.disable_sleeves != true) {
+        //then manange sleeves
+        manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers)
+    }
 }
 
-function manage_actions_player(ns, bit_node_multipliers) {
+function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
     //get player
     const player = ns.getPlayer()
     //get player activity
@@ -837,7 +843,7 @@ function manage_actions_player(ns, bit_node_multipliers) {
     //set the default focus for actions (always false)
     const action_focus = false
     //check if we joined bladeburner (default is false
-    const bladeburner_joined = get_bladeburner_access(ns) 
+    const bladeburner_joined = get_bladeburner_access(ns, challenge_flags) 
 
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < stat_minimum_hacking) {
@@ -897,7 +903,9 @@ function manage_actions_player(ns, bit_node_multipliers) {
     }
 }
     
-manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
+function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
+    //get player
+    const player = ns.getPlayer()
     //sleeve actions
     //shock value that is wanted (96%)
     const sleeve_shock_desired_maximum = 0.96
@@ -1645,7 +1653,7 @@ function over_write_port(ns, port, data) {
  * @param {NS} ns
  * Cost: 0 GB
  */
-function update_ui(ns, sleeves_available, bit_node_multipliers) {
+function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags) {
     //get the UI
     const doc = eval('document')
     //left side
@@ -1713,23 +1721,24 @@ function update_ui(ns, sleeves_available, bit_node_multipliers) {
     //add global
     values.push(get_augmentations_installed(ns).length + "+" + get_augments_to_be_installed() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
-
-
-    //sleeves
-    //want to log augments of sleeves, but this costs 4 GB...
-    for (let index = 0; index < sleeves_available; index++) {
-        //get sleeve activity
-        const activity = get_activity(ns, index)
-        //add to header
-        headers.push("Sleeve " + index + "(" + ns.sleeve.getSleeve(index).shock + ")")
-        //add specifics to data
-        values.push(activity.type.charAt(0) + activity.type.slice(1).toLowerCase() + ": " + activity.value)
+    //if sleeves are enabled
+    if(challenge_flags.disable_sleeves != true) {
+        //sleeves
+        //want to log augments of sleeves, but this costs 4 GB...
+        for (let index = 0; index < sleeves_available; index++) {
+            //get sleeve activity
+            const activity = get_activity(ns, index)
+            //add to header
+            headers.push("Sleeve " + index + "(" + ns.sleeve.getSleeve(index).shock + ")")
+            //add specifics to data
+            values.push(activity.type.charAt(0) + activity.type.slice(1).toLowerCase() + ": " + activity.value)
+        }
     }
 
     //bladeburner
     
     
-    if (get_bladeburner_access(ns)) {
+    if (get_bladeburner_access(ns, challenge_flags)) {
         //stamina
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
@@ -2757,28 +2766,14 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_g
 
 
 
-/**
- * Function that will output challenge in a formatted way
- */
-function log_challenge_information(ns, challenge_flags) {    
-    //for each challenge
-    for (challenge in challenge_flags) {
-        //if challenge is active
-        if(challenge_flags[challenge]) {
-            //log challenge information
-            log(ns, 1, warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
-        }
-    }
-}
-
 
 
 /**
  * Function to do a check for bladeburner access 
  */
-function get_bladeburner_access(ns) {
+function get_bladeburner_access(ns, challenge_flags) {
     //if performing the challenge
-    if(challenge_flags.disable_bladeburner == true {
+    if(challenge_flags.disable_bladeburner == true) {
         //no access
         return false
         
