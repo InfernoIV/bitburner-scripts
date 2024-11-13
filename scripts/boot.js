@@ -73,8 +73,30 @@ export async function main(ns) {
  * Function that logs information to console about the bitnode information
 */
 function log_bit_node_information(ns, bit_node_multipliers) {
+       //get the bitnode
+    let bitnode = reset_info.currentNode
+    //set level
+    let sourceFile = 1
+    //if we have source file
+    if (reset_info.ownedSF.has(bitnode)) {
+        //add the owned level to the source file
+        sourceFile += reset_info.ownedSF.get(bitnode)
+        //if bitnode is not 12 (which is unlimited)
+        if (bitnode != 12) {
+            //limit if needed
+            sourceFile = Math.min(sourceFile, 3)
+        }
+    }
+    //get difficulty
+    const difficulty = bit_node_multipliers["WorldDaemonDifficulty"]
+    //get default hacking skill required for world deamon
+    const worldDeamonHackingSkill = 3000
+    
+    //log bitnode information
+    log(ns, 1, info, "BitNode: " + bitnode + "." + sourceFile + ", World daemon difficulty: " + difficulty + ", hacking level required: " + (difficulty * worldDeamonHackingSkill))
+    
     //start logging
-    log(ns, 1, info, "Bitnode multipliers: ")
+    //log(ns, 1, info, "Bitnode multipliers: ")
     
     //for each multiplier
     for (const key in bit_node_multipliers) {
@@ -189,3 +211,408 @@ const bit_node_lookup_data = {
     StaneksGiftExtraSize: { higher_is_better: true, }, /** Influences the size of the gift. */
     WorldDaemonDifficulty: { }, /** Influences the hacking skill required to backdoor the world daemon. */    
 }
+
+
+/**
+ * Function that will output bitnode multipliers in a formatted way
+ */
+function log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid) {
+    //get the bitnode
+    let bitnode = reset_info.currentNode
+    //set level
+    let sourceFile = 1
+    //if we have source file
+    if (reset_info.ownedSF.has(bitnode)) {
+        //add the owned level to the source file
+        sourceFile += reset_info.ownedSF.get(bitnode)
+        //if bitnode is not 12 (which is unlimited)
+        if (bitnode != 12) {
+            //limit if needed
+            sourceFile = Math.min(sourceFile, 3)
+        }
+    }
+    //set log type
+    let logType = info
+    //get difficulty
+    const difficulty = bit_node_multipliers["WorldDaemonDifficulty"]
+    //get default hacking skill required for world deamon
+    const worldDeamonHackingSkill = 3000
+    
+
+
+
+    //stats
+    const stats = {
+        "Hack exp": bit_node_multipliers.HackExpGain,
+        "Hack": bit_node_multipliers.HackingLevelMultiplier,
+        "Strength": bit_node_multipliers.StrengthLevelMultiplier,
+        "Defense": bit_node_multipliers.DefenseLevelMultiplier,
+        "Dexterity": bit_node_multipliers.DexterityLevelMultiplier,
+        "Agility": bit_node_multipliers.AgilityLevelMultiplier,
+        "Charisma": bit_node_multipliers.CharismaLevelMultiplier,
+    }
+    logType = info
+    for (const stat in stats) {
+        if (stats[stat] < 1) {
+            logType = warning
+            break
+        }
+    }
+    let message = "Stats: "
+    for (const stat in stats) {
+        const value = stats[stat]
+        if (value < 1 || value > 1) {
+            if (message != "Stats: ") {
+                message += ", "
+            }
+            message += stat + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+
+    //augments
+    const augments = {
+        "Rep cost": bit_node_multipliers.AugmentationRepCost,
+        "Money cost": bit_node_multipliers.AugmentationMoneyCost,
+        "Deadalus augment requirement": bit_node_multipliers.DaedalusAugsRequirement,
+    }
+    logType = info
+    if (augments["Rep cost"] > 1 || augments["Money cost"] > 1) {
+        logType = warning
+    }
+    message = "Augments: "
+    for (const key in augments) {
+        const value = augments[key]
+        if (value < 1 || value > 1) {
+            if (message != "Augments: ") {
+                message += ", "
+            }
+            if (key == "Deadalus augment requirement") {
+                message += key + ": " + value
+            } else {
+                message += key + ": " + value * 100 + "%"
+            }
+        }
+    }
+    log(ns, 1, logType, message)
+
+
+
+    //bladeburner
+    const bladeburner = {
+        "Rank gain": bit_node_multipliers.BladeburnerRank,
+        "Skill cost": bit_node_multipliers.BladeburnerSkillCost
+    }
+    logType = info
+    if (bladeburner["Rank gain"] < 1 || bladeburner["Skill cost"] > 1) {
+        logType = warning
+        if (bladeburner["Rank gain"] == 0) {
+            logType = error
+        }
+    }
+    message = "Bladeburner: "
+    for (const key in bladeburner) {
+        const value = bladeburner[key]
+        if (value < 1 || value > 1) {
+            if (message != "Bladeburner: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+
+   
+
+
+
+    //hacking
+    const hack = {
+        "Money": bit_node_multipliers.ScriptHackMoney,
+        "Money gain": bit_node_multipliers.ScriptHackMoneyGain,
+        "Growth rate": bit_node_multipliers.ServerGrowthRate,
+        "Max money": bit_node_multipliers.ServerMaxMoney,
+        "Server starting money": bit_node_multipliers.ServerStartingMoney,
+        "Server starting security": bit_node_multipliers.ServerStartingSecurity,
+        "Weaken rate": bit_node_multipliers.ServerWeakenRate,
+        "Hacking speed": bit_node_multipliers.HackingSpeedMultiplier,
+    }
+    logType = info
+    for (const key in hack) {
+        if (hack[key] < 1) {
+            logType = warning
+            break
+        } else if (key == "Server starting security" && hack[key] > 1) {
+            logType = warning
+            break
+        }
+    }
+    message = "Hacking: "
+    for (const key in hack) {
+        const value = hack[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Hacking: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+
+
+    //gang
+    const gang = {
+        "Soft cap": bit_node_multipliers.GangSoftcap,
+        "Unique augments": bit_node_multipliers.GangUniqueAugs,
+    }
+    logType = info
+    for (const key in gang) {
+        if (gang[key] < 1) {
+            logType = warning
+            break
+        }
+    }
+    message = "Gang: "
+    for (const key in gang) {
+        const value = gang[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Gang: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+    //Corporation
+    const corporation = {
+        "Softcap": bit_node_multipliers.CorporationSoftcap,
+        "Valuation": bit_node_multipliers.CorporationValuation,
+        "Divisions": bit_node_multipliers.CorporationDivisions,
+    }
+    logType = info
+    for (const key in corporation) {
+        if (corporation[key] < 1) {
+            logType = warning
+            if (corporation["Softcap"] < 0.15) {
+                logType = error
+            }
+        }
+    }
+    message = "Corporation: "
+    for (const key in corporation) {
+        const value = corporation[key]
+        if (value < 1 || value > 1) {
+            if (message != "Corporation: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+    //Servers
+    const server = {
+        "Home RAM cost": bit_node_multipliers.HomeComputerRamCost,
+        "Server cost": bit_node_multipliers.PurchasedServerCost,
+        "Server soft cap": bit_node_multipliers.PurchasedServerSoftcap,
+        "Server limit": bit_node_multipliers.PurchasedServerLimit,
+        "Server max RAM": bit_node_multipliers.PurchasedServerMaxRam,
+        "Hacknet money": bit_node_multipliers.HacknetNodeMoney,
+    }
+    logType = info
+    for (const key in server) {
+        if (server["Home RAM cost"] > 1 || server["Server soft cap"] > 1 || server["Server cost"] > 1) {
+            logType = warning
+        } else if (server[key] < 1) {
+            logType = warning
+        }
+    }
+    message = "Server: "
+    for (const key in server) {
+        const value = server[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Server: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+
+    //Faction
+    const faction = {
+        "Passive rep gain": bit_node_multipliers.FactionPassiveRepGain,
+        "Work exp gain": bit_node_multipliers.FactionWorkExpGain,
+        "Work rep gain": bit_node_multipliers.FactionWorkRepGain,
+        "Rep to donate": bit_node_multipliers.RepToDonateToFaction,
+    }
+
+    logType = info
+    for (const key in faction) {
+        if (faction[key] < 1) {
+            logType = warning
+        }
+    }
+    message = "Faction: "
+    for (const key in faction) {
+        const value = faction[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Faction: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (logType != info) {
+        log(ns, 1, logType, message)
+    }
+
+
+
+    //company
+    const company = {
+        "Work exp gain": bit_node_multipliers.CompanyWorkExpGain,
+        "Work money": bit_node_multipliers.CompanyWorkMoney,
+        "Work rep gain": bit_node_multipliers.CompanyWorkRepGain,
+    }
+    logType = info
+    for (const key in company) {
+        if (company[key] < 1) {
+            logType = warning
+        }
+    }
+    message = "Company: "
+    for (const key in company) {
+        const value = company[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Company: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    log(ns, 1, logType, message)
+
+
+    //stock
+    const stock = {
+        "4S Data cost": bit_node_multipliers.FourSigmaMarketDataApiCost,
+        "4S api cost": bit_node_multipliers.FourSigmaMarketDataCost,
+    }
+    logType = info
+    for (const key in stock) {
+        if (stock[key] > 1) {
+            logType = warning
+        }
+    }
+    message = "Stock: "
+    for (const key in stock) {
+        const value = stock[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Stock: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    if (message != "Stock: ") {
+        log(ns, 1, logType, message)
+    }
+
+
+    //Crime
+    const crime = {
+        "Exp gain": bit_node_multipliers.CrimeExpGain,
+        "Money": bit_node_multipliers.CrimeMoney,
+        "Success rate": bit_node_multipliers.CrimeSuccessRate,
+    }
+    logType = info
+    for (const key in crime) {
+        if (crime[key] < 1) {
+            logType = warning
+        }
+    }
+    message = "Crime: "
+    for (const key in crime) {
+        const value = crime[key]
+        if (value < 1 || value > 1) {
+            if (value == 0) {
+                logType = error
+            }
+            if (message != "Crime: ") {
+                message += ", "
+            }
+            message += key + ": " + value * 100 + "%"
+        }
+    }
+    log(ns, 1, logType, message)
+
+
+    //Go
+    const go = {
+        "Power": bit_node_multipliers.GoPower,
+    }
+    if (go["Power"] < 1) {
+        log(ns, 1, warning, "Go: " + "Power: " + go["Power"])
+    }
+
+    log(ns, 1, info, "------------------------------------")
+    message = "Owned Augments: "
+    for (let augment of reset_info.ownedAugs.keys()) {
+        if (message != "Owned Augments: ") {
+            message += ", "
+        }
+        message += augment
+    }
+    log(ns, 1, info, message)
+
+    /*  Ignored:
+    ManualHackMoney
+    ClassGymExpGain
+    InfiltrationMoney
+    InfiltrationRep
+    CodingContractMoney 1
+    */
+}
+
