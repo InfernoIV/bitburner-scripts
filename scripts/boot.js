@@ -53,7 +53,9 @@ export async function main(ns) {
     //write data to file
     ns.write(filenameAugmentsOwned, JSON.stringify(ns.singularity.getOwnedAugmentations(false)), "w")
 
-    log_bit_node_information(ns, bitNodeMultiplier)
+
+
+    log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
 
 
     //if not disabled
@@ -72,7 +74,7 @@ export async function main(ns) {
 /**
  * Function that logs information to console about the bitnode information
 */
-function log_bit_node_information(ns, bit_node_multipliers) {
+function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
        //get the bitnode
     let bitnode = reset_info.currentNode
     //set level
@@ -216,7 +218,7 @@ const bit_node_lookup_data = {
 /**
  * Function that will output bitnode multipliers in a formatted way
  */
-function log_bit_node_information(ns, bit_node_multipliers, reset_info, stanek_grid) {
+function log_bit_node_information_old(ns, bit_node_multipliers, reset_info, stanek_grid) {
     //get the bitnode
     let bitnode = reset_info.currentNode
     //set level
