@@ -53,6 +53,8 @@ export async function main(ns) {
     //write data to file
     ns.write(filenameAugmentsOwned, JSON.stringify(ns.singularity.getOwnedAugmentations(false)), "w")
 
+    log_bit_node_information(ns, bitNodeMultiplier)
+
 
     //if not disabled
     if (challenge_flags.disable_stanek != true) {
@@ -70,12 +72,12 @@ export async function main(ns) {
 /**
  * Function that logs information to console about the bitnode information
 */
-function log_bit_node_information(bit_node_multipliers) {
+function log_bit_node_information(ns, bit_node_multipliers) {
     //start logging
     log(ns, 1, info, "Bitnode multipliers: ")
     
     //for each multiplier
-    for (const key of bit_node_multipliers) {
+    for (const key in bit_node_multipliers) {
         //failsafe, if the multiplier doesn't exist in the list
         if(!Object.hasOwn(bit_node_lookup_data, key)) {
             //log error
@@ -87,12 +89,12 @@ function log_bit_node_information(bit_node_multipliers) {
         //get the value
         const value = bit_node_multipliers[key]
         //get the comparison data
-        const lookup_data = bit_node_lookup_data[multiplier]
+        const lookup_data = bit_node_lookup_data[key]
         //set the default value
         let default_value = 1
         //if there is another default value
-        if(Object.hasOwn(lookup_data, "")) {
-            default_value = lookup_data[default_value]
+        if(Object.hasOwn(lookup_data, "default_value")) {
+            default_value = lookup_data["default_value"]
         }
         
         //if value is not default value (use '<>' or '!=' ???)
@@ -100,9 +102,9 @@ function log_bit_node_information(bit_node_multipliers) {
             //if the lookup data has a disabled value
             if(Object.hasOwn(lookup_data, "disabled_value")) {
                 //if disabled / limited
-                if (value == lookup_data[disabled_value]) {
+                if (value == lookup_data["disabled_value"]) {
                     //log information
-                    log(ns, 1, error, key + ": " + value + " (" + lookup_data[disabled_text] + ")")
+                    log(ns, 1, error, key + ": " + value + " (" + lookup_data["disabled_text"] + ")")
                     //go to next key in the loop
                     continue
                 }
@@ -113,9 +115,9 @@ function log_bit_node_information(bit_node_multipliers) {
             //assume negative multiplier
             let log_type = warning
             //check if there is data on positive
-            if(Object.hasOwn(lookup_data, "higher_is_better") {
+            if(Object.hasOwn(lookup_data, "higher_is_better")) {
                 //check if it is positive
-                if(value > default_value && lookup_data[higher_is_better]) {
+                if(value > default_value && lookup_data["higher_is_better"]) {
                     //this is positive
                     log_type = success
                 }
