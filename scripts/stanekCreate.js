@@ -14,7 +14,53 @@ export async function main(ns) {
     const faction = "Church of the Machine God"
     ns.stanek.acceptGift()
     ns.singularity.joinFaction(faction)
-    //if not joined
+    
+  
+  /*
+   //Stanek
+    const stanek = {
+        "Power multiplier": bit_node_multipliers.StaneksGiftPowerMultiplier,
+        "Extra size": bit_node_multipliers.StaneksGiftExtraSize,
+    }
+    //set base size
+    let stanekBaseSize = 9 + stanek["Extra size"]
+    //update stanek information
+    if (reset_info.ownedSF.has(13)) {
+        //each level grants a additional size
+        stanekBaseSize += reset_info.ownedSF.get(13)
+    }
+    //from return Math.max(2, Math.min(Math.floor(this.baseSize() / 2 + 1), StanekConstants.MaxSize));
+    //calculate width
+    stanek_grid.width = Math.max(2, Math.min(Math.floor(stanekBaseSize / 2 + 1), 25))
+    //calculate height 
+    stanek_grid.height = Math.max(3, Math.min(Math.floor(stanekBaseSize / 2 + 0.6), 25))
+    //check log type
+    logType = info
+    if (stanek["Power multiplier"] < 1 || stanek["Extra size"] < 1) {
+        logType = warning
+        if (stanek_grid.width <= 0 || stanek_grid.height <= 0) {
+            logType = error
+        }
+    }
+    message = "Stanek's Gift: "
+    for (const key in stanek) {
+        const value = stanek[key]
+        if (value < 1 || value > 1 || key == "Extra size") {
+            if (message != "Stanek's Gift: ") {
+                message += ", "
+            }
+            if (key == "Extra size") {
+                message += key + ": " + value
+            } else {
+                message += key + ": " + value * 100 + "%"
+            }
+        }
+    }
+    message += ", total width: " + stanek_grid.width + ", total height: " + stanek_grid.height
+    log(ns, 1, logType, message)
+  */
+      
+  //if not joined
     /*
     if(ns.getPlayer().factions.indexOf(faction) == -1) {
         ns.singularity.travelToCity("Chongqing")
