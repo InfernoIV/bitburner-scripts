@@ -325,8 +325,8 @@ function buy_augments(ns, sleeves_available, challenge_flags) {
     for (const faction of ns.getPlayer().factions) {
         //for each augment of the faction
         for (const augment of ns.singularity.getAugmentationsFromFaction(faction)) {
-            //if not owned
-            if (augments_installed.indexOf(augment) == -1) {
+            //if not owned or is neuroflux
+            if (augments_installed.indexOf(augment) == -1 || augment == enum_augments.neuroFluxGovernor) {
                 //try to buy
                 if(ns.singularity.purchaseAugmentation(faction, augment)) {
                     log(ns,1,success,"Bought augment '" + augment + "' for player")
