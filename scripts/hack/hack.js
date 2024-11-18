@@ -4,6 +4,8 @@ import { info, success, warning, error, fail, //constants
     log, numberFormatter, overWritePort, //functions
 } from "scripts/common.js"
 
+//config.
+import * as config from "config.js"
 
 //global variables
 var counter
@@ -16,20 +18,15 @@ export async function main(ns) {
     //counter = 0
     //init
     init(ns)
-    //configurable delay
-    const delayBetweenScripts = 50
-    //define max amount of threads per instance
-    const maxThreads = 100
-    const logLevel = 0
-
-    log(ns, 0, success, "Looking for servers to execute hacks")
+    
+    log(ns, config.log_level, success, "Looking for servers to execute hacks")
     //wait until servers become available
     while (getExecuteServers(ns).length == 0) {
         await ns.sleep(1 * 1000)
     }
-    log(ns, 0, success, "Found " + getExecuteServers(ns).length + " servers to execute hacks")
+    log(ns, config.log_level, success, "Found " + getExecuteServers(ns).length + " servers to execute hacks")
     //create target info
-    let target = new targetInfo(ns, delayBetweenScripts, maxThreads, logLevel)
+    let target = new targetInfo(ns, config.delay_between_scripts)
     //always start in stop mode, to limit ram usage
     let flagStop = false
     //main loop
@@ -38,7 +35,7 @@ export async function main(ns) {
         if (flagStop == true) {
             if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.start)) {
                 //log information
-                log(ns, 0, info, "Resuming HackManager")
+                log(ns, config.log_level, info, "Resuming HackManager")
                 //reset flag
                 flagStop = false
             } else {
@@ -50,8 +47,8 @@ export async function main(ns) {
         } else {
             if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.stop)) {
                 //log information
-                log(ns, 0, info, "Pausing HackManager")
-                let waitTime = ns.getWeakenTime(ns) + (2*delayBetweenScripts)
+                log(ns, config.log_level, info, "Pausing HackManager")
+                let waitTime = ns.getWeakenTime(ns) + (2*config.delay_between_scripts)
                 await ns.sleep(waitTime)
 
                 //set flag
@@ -104,13 +101,9 @@ function init(ns) {
 class targetInfo {
     //create the class
     /** @param {NS} ns */
-    constructor(ns, delayBetweenScripts, maxThreads, logLevel) {
+    constructor(ns) {
         //set hostname to empty
         this.hostname = ""
-        //save the delay to use for calculations
-        this.delayBetweenScripts = delayBetweenScripts
-        //save max threads
-        this.maxThreads = maxThreads
         //set initial waitingtime
         this.waitTime = 0
         this.wait = 0
@@ -124,8 +117,6 @@ class targetInfo {
             grow: ns.getScriptRam(this.scriptGrow),
             hack: ns.getScriptRam(this.scriptHack),
         }
-        //set loglevel
-        this.logLevel = logLevel
     }
 
     //function to determine the hacking target
@@ -210,7 +201,7 @@ class targetInfo {
             this.hack[cores] = []
 
             //maximum is defined main threads (limited due to hack %: 1 hack = 1%, 100 hack = 100%)
-            for (let index = 1; index <= this.maxThreads; index++) {
+            for (let index = 1; index <= config.max_threads; index++) {
                 //get information for 1-100 main thread
                 if (!this.calculateThreads(ns, index, cores)) {
                     //hacking signed that we exceeded the threshold
@@ -327,9 +318,9 @@ class targetInfo {
             //exceeded list, return last entry
             return list[list.length - 1].threads
         } catch (error) {
-            log(ns, 1, warning, "getThreads: " + error)
-            log(ns, 1, warning, "cores: " + cores + ", ram: " + ram + ", type: " + type)
-            log(ns, 1, error, "this: " + JSON.stringify(this))
+            log(ns, config.log_level, warning, "getThreads: " + error)
+            log(ns, config.log_level, warning, "cores: " + cores + ", ram: " + ram + ", type: " + type)
+            log(ns, config.log_level, error, "this: " + JSON.stringify(this))
             return undefined ///{ grow: 0, weaken: 0, hack: 0, weaken1: 0, weaken2: 0 }
         }
     }
@@ -346,7 +337,7 @@ class targetInfo {
         //check if need to log
         if ((Math.round(ns.getServerSecurityLevel(this.hostname)) > Math.round(securityMin)) ||
             (ns.getServerMoneyAvailable(this.hostname) < moneyMax)) {
-            log(ns, 1, info, "Started prep " + this.hostname + ": " +
+            log(ns, config.log_level, info, "Started prep " + this.hostname + ": " +
                 ns.getServerSecurityLevel(this.hostname) + " > " + securityMin + " (" + (ns.getServerSecurityLevel(this.hostname) > securityMin) + "), " +
                 ns.getServerMoneyAvailable(this.hostname) + " < " + moneyMax + " (" + (ns.getServerMoneyAvailable(this.hostname) < moneyMax) + ")")
             //kill all running scripts
@@ -392,7 +383,7 @@ class targetInfo {
                     |---Weaken---|
                 */
                 return {
-                    weaken: this.delayBetweenScripts,	//cannot be 0, use delay between scripts
+                    weaken: config.delay_between_scripts,	//cannot be 0, use delay between scripts
                 }
 
             case "grow":
@@ -401,7 +392,7 @@ class targetInfo {
                     |---Weaken---|
                 */
                 return {
-                    grow: timeWeaken - timeGrow - this.delayBetweenScripts,
+                    grow: timeWeaken - timeGrow - config.delay_between_scripts,
                     weaken: 0,
                 }
 
@@ -413,13 +404,13 @@ class targetInfo {
                     ..|---Weaken---|
                 */
                 return {
-                    hack: timeWeaken - timeHack - this.delayBetweenScripts,
+                    hack: timeWeaken - timeHack - config.delay_between_scripts,
                     weaken1: 0,
-                    grow: timeWeaken - timeGrow + this.delayBetweenScripts,
-                    weaken2: this.delayBetweenScripts * 2,
+                    grow: timeWeaken - timeGrow + config.delay_between_scripts,
+                    weaken2: config.delay_between_scripts * 2,
                 }
             default:
-                log(ns, 1, error, "getDelays - Unhandled type: " + type)
+                log(ns, config.log_level, error, "getDelays - Unhandled type: " + type)
                 //stop the script
                 ns.exit()
         }
@@ -462,7 +453,7 @@ class targetInfo {
                 //calculate the available ram
                 serverRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
                 if (serverRam > minRam) {
-                    log(ns, 0, info, "Found server: " + server + " (" + cores + " core(s), " + serverRam + " GB RAM) to run " + minRam + " GB RAM")
+                    log(ns, config.log_level, info, "Found server: " + server + " (" + cores + " core(s), " + serverRam + " GB RAM) to run " + minRam + " GB RAM")
                     //set the execute server
                     serverExec = server
                     //stop looking
@@ -498,7 +489,7 @@ class targetInfo {
         }
 
         if (threads === undefined) {
-            log(ns, 1, info, "Server: " + serverExec + ": " + ns.getServer(serverExec).cpuCores + ", ram: " + serverRam + ", type: " + type)
+            log(ns, 1, warning, "Server: " + serverExec + ": " + ns.getServer(serverExec).cpuCores + ", ram: " + serverRam + ", type: " + type)
             ns.exit()
         }
 
@@ -511,7 +502,7 @@ class targetInfo {
                 if (delays.weaken < 0) {
                     break
                 }
-                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, this.logLevel)) {
+                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, config.log_level)) {
                     log(ns, 1, warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                     counter++
                     //log(ns,1,info,"zb-institute: " + ))
@@ -524,11 +515,11 @@ class targetInfo {
                     break
                 }
 
-                if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /*    */ this.hostname, delays.grow, threads.grow, serverExec, this.logLevel)) {
+                if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /*    */ this.hostname, delays.grow, threads.grow, serverExec, config.log_level)) {
                     log(ns, 1, warning, serverExec + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                     counter++
                 }
-                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, this.logLevel)) {
+                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, config.log_level)) {
                     log(ns, 1, warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                     counter++
                 }
@@ -540,19 +531,19 @@ class targetInfo {
                 }
 
                 try {
-                    if (!ns.exec(this.scriptHack, serverExec, threads.hack, /* */this.hostname, delays.hack, threads.hack, serverExec, this.logLevel)) {
+                    if (!ns.exec(this.scriptHack, serverExec, threads.hack, /* */this.hostname, delays.hack, threads.hack, serverExec, config.log_level)) {
                         log(ns, 1, warning, serverExec + " failed to start " + "hack (" + threads.hack + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken1, this.hostname, delays.weaken1, threads.weaken1, serverExec, this.logLevel)) {
+                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken1, this.hostname, delays.weaken1, threads.weaken1, serverExec, config.log_level)) {
                         log(ns, 1, warning, serverExec + " failed to start " + "weaken1 (" + threads.weaken1 + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /* */this.hostname, delays.grow, threads.grow, serverExec, this.logLevel)) {
+                    if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /* */this.hostname, delays.grow, threads.grow, serverExec, config.log_level)) {
                         log(ns, 1, warning, serverExec + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken2, this.hostname, delays.weaken2, threads.weaken2, serverExec, this.logLevel)) {
+                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken2, this.hostname, delays.weaken2, threads.weaken2, serverExec, config.log_level)) {
                         log(ns, 1, warning, serverExec + " failed to start " + "weaken2 (" + threads.weaken2 + ") -> " + JSON.stringify(ns.getServer(serverExec)))
                         counter++
                     }
@@ -574,7 +565,7 @@ class targetInfo {
                 ns.exit()
         }
         //set wait time for next execute
-        this.wait = ((Object.keys(threads).length + 0) * this.delayBetweenScripts)
+        this.wait = ((Object.keys(threads).length + 0) * config.delay_between_scripts)
         this.waitTime = Date.now() + this.wait
     }
 
