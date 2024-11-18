@@ -9,6 +9,8 @@ import {
 
 /** @param {NS} ns */
 export async function main(ns) {
+    //initialize
+    init(ns)
     
     //connect to home
     ns.singularity.connect(enum_servers.home)
@@ -60,4 +62,16 @@ export async function main(ns) {
         await ns.sleep(100)
     }
     //script never ends
+}
+
+
+
+/**
+ * Function that disables logging
+ */
+function init(ns) {
+    //disable logging
+    ns.disableLog("scan")
+    ns.disableLog("singularity.installBackdoor")
+    ns.disableLog("sleep")
 }
