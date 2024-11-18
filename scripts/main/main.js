@@ -684,20 +684,19 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
                         //split into segments
                         const script_path = script.split("/")
                         //go over each index (except the last)
-                        for (let index = 0; index < script_path.lenght-1; index++) {
+                        for (let index = 0; index < script_path.length-1; index++) {
                             //check if we need to add a '/'
                             if(script_folder != "") {
                                 //add a slash
                                 script_folder += "/"
                             }
+                            let script_path_element = script_path[index]
                             //add the path element
-                            script_folder += script_path[index]
+                            script_folder += script_path_element                    
                         }           
                         //get the scripts from the folder
                         const scripts_in_folder = ns.ls(enum_servers.home, script_folder)
-                        //TODO REMOVE
-                        log(ns,1,info, "script folder: " + script_folder)
-                        log(ns,1,info, "scripts: " + JSON.stringify(scripts))
+
                         //copy the scripts from the folder
                         if (ns.scp(scripts_in_folder, enum_servers.home, server.hostname)) {
                             //execute the main script
