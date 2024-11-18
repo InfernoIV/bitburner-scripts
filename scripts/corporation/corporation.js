@@ -10,9 +10,9 @@ import { log, success, warning, error, info, numberFormatter } from "scripts/log
 import { data.corporation_requirement_money } from "scripts/corporation.js"
 */
 //config
-import * as config from "config.js"
+import * as config from "./config.js"
 //data
-import * as data from "data.js"
+import * as data from "./data.js"
 
 
 
