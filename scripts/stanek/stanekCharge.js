@@ -95,7 +95,6 @@ async function chargeFragments(ns, threads) {
                 //wait a bit
                 await ns.sleep(1)
             }
-
         }
     }
 }
