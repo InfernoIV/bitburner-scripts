@@ -94,14 +94,14 @@ function createGang(ns) {
     //if not in a gang
     if (!flagInGang) {
         //defaulting to Slum Snakes 
-        let gangFaction = factionGang
+        let gangFaction = config.faction_gang
         //create a gang
         if (ns.gang.createGang(gangFaction)) {
             //set flag
             flagInGang = true
             //set clash to false
             //log information
-            log(ns, logLevel, success, "Created gang " + gangFaction)
+            log(ns, config.log_level, success, "Created gang " + gangFaction)
         }
     }
     return flagInGang
@@ -140,7 +140,7 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
     let trainAction = data.gang_task.money
     let upgradesHave = [].concat(gangMember.upgrades, gangMember.augmentations)
     let upgradesAvailable = getUpgrades(ns) //ns.gang.getEquipmentNames()
-    log(ns, logLevel, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
+    log(ns, config.log_level, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
     //let augmentationAvailable = ns.gang.
 
     //things to check for specific gang focus
@@ -153,18 +153,18 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
         statMult = gangMember.hack_asc_mult
         trainAction = data.gang_task.trainHacking
     } else {
-        log(ns, logLevel, error, "Uncaught Gang focus: " + gangFocus)
+        log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
         //defaults to raise money
         return data.gang_task.power
     }
 
     //if the desired level is too low
-    if (statTrain < maxTrainLevel) {
+    if (statTrain < config.desired_training_Level) {
         overWritePort(ns, enum_port.gang, "Training")
 
         return trainAction
         //if not enough members unlocked
-    } else if (statMult < desiredMult) {
+    } else if (statMult < config.desired_multiplier) {
         overWritePort(ns, enum_port.gang, "Training")
 
         return trainAction
@@ -176,10 +176,10 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
     } else if (wantedLevel > previousWantedLevel) {
         return data.gang_task.lowerWanted   //if wanted level is rising, lower wanted level    
         //if not all upgrades unlocked
-    } else if (upgradesHave.length < numberOfEquipment) {
+    } else if (upgradesHave.length < config.desired_equipment) {
         //block resets
         overWritePort(ns, enum_port.reset, "gang")
-        overWritePort(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + numberOfEquipment)
+        overWritePort(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
         //upgradesAvailable.length) {
         //raise money to buy upgrades
         return data.gang_task.money
@@ -229,14 +229,14 @@ async function recruitMembers(ns) {
                 //recruit a new member
                 if (ns.gang.recruitMember(memberNameNew)) {
                     //log information
-                    log(ns, logLevel, success, "Recruited member: '" + memberNameNew + "'")
+                    log(ns, config.log_level, success, "Recruited member: '" + memberNameNew + "'")
                 } else {
-                    log(ns, logLevel, warning, "Failed to recruit member '" + memberNameNew + "'")
+                    log(ns, config.log_level, warning, "Failed to recruit member '" + memberNameNew + "'")
                 }
                 return
             }
         }
-        log(ns, logLevel, error, "Unhandled: All " + data.gang_members_max + " members recruited?!?")
+        log(ns, config.log_level, error, "Unhandled: All " + data.gang_members_max + " members recruited?!?")
     }
 }
 
@@ -290,7 +290,7 @@ function manageTerritoryClash(ns, gangOwn) {
         //clear blockage        
     } else {        //update information
         //if we have more than the minimum chance
-        if (ns.gang.getChanceToWinClash(bestOtherGang.faction) > territoryClashMinPercentage) {
+        if (ns.gang.getChanceToWinClash(bestOtherGang.faction) > config.territory_clash_minimum_percentage) {
             //update information
             //overWritePort(ns, portGang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
             //start clashing 
@@ -342,7 +342,7 @@ function performTask(ns, gangOwn, gangMember, taskFocus) {
         case data.gang_task.money:
             task = getBestTask(ns, gangOwn, gangMember, taskFocus); break
         //log(ns,1,info,"task: " + JSON.stringify(task)); break
-        default: log(ns, logLevel, error, "performTask: unhandled condition '" + taskFocus + "', defaulting to " + task); break
+        default: log(ns, config.log_level, error, "performTask: unhandled condition '" + taskFocus + "', defaulting to " + task); break
     }
 
     //If the member is not performing the task
@@ -514,7 +514,7 @@ function manageAscension(ns, gangMember) {
     }
     if (fNeeded < f) {
         if (ns.gang.ascendMember(gangMember.name)) {
-            log(ns, logLevel, success, "Ascended " + gangMember.name + "!")
+            log(ns, config.log_level, success, "Ascended " + gangMember.name + "!")
         }
     }
 }
@@ -539,7 +539,7 @@ function getUpgrades(ns) {
                 upgradeList.push(upgrade)
             }
         } else {
-            log(ns, logLevel, error, "getUpgrades - No gang focus!")
+            log(ns, config.log_level, error, "getUpgrades - No gang focus!")
             return []
         }
     }
