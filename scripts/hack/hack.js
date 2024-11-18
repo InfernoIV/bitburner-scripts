@@ -1,20 +1,9 @@
 //imports
-import { enum_port, enum_servers, enum_scripts} from "scripts/common.js"
+import { info, success, warning, error, fail, //constants 
+    enum_port, enum_servers, enum_scripts, enum_hackingCommands, //enums
+    log, numberFormatter, overWritePort, //functions
+} from "scripts/common.js"
 
-
-
-//log constants
-const info = "INFO"
-const success = "SUCCESS"
-const warning = "WARNING"
-const error = "ERROR"
-const fail = "FAIL"
-
-const serverHome = "home"
-const enum_hackingCommands = {
-    start: "Start",
-    stop: "Stop",
-}
 
 //global variables
 var counter
@@ -152,8 +141,6 @@ class targetInfo {
         //log(ns,1,info,"this.servers: " + JSON.stringify(this.servers))
         //for every server
         for (let server of this.servers) {
-            
-            
             //set score to 0			
             let score = 0
             let maxMoney = ns.getServerMaxMoney(server)
@@ -199,7 +186,7 @@ class targetInfo {
 
         this.minRam = {}
 
-        let maxCores = 128/*ns.getServer(serverHome).cpuCores //128 
+        let maxCores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
         
         for (let index = 0; index < ns.hacknet.numNodes(); index++) {
             let hackNetCores = ns.hacknet.getNodeStats(index).cores
@@ -349,7 +336,6 @@ class targetInfo {
 
 
 
-
     //prepare the target
     async prepTarget(ns) {
 
@@ -438,6 +424,9 @@ class targetInfo {
                 ns.exit()
         }
     }
+
+
+    
     /** @param {NS} ns */
     async executeHack(ns) {
         let moneyPercentage = "" + numberFormatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + numberFormatter(ns.getServerMaxMoney(this.hostname))
@@ -449,6 +438,8 @@ class targetInfo {
         await this.executeBatch(ns, "hack")
     }
 
+
+    
     async executeBatch(ns, type) {
 
         //variable to save server name to
@@ -598,22 +589,28 @@ class targetInfo {
     }
 }
 
+
+
 /** @param {NS} ns */
 function updateUI(ns, header, value) {
-    
+    //write data to port
     overWritePort(ns, portHackTarget, header)
     overWritePort(ns, portHackStatus, value)
 }
+
+
 
 /** @param {NS} ns */
 function getServers(ns) {
     //create a list to save hostnames to
     let scanList = []
     //start scanning from home
-    scanServer(ns, serverHome, scanList)
+    scanServer(ns, enum_servers.home, scanList)
     //add purchased servers to the list
     return scanList.concat(ns.getPurchasedServers())
 }
+
+
 
 /** @param {NS} ns */
 function scanServer(ns, hostname, scanList) {
@@ -631,13 +628,15 @@ function scanServer(ns, hostname, scanList) {
     }
 }
 
+
+
 /** @param {NS} ns */
 function getExecuteServers(ns) {
     let executeServers = []
-    let allServers = getServers(ns)
+    const allServers = getServers(ns)
     //TODO: WHY DO THEY FAIL?
-    let blackList = ["zb-institute", "univ-energy", "titan-labs"]
-    for (let server of allServers) {
+    const blackList = ["zb-institute", "univ-energy", "titan-labs"]
+    for (const server of allServers) {
         //if not on the blacklist
         //if (blackList.indexOf(server) != -1) {
         //if root access and RAM
@@ -664,68 +663,4 @@ function getExecuteServers(ns) {
     }
     //log(ns,1,info,"executeServers: " + executeServers)
     return executeServers
-}
-
-
-
-/**
- * Function that formats numbers
- * Cost: 0
- */
-function numberFormatter(number) {
-    let fractionDigits = 3
-    if (number == 0) {
-        return 0
-    }
-    //round the number
-    number = Math.round(number)
-
-    let symbols = ["", "k", "m", "b", "t"]
-    let largestIndex = 0
-    for (let index = 0; index < symbols.length; index++) {
-        if (Math.abs(number) >= Math.pow(1000, index)) {
-            largestIndex = index
-        } else {
-            break
-        }
-    }
-    let numberReturn = number
-    if (largestIndex > 0) {
-        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fractionDigits))
-    }
-    return numberReturn + symbols[largestIndex]
-}
-
-
-
-/**
- * Function that overwrites the specified port with new data
- * Cost: 0
- */
-function overWritePort(ns, port, data) {
-    //clear port
-    ns.clearPort(port)
-    //write data
-    ns.writePort(port, data)
-}
-
-
-
-/**
- * Function that enables easy logging
- * Cost: 0
- */
-function log(ns, loglevel, type, message) {
-    //depending on loglevel
-    switch (loglevel) {
-        case 2: //alert
-            ns.alert(message)
-        case 1: //console log
-            ns.tprint(type + " " + message)
-        case 0: //log
-            ns.print(type + " " + message)
-        default:
-            //do nothing?
-            break
-    }
 }
