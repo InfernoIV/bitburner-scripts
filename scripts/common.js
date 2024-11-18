@@ -207,3 +207,16 @@ export const enum_hackingCommands = {
     start: "Start",
     stop: "Stop",
 }
+
+
+
+/**
+ * Function that overwrites the specified port with new data
+ * Cost: 0
+ */
+function overwritePort(ns, port, data) {
+    //clear port
+    ns.clearPort(port)
+    //write data
+    ns.writePort(port, data)
+}
