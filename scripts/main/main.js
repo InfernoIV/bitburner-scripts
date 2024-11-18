@@ -747,7 +747,7 @@ function restart_player_actions(ns) {
     if ((player_activity.type != player_action_desired.type) ||
        (player_activity.value != player_action_desired.value)) {
         //check if it works
-        if (!ns.singularity.commitCrime(player_activity.value, action_focus)) {
+        if (!ns.singularity.commitCrime(player_action_desired.value, action_focus)) {
             log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
         }
     }        
