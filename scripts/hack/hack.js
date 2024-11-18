@@ -1,7 +1,7 @@
 //imports
 import { info, success, warning, error, fail, //constants 
     enum_port, enum_servers, enum_scripts, enum_hackingCommands, //enums
-    log, numberFormatter, overWritePort, //functions
+    log, number_formatter, overwrite_port, //functions
 } from "scripts/common.js"
 
 //config.
@@ -349,7 +349,7 @@ class targetInfo {
         //while the security is not min
         while (ns.getServerSecurityLevel(this.hostname) > securityMin) {
             //log info to UI
-            overWritePort(ns, enum_port.hack, "Weaken: " + this.hostname)
+            overwrite_port(ns, enum_port.hack, "Weaken: " + this.hostname)
             //updateUI(ns, this.hostname, "Weaken: " + Math.floor(securityMin / ns.getServerSecurityLevel(this.hostname)) + "%")
             //weaken the server
             await this.executeBatch(ns, "weaken")
@@ -360,7 +360,7 @@ class targetInfo {
         //while money is not max
         while (ns.getServerMoneyAvailable(this.hostname) < moneyMax) {
             //log info to UI
-            overWritePort(ns, enum_port.hack, "Grow: " + this.hostname)
+            overwrite_port(ns, enum_port.hack, "Grow: " + this.hostname)
             //updateUI(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / moneyMax) + "%")
             //grow the money
             await this.executeBatch(ns, "grow")
@@ -420,10 +420,10 @@ class targetInfo {
     
     /** @param {NS} ns */
     async executeHack(ns) {
-        let moneyPercentage = "" + numberFormatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + numberFormatter(ns.getServerMaxMoney(this.hostname))
-        let securityPercentage = "" + numberFormatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + numberFormatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
+        let moneyPercentage = "" + number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + number_formatter(ns.getServerMaxMoney(this.hostname))
+        let securityPercentage = "" + number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
-        overWritePort(ns, enum_port.hack, "Hack: " + this.hostname)
+        overwrite_port(ns, enum_port.hack, "Hack: " + this.hostname)
         //updateUI(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
         //execute the batch
         await this.executeBatch(ns, "hack")
@@ -585,8 +585,8 @@ class targetInfo {
 /** @param {NS} ns */
 function updateUI(ns, header, value) {
     //write data to port
-    overWritePort(ns, portHackTarget, header)
-    overWritePort(ns, portHackStatus, value)
+    overwrite_port(ns, portHackTarget, header)
+    overwrite_port(ns, portHackStatus, value)
 }
 
 
