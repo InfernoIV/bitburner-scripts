@@ -1,34 +1,16 @@
 //imports
-import { info, success, warning, error, fail } from "scripts/common.js"
+import { 
+    info, success, warning, error, fail, portNoData, //constants 
+    enum_scripts, enum_servers, enum_factions, enum_cities, enum_port, enum_hackingCommands, //enums
+    log, number_formatter, //functions
+} from "scripts/common.js"
 
-//requirements to be fulfilled
-const requirement = {
-    karma_for_gang: -54000, //-54k
-    kills_for_factions: 30,
-    faction_netburners: { 
-        levels: 100,
-        ram: 8,
-        cores: 4,
-    },
-}
+//constants
+import { stat_minimum_hacking, time_between_loops, augments_minimum_for_reset, bladeburner_success_chance_minimum, bladeburner_black_op_success_chance_minimum, } from "config.js"
+//enums
+import { enum_requirements, enum_hashUpgrades, enum_augments, enum_activities, enum_crimes, enum_crimeFocus, enum_bladeburnerSkills, enum_bladeburnerActions, enum_sleeveBladeburnerActions, enum_company_factions, enum_hack_tools } from "data.js" 
 
-//from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
-const enum_hashUpgrades = {
-    money: "Sell for Money",
-    corporationFunds: "Sell for Corporation Funds",
-    corporationResearch: "Exchange for Corporation Research",
-    serverSecurityMin: "Reduce Minimum Security",
-    serverMoneyMax: "Increase Maximum Money", // Use hashes to increase the maximum amount of money on a single server by 2%. This effect persists until you install Augmentations (since servers are reset at that time). Note that a server's maximum money is soft capped above <Money money={10e12}
-    trainingStudying: "Improve Studying",
-    trainingGym: "Improve Gym Training",
-    bladeburnerRank: "Exchange for Bladeburner Rank",
-    bladeburnerSkillPoints: "Exchange for Bladeburner SP",
-    codingContract: "Generate Coding Contract",
-    companyFavor: "Company Favor",
-}
 
-//minimum stat for hacking (todo: struct format?)
-const stat_minimum_hacking = 25//50 //?
 
 /**
  * Function that handles everything
@@ -40,10 +22,7 @@ const stat_minimum_hacking = 25//50 //?
  *  getResetInfo (1)
  */
 export async function main(ns) {    
-    //set time to wait after each main loop
-    const time_between_loops = 1 * 1000
-    //minimum amount of augments before resetting
-    const augments_minimum_for_reset = 4 //to be set to 40 for achievement
+    
     //get reset info
     const reset_info = ns.getResetInfo()
     //get bitnode information from file
@@ -493,7 +472,7 @@ function manage_companies(ns) {
 
 /**
  * Function that manages buying and upgrading of servers
- * Also takes care of Faction Netburner requirements
+ * Also takes care of Faction Netburner enum_requirements
  * No updating of cache: it is all spent on money
  * Cost: 10 GB
  *  upgradeHomeCores (3)
@@ -533,13 +512,13 @@ function manage_servers(ns, challenge_flags) {
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.cores < requirement.faction_netburners.cores) {
+            if (hacknet_stats.cores < enum_enum_enum_enum_enum_requirements.faction_netburners.cores) {
                 //upgrade cores
                 ns.hacknet.upgradeCore(server_index)
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.level < requirement.faction_netburners.levels) {
+            if (hacknet_stats.level < enum_enum_enum_enum_enum_requirements.faction_netburners.levels) {
                 //upgrade level
                 ns.hacknet.upgradeLevel(server_index)
             }
@@ -662,7 +641,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
     //check if makes sense to launch gang manager
     if ((!challenge_flags.disable_gang) && //if not performing a challenge
         (bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
-        (player.karma < requirement.karma_for_gang)) { //and if karma threshold is reached
+        (player.karma < enum_enum_enum_enum_enum_requirements.karma_for_gang)) { //and if karma threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.gang)
     }
@@ -749,7 +728,7 @@ function restart_player_actions(ns, challenge_flags) {
         }
         
         //if we have not reached target karma
-    } else if (player.karma > requirement.karma_for_gang) {
+    } else if (player.karma > enum_enum_enum_enum_enum_requirements.karma_for_gang) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug
         //commit crime for karma
@@ -849,7 +828,7 @@ function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
             }
         }
         //if we have not reached target karma
-    } else if (player.karma > requirement.karma_for_gang) {
+    } else if (player.karma > enum_enum_enum_enum_enum_requirements.karma_for_gang) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, enum_crimeFocus.karma)
         //if not performing the correct crime
@@ -924,7 +903,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //if we have not reached target karma
-    } else if (player.karma > requirement.karma_for_gang) {
+    } else if (player.karma > enum_enum_enum_enum_enum_requirements.karma_for_gang) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for karma
@@ -937,7 +916,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //not reached target kills
-    } else if (player.numPeopleKilled < requirement.kills_for_factions) {
+    } else if (player.numPeopleKilled < enum_enum_enum_enum_enum_requirements.kills_for_factions) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for kills
@@ -1446,10 +1425,6 @@ function get_faction_work_types(faction) {
  *  getActionEstimatedSuccessChance (4)
  */
 function bladeburner_determine_action(ns) {
-    //target min chance before attempting bladeburner
-    const bladeburner_success_chance_minimum = 1
-    const bladeburner_black_op_success_chance_minimum = 0.5
-    
     //go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
     let bladeburner_chaos_lowest = 999999
@@ -1574,7 +1549,6 @@ function bladeburner_determine_action(ns) {
 function determine_faction_work(person, work_types) {
     //set max skill level
     const crime_skill_level_maximum = 975
-
     //save best rep
     let best_rep = -1
     //save best work type
@@ -1835,11 +1809,11 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
 
     //karma
     headers.push("Karma")
-    values.push(number_formatter(player.karma) + "/" + number_formatter(requirement.karma_for_gang))
+    values.push(number_formatter(player.karma) + "/" + number_formatter(enum_enum_enum_enum_enum_requirements.karma_for_gang))
 
     //kills
     headers.push("Kills")
-    values.push(number_formatter(player.numPeopleKilled) + "/" + requirement.kills_for_factions)
+    values.push(number_formatter(player.numPeopleKilled) + "/" + enum_enum_enum_enum_enum_requirements.kills_for_factions)
 
     //hack tools
     const hacking = player.skills.hacking
@@ -1950,57 +1924,6 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
 
 
 /**
- * Function that enables easy logging
- * Cost: 0
- */
-function log(ns, log_level, type, message) {
-    //depending on log_level
-    switch (log_level) {
-        case 2: //alert
-            ns.alert(message)
-        case 1: //console log
-            ns.tprint(type + " " + message)
-        case 0: //log
-            ns.print(type + " " + message)
-        default:
-            //do nothing?
-            break
-    }
-}
-
-
-
-/**
- * Function that formats numbers
- * Cost: 0
- */
-function number_formatter(number) {
-    const fraction_digits = 3
-    if (number == 0) {
-        return 0
-    }
-    //round the number
-    number = Math.round(number)
-
-    const symbols = ["", "k", "m", "b", "t"]
-    let largestIndex = 0
-    for (let index = 0; index < symbols.length; index++) {
-        if (Math.abs(number) >= Math.pow(1000, index)) {
-            largestIndex = index
-        } else {
-            break
-        }
-    }
-    let numberReturn = number
-    if (largestIndex > 0) {
-        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
-    }
-    return numberReturn + symbols[largestIndex]
-}
-
-
-
-/**
  * Function that a boolean if enough rep is reached for a faction
  * Always returns true if faction is sector-12 (to ensure grinding for neurflux governor
  * @param {NS} ns
@@ -2030,452 +1953,6 @@ function should_work_for_faction(ns, faction) {
         return rep_highest >= ns.singularity.getFactionRep(faction)
     }
     return false
-}
-
-
-    
-/**
- * enum of special servers
- * All servers will be backdoored, if possible
- */
-const enum_servers = {
-    home: "home",   //no effect
-    worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
-    //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
-}
-
-
-
-/**
- * Enum of all factions with their work types
- * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
- * Work types: "field", "hacking", "security" 	
- */
-const enum_factions = {
-    //special factions (no faction work available)
-    slumSnakes: { name: "Slum Snakes" },
-    bladeburners: { name: "Bladeburners" },
-    churchOfTheMachineGod: { name: "Church of the Machine God" },
-    shadowsOfAnarchy: { name: "Shadows of Anarchy" },
-
-    //important factions
-    daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
-    illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
-    theCovenant: { name: "The Covenant", work_types: ["field", "hacking"] },
-
-    //company factions
-    eCorp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
-    megaCorp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
-    bachmanAssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
-    bladeIndustries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
-    nWO: { name: "NWO", work_types: ["field", "hacking", "security"] },
-    clarkeIncorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
-    omniTekIncorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
-    fourSigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
-    kuaiGongInternational: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
-    fulcrumSecretTechnologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
-
-    //hacking factions
-    bitRunners: { name: "BitRunners", work_types: ["hacking"] },
-    theBlackHand: { name: "The Black Hand", work_types: ["field", "hacking"] },
-    niteSec: { name: "NiteSec", work_types: ["hacking"] },
-    cyberSec: { name: "CyberSec", work_types: ["hacking"] },
-
-    //location factions
-    aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
-    chongqing: { name: "Chongqing", work_types: ["field", "hacking", "security"] },
-    ishima: { name: "Ishima", work_types: ["field", "hacking", "security"] },
-    newTokyo: { name: "New Tokyo", work_types: ["field", "hacking", "security"] },
-    sector12: { name: "Sector-12", work_types: ["field", "hacking", "security"] },
-    volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
-
-    //crime factions
-    speakersForTheDead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
-    theDarkArmy: { name: "The Dark Army", work_types: ["field", "hacking"] },
-    theSyndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
-    silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
-    tetrads: { name: "Tetrads", work_types: ["field", "security"] },
-
-    //other factions
-    netburners: { name: "Netburners", work_types: ["hacking"] },
-    tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
-}
-
-
-
-/**
- * Enum stating all cities
- */
-const enum_cities = {
-    aevum: "Aevum",
-    chongqing: "Chongqing",
-    ishima: "Ishima",
-    newTokyo: "New Tokyo",
-    sector12: "Sector-12",
-    volhaven: "Volhaven",
-}
-
-
-
-/**
- * Enum stating special augments
- */
-const enum_augments = {
-    theRedPill: "The Red Pill", //enables bitnode destruction by hacking
-    neuroFluxGovernor: "NeuroFlux Governor",
-    bladesSimulacrum: "The Blade's Simulacrum", //"This augmentation allows you to perform Bladeburner actions and other actions (such as working, committing crimes, etc.) at the same time.",
-    neuroreceptorManager: "Neuroreceptor Management Implant", //"This augmentation removes the penalty for not focusing on actions such as working in a job or working for a faction.",
-}
-
-
-
-/**
- * Enum describing the activities of the player and sleeve
- * getCurrentWork: https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.task.md
- * getCurrentAction: https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.bladeburnercuraction.md
- * getTask: https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.sleevetask.md
- */
-const enum_activities = {
-    //getCurrentWork (player)
-    study: "CLASS", //properties: type, classType, location, cyclesWorked (player)
-    company: "COMPANY", //properties: type, companyName, cyclesWorked (player)
-    //createProgram: "CREATE_PROGRAM", //properties: type, programName, cyclesWorked
-    crime: "CRIME", //properties: type, crimeType, cyclesWorked, cyclesNeeded (sleeve), tasksCompleted (sleeve)
-    faction: "FACTION", //properties: type, factionName, factionwork_type, cyclesWorked (player)		
-    grafting: "GRAFTING", //properties: type, augmentation, completion, cyclesWorked
-    //bladeburner (player)
-    //properties: type, name
-    /*
-    Property 	Modifiers 	Type 	Description
-    name 		string 	Name of Action
-    type 		string 	Type of Action
-    */
-    //getTask (sleeve)
-    bladeburner: "BLADEBURNER", //properties: type, actionType, actionName, cyclesWorked, cyclesNeeded, nextCompletion, tasksCompleted
-    infiltrate: "INFILTRATE", //properties: type, cyclesWorked, cyclesNeeded, nextCompletion
-    recovery: "RECOVERY", //properties: type
-    support: "SUPPORT", //properties: type
-    synchro: "SYNCHRO", //properties: type
-}
-
-
-
-/**
- * Enum for possible crimes
- * Mug is used for karma (best karma / time)
- * homicide is used for kills (only needed for a short bit, Assassination is not used)
- * the rest doesn't matter
- */
-const enum_crimes = {
-    shoplift: {
-        type: "Shoplift",
-        time: 2e3,
-        money: 15e3,
-        difficulty: 1 / 20,
-        karma: 0.1,
-        kills: 0,
-        weight: { dexterity: 1, agility: 1, },
-        exp: { dexterity: 2, agility: 2, },
-    },
-    robStore: {
-        type: "Rob Store",
-        time: 60e3,
-        money: 400e3,
-        difficulty: 1 / 5,
-        karma: 0.5,
-        kills: 0,
-        weight: { hacking: 0.5, dexterity: 2, agility: 1, },
-        exp: { hacking: 30, dexterity: 45, agility: 45, intelligence: 7.5 * 0.05, },
-    },
-    mug: {
-        type: "Mug",
-        time: 4e3,
-        money: 36e3,
-        difficulty: 1 / 5,
-        karma: 0.25,
-        kills: 0,
-        weight: { strength: 1.5, defense: 0.5, dexterity: 1.5, agility: 0.5, },
-        exp: { strength: 3, defense: 3, dexterity: 3, agility: 3, },
-    },
-    larceny: {
-        type: "Larceny",
-        time: 90e3,
-        money: 800e3,
-        difficulty: 1 / 3,
-        karma: 1.5,
-        kills: 0,
-        weight: { hacking: 0.5, dexterity: 1, agility: 1, },
-        exp: { hacking: 45, dexterity: 60, agility: 60, },
-    },
-    dealDrugs: {
-        type: "Deal Drugs",
-        time: 10e3,
-        money: 120e3,
-        difficulty: 1,
-        karma: 0.5,
-        kills: 0,
-        weight: { dexterity: 2, agility: 1, charisma: 3, },
-        exp: { dexterity: 5, agility: 5, charisma: 10, },
-    },
-    bondForgery: {
-        type: "Bond Forgery",
-        time: 300e3,
-        money: 4.5e6,
-        difficulty: 1 / 2,
-        karma: 0.1,
-        kills: 0,
-        weight: { hacking: 0.05, dexterity: 1.25, },
-        exp: { hacking: 100, dexterity: 150, charisma: 15, intelligence: 60 * 0.05, },
-    },
-    traffickArms: {
-        type: "Traffick Arms",
-        time: 40e3,
-        money: 600e3,
-        difficulty: 2,
-        karma: 1,
-        kills: 0,
-        weight: { strength: 1, defense: 1, dexterity: 1, agility: 1, charisma: 1, },
-        exp: { strength: 20, defense: 20, dexterity: 20, agility: 20, charisma: 40, },
-    },
-    homicide: {
-        type: "Homicide",
-        time: 3e3,
-        money: 45e3,
-        difficulty: 1,
-        karma: 3,
-        kills: 1,
-        weight: { strength: 2, defense: 2, dexterity: 0.5, agility: 0.5, },
-        exp: { strength: 2, defense: 2, dexterity: 2, agility: 2, },
-    },
-    grandTheftAuto: {
-        type: "Grand Theft Auto",
-        time: 80e3,
-        money: 1.6e6,
-        difficulty: 8,
-        karma: 5,
-        kills: 0,
-        weight: { hacking: 1, strength: 1, dexterity: 4, agility: 2, charisma: 2, },
-        exp: { strength: 20, defense: 20, dexterity: 20, agility: 80, charisma: 40, intelligence: 16 * 0.05, },
-    },
-    kidnap: {
-        type: "Kidnap",
-        time: 120e3,
-        money: 3.6e6,
-        difficulty: 5,
-        karma: 6,
-        kills: 0,
-        weight: { strength: 1, dexterity: 1, agility: 1, charisma: 1, },
-        exp: { strength: 80, defense: 80, dexterity: 80, agility: 80, charisma: 80, intelligence: 26 * 0.05, },
-    },
-    assassination: {
-        type: "Assassination",
-        time: 300e3,
-        money: 12e6,
-        difficulty: 8,
-        karma: 10,
-        kills: 1,
-        weight: { strength: 1, dexterity: 1, agility: 1, },
-        exp: { strength: 300, defense: 300, dexterity: 300, agility: 300, intelligence: 65 * 0.05, },
-    },
-    heist: {
-        type: "Heist",
-        time: 600e3,
-        money: 120e6,
-        difficulty: 18,
-        karma: 15,
-        kills: 0,
-        weight: { hacking: 1, strength: 1, defense: 1, dexterity: 1, agility: 1, charisma: 1, },
-        exp: { hacking: 450, strength: 450, defense: 450, dexterity: 450, agility: 450, charisma: 450, intelligence: 130 * 0.05, },
-    },
-}
-
-
-
-/**
- * Enum that provides the available focus for determining crimes
- */
-const enum_crimeFocus = {
-    karma: "karma",
-    kills: "kills",
-    skills: "skills",
-    hacking: "hacking",
-}
-
-
-
-/**
- * enum that holds the bladeburner skills (in priority)
- */
-const enum_bladeburnerSkills = {
-    //reduces time
-    overclock: "Overclock", //Each level of this skill decreases the time it takes to attempt a Contract, Operation, and BlackOp by 1% (Max Level: 90)
-    //raises chance
-    bladesIntuition: "Blade's Intuition", //Each level of this skill increases your success chance for all Contracts, Operations, and BlackOps by 3%
-    cloak: "Cloak", //raises success chance in stealth-related Contracts, Operations, and BlackOps by 5.5%
-    shortCircuit: "Short-Circuit", //raises success chance in Contracts, Operations, and BlackOps that involve retirement by 5.5%
-    digitalObserver: "Digital Observer", //Each level of this skill increases your success chance in all Operations and BlackOps by 4%
-    tracer: "Tracer", //Each level of this skill increases your success chance in all Contracts by 4%
-    reaper: "Reaper",   //Each level of this skill increases your effective combat stats for Bladeburner actions by 2%
-    evasiveSystem: "Evasive System", //Each level of this skill increases your effective dexterity and agility for Bladeburner actions by 4%
-    datamancer: "Datamancer", //Each level of this skill increases your effectiveness in synthoid population analysis and investigation by 5%. This affects all actions that can potentially increase the accuracy of your synthoid population/community estimates.
-    //other
-    cybersEdge: "Cyber's Edge", //Each level of this skill increases your max stamina by 2%
-    hyperdrive: "Hyperdrive", //Each level of this skill increases the experience earned from Contracts, Operations, and BlackOps by 10%
-    handsOfMidas: "Hands of Midas", //Each level of this skill increases the amount of money you receive from Contracts by 10%"
-}
-
-
-
-/**
- * Enum for going through and checking (available) actions and their requirements (if applicable)
- */
-const enum_bladeburnerActions = {
-    type: {
-        blackOps: "Black Operations",
-        operations: "Operations",
-        contracts: "Contracts",
-        general: "General",
-    },
-    blackOps: {
-        operationTyphoon: { name: "Operation Typhoon", reqRank: 2.5e3, },
-        operationZero: { name: "Operation Zero", reqRank: 5e3, },
-        operationX: { name: "Operation X", reqRank: 7.5e3, },
-        operationTitan: { name: "Operation Titan", reqRank: 10e3, },
-        operationAres: { name: "Operation Ares", reqRank: 12.5e3, },
-        operationArchangel: { name: "Operation Archangel", reqRank: 15e3, },
-        operationJuggernaut: { name: "Operation Juggernaut", reqRank: 20e3, },
-        operationRedDragon: { name: "Operation Red Dragon", reqRank: 25e3, },
-        operationK: { name: "Operation K", reqRank: 30e3, },
-        operationDeckard: { name: "Operation Deckard", reqRank: 40e3, },
-        operationTyrell: { name: "Operation Tyrell", reqRank: 50e3, },
-        operationWallace: { name: "Operation Wallace", reqRank: 75e3, },
-        operationShoulderOfOrion: { name: "Operation Shoulder of Orion", reqRank: 100e3, },
-        operationHyron: { name: "Operation Hyron", reqRank: 125e3, },
-        operationMorpheus: { name: "Operation Morpheus", reqRank: 150e3, },
-        operationIonStorm: { name: "Operation Ion Storm", reqRank: 175e3, },
-        operationAnnihilus: { name: "Operation Annihilus", reqRank: 200e3, },
-        operationUltron: { name: "Operation Ultron", reqRank: 250e3, },
-        operationCenturion: { name: "Operation Centurion", reqRank: 300e3, },
-        operationVindictus: { name: "Operation Vindictus", reqRank: 350e3, },
-        operationDaedalus: { name: "Operation Daedalus", reqRank: 400e3, },
-    },
-    operations: {
-        assassination: "Assassination",
-        stealthRetirement: "Stealth Retirement Operation",
-        //raid: "Raid", //disabled: requires communities to be presents: needs extra RAM to check
-        sting: "Sting Operation",
-        undercover: "Undercover Operation",
-        investigation: "Investigation",
-    },
-    contracts: {
-        retirement: "Retirement",
-        bountyHunter: "Bounty Hunter",
-        tracking: "Tracking",
-    },
-    general: {
-        training: "Training",
-        fieldAnalysis: "Field Analysis",
-        recruitment: "Recruitment",
-        diplomacy: "Diplomacy",
-        hyperbolicRegen: "Hyperbolic Regeneration Chamber",
-        inciteViolence: "Incite Violence",
-    },
-}
-
-
-
-/**
- * Enum that describes the bladeburner actions that sleeves can take
- */
-const enum_sleeveBladeburnerActions = {
-    fieldAnalysis: "Field Analysis",
-    recruitment: "Recruitment",
-    diplomacy: "Diplomacy",
-    infiltratesynthoids: "Infiltrate synthoids",
-    supportmainsleeve: "Support main sleeve",
-    takeonContracts: "Take on Contracts",
-}
-
-
-
-/**
- * Enum that describes the companies we want to join, and the faction behind it
- * Only fulcrum has a different faction name
- */
-const enum_company_factions = {
-    //225 stat(s) required
-    "Bachman & Associates": "Bachman and Associates",
-    "KuaiGong International": "KuaiGong International",
-    "Four Sigma": "Four Sigma",
-    "Blade Industries": "Blade Industries",
-    "OmniTek Incorporated": "OmniTek Incorporated",
-    "Clarke Incorporated": "Clarke Incorporated",
-    "Fulcrum Technologies": "Fulcrum Secret Technologies",
-    //250 stat(s) required
-    "NWO": "NWO",
-    "ECorp": "ECorp",
-    "MegaCorp": "MegaCorp",
-}
-
-
-
-
-
-
-
-/**
- * description of all hack tools
- */
-const enum_hack_tools = {
-    bruteSSH: "BruteSSH.exe",   //500e3
-    fTPCrack: "FTPCrack.exe",   //1500e3
-    relaySMTP: "relaySMTP.exe", //5e6
-    hTTPWorm: "HTTPWorm.exe",   //30e6
-    sQLInject: "SQLInject.exe", //250e6
-}
-
-
-
-/**
- * Enum describing the port numbers
- */
-const enum_port = {
-    //external scripts
-    reset: 1,
-    hack: 2,
-    gang: 3,
-    corporation: 4,
-    stock: 5,
-    backdoor: 6,
-    stopHack: 7,
-}
-const portNoData = "NULL PORT DATA"
-const enum_hackingCommands = {
-    start: "Start",
-    stop: "Stop",
-}
-
-
-/**
- * Enum containing scripts
- */
-const enum_scripts = {
-    boot: "scripts/boot.js",
-    main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
 }
 
 
