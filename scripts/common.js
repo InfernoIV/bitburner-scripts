@@ -62,6 +62,7 @@ export const enum_scripts = {
     main: "scripts/main/main.js",
     //utility
     jump: "scripts/utility/jump_script.js",
+    jump2: "scripts/utility/jump.js",
     destroyBitNode: "scripts/utility/destroy_bit_node.js",
     reset: "scripts/utility/reset.js",
     //backdoor
