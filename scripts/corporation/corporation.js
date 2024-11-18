@@ -1,5 +1,6 @@
 import { log, success, warning, error, info, numberFormatter } from "scripts/log.js"
-import { overWritePort, portCorporation, portBlockReset } from "scripts/port.js"
+//import { overWritePort, portCorporation, portBlockReset } from "scripts/port.js"
+//TODO: check import above
 /*
   Script that creates and manages the corporation (Agriculture -> Tobacco)          
 */
@@ -8,45 +9,20 @@ import { overWritePort, portCorporation, portBlockReset } from "scripts/port.js"
 /*
 import { corporationMoneyRequirement } from "scripts/corporation.js"
 */
+//config
+import * as config from "config.js"
+//data
+import * as data from "data.js"
 
 
 
-//money needed to create corporation
-export const corporationMoneyRequirement = 150e9
-const researchLeftOverPercentage = 1.1 //10%
-const logLevel = 0
+
 
 /*
 Main function
 */
 /** @param {NS} ns */
 export async function main(ns) {
-    //config, but should not be adjusted
-    //amount of dividends to be paid to to the player
-    const corporationGreed = 0.01 //1%
-    //percentage to keep when unlocking researches
-    const researchLeftOver = 0.5 //50%
-    //define product investments
-    const investmentDesign = 1e9 //1b
-    const investmentMarketing = 1e9 //1b
-
-    //investments required
-    const investment1 = 176e9 //142b is fast stable, originally 210e9 (210b)
-    /*
-        total money required = 55b + 29b + 29b + 64b (materials not taken into account) = 177b
-        upgrade office to 9 of each city (54.674b)
-        Hire 6 employees (0)
-        Upgrade smart factories to 10 (28.362b)
-        Upgrade smart storage to 10 (28.362b)
-        upgrade warehouse 7x of each city (63.609b)
-        buyMaterials (can go into -money)
-    */
-    const investment2 = 5e12//5t
-    /*
-    */
-    const investment3 = 800e12//800t
-    const investment4 = 1e15//high q?
-
     //initialize
     init(ns)
 
@@ -65,13 +41,13 @@ export async function main(ns) {
     //if tobacco has not been created yet, then agriculture is not or may not be finished...
     if (corp.divisions.length < 2) {
         //setup agriculture
-        await setupAgriculture(ns, investment1, investment2)
+        await setupAgriculture(ns)
     }
 
     //if the company is not public, then tobacco has not been finished
     if (!corp.public) {
         //setup tobacco
-        await setupTobacco(ns, corporationGreed, investmentDesign, investmentMarketing, investment3, investment4)
+        await setupTobacco(ns)
     }
 
     //set UI to maintain
@@ -80,7 +56,7 @@ export async function main(ns) {
     //main loop
     while (true) {
         //maintain tobacco
-        await manageTobacco(ns, researchLeftOver, investmentDesign, investmentMarketing)
+        await manageTobacco(ns)
     }
 }
 
@@ -106,14 +82,14 @@ function init(ns) {
 /*
 function that sets up agriculture
 */
-async function setupAgriculture(ns, investment1, investment2) {
+async function setupAgriculture(ns) {
     //check where we are with investments
     let investment = ns.corporation.getInvestmentOffer()
 
     //if investment 1 has not been done
     if (investment.round == 1) {
         //start setup: reach investment 1
-        await startAgriculture(ns, investment1)
+        await startAgriculture(ns)
         //update investment
         investment = ns.corporation.getInvestmentOffer()
     }
@@ -121,7 +97,7 @@ async function setupAgriculture(ns, investment1, investment2) {
     //if investment 2 has not been done
     if (investment.round == 2) {
         //improve setup: reach investment 2
-        await improveAgriculture(ns, investment2)
+        await improveAgriculture(ns)
     }
 
     //finalize setup.
@@ -133,7 +109,7 @@ async function setupAgriculture(ns, investment1, investment2) {
 /*
 Funtion that takes care of setting up agriculture
 */
-async function startAgriculture(ns, targetInvestment) {
+async function startAgriculture(ns) {
     //log information
     updateUI(ns, info, "Agriculture 1.1: expand industry")
 
@@ -260,7 +236,7 @@ async function startAgriculture(ns, targetInvestment) {
 /*
 Function that improves agriculture
 */
-async function improveAgriculture(ns, targetInvestment) {
+async function improveAgriculture(ns) {
     //log information
     updateUI(ns, info, "Agriculture 2.1: hire employees")
 
@@ -340,7 +316,7 @@ async function finalizeAgriculture(ns) {
 /*
 function that sets up tobacco
 */
-async function setupTobacco(ns, corporationGreed, investmentDesign, investmentMarketing, investment3, investment4) {
+async function setupTobacco(ns) {
     //check where we are with investments
     let investment = ns.corporation.getInvestmentOffer()
 
@@ -353,28 +329,28 @@ async function setupTobacco(ns, corporationGreed, investmentDesign, investmentMa
     //if a product has not been created
     if (ns.corporation.getDivision(divisionProduct).products.length < 1) {
         //create product 1
-        await createProductTobacco(ns, divisionProduct, investmentDesign, investmentMarketing)
+        await createProductTobacco(ns, divisionProduct)
     }
 
     if (ns.corporation.getDivision(divisionProduct).products.length < 2) {
         //create product 2
-        await createProductTobacco2(ns, divisionProduct, investmentDesign, investmentMarketing)
+        await createProductTobacco2(ns, divisionProduct)
     }
 
     //if investment 3 is not yet done
     if (investment.round == 3) {
         //wait for investment
-        await getInvestment3(ns, investment3)
+        await get_investment_3(ns)
     }
 
     //if investment 4 is not yet done
     if (investment.round == 4) {
         //improve setup: reach investment 4
-        await getInvestment4(ns, investment4)
+        await get_investment_4(ns)
     }
 
     //finalize setup: go public
-    await goPublic(ns, corporationGreed)
+    await goPublic(ns)
 }
 
 
@@ -460,7 +436,7 @@ async function createProductTobacco(ns) {
     //log information
     updateUI(ns, info, "Tobacco 2.1: create product")
 
-    await createProduct(ns, divisionProduct, investmentDesign, investmentMarketing)
+    await createProduct(ns, divisionProduct)
 
     //log information
     updateUI(ns, info, "Tobacco 2.2: upgrade D.S.")
@@ -493,11 +469,11 @@ async function createProductTobacco(ns) {
 /*
 Fuction that creates the and product
 */
-async function createProductTobacco2(ns, investmentDesign, investmentMarketing) {
+async function createProductTobacco2(ns) {
     //log information
     updateUI(ns, info, "Tobacco 3.1: create product")
 
-    await createProduct(ns, divisionProduct, investmentDesign, investmentMarketing)
+    await createProduct(ns, divisionProduct)
 
     //log information
     updateUI(ns, info, "Tobacco 3.2: upgrade D.S.")
@@ -513,7 +489,7 @@ async function createProductTobacco2(ns, investmentDesign, investmentMarketing) 
 /*
 Function that raises stats while waiting for the investment
 */
-async function getInvestment3(ns, targetInvestment) {
+async function get_investment_3(ns) {
     //log information
     updateUI(ns, info, "Tobacco 4.1: upgrade W.A.")
 
@@ -524,7 +500,7 @@ async function getInvestment3(ns, targetInvestment) {
     updateUI(ns, info, "Tobacco 4.2: investment $" + numberFormatter(targetInvestment))
 
     //wait for investment
-    await waitForInvestment(ns, divisionProduct, targetInvestment, true)
+    await waitForInvestment(ns, divisionProduct, config.investment_3, true)
 
     //log information
     updateUI(ns, success, "Tobacco 4: complete")
@@ -535,12 +511,12 @@ async function getInvestment3(ns, targetInvestment) {
 /*
 improve setup of Tobacco
 */
-async function getInvestment4(ns, targetInvestment) {
+async function get_investment_4(ns) {
     //log information
     updateUI(ns, info, "Tobacco 5.1: investment : $" + numberFormatter(targetInvestment))
 
     //wait for investment
-    await waitForInvestment(ns, divisionProduct, targetInvestment, true)
+    await waitForInvestment(ns, divisionProduct, config.investment_4, true)
 
     //log information
     updateUI(ns, success, "Tobacco 5: complete")
@@ -551,7 +527,7 @@ async function getInvestment4(ns, targetInvestment) {
 /*
 finalize setup
 */
-async function goPublic(ns, corporationGreed) {
+async function goPublic(ns) {
     //log information
     updateUI(ns, info, "Tobacco 6.1: go public")
 
@@ -561,7 +537,7 @@ async function goPublic(ns, corporationGreed) {
     //log information
     updateUI(ns, info, "Tobacco 6.2: Issue dividends")
     //set dividends
-    ns.corporation.issueDividends(corporationGreed)
+    ns.corporation.issueDividends(config.corporation_greed)
 
     //log success
     updateUI(ns, success, "Tobacco 6: complete")
@@ -577,7 +553,7 @@ Upgrade size at Aevum, +15 at a time (up to 250-300) OR buy and AdVert.inc, whic
 Upgrade size on other cities, keeping Aevum at least 60 ahead: any closer and you're wasting money that you ought to save for the above
 level up other upgrades if they are cheap to buy
 */
-async function manageTobacco(ns, researchLeftOver, investmentDesign, investmentMarketing) {
+async function manageTobacco(ns) {
     //size to grow the main office
     const growSize = 15
     //max size of the main office
@@ -586,7 +562,7 @@ async function manageTobacco(ns, researchLeftOver, investmentDesign, investmentM
     //if marketTA2 is unlocked or if less than 3 products are created
     if ((ns.corporation.hasResearched(divisionProduct, research.marketTa2)) || (ns.corporation.getDivision(divisionProduct).products.length < 3)) {
         //create product
-        await createProduct(ns, divisionProduct, investmentDesign, investmentMarketing)
+        await createProduct(ns, divisionProduct)
     }
 
     //try to buy Wilson Analytics
@@ -664,11 +640,11 @@ function manageUpgrades(ns) {
 /*
 Function that creates a product
 */
-async function createProduct(ns, division, investmentDesign, investmentMarketing) {
+async function createProduct(ns, division) {
     //create a name
     let productName = divisionProduct + ns.corporation.getDivision().product.length
     //start product development in Aevum
-    ns.corporation.makeProduct(divisionProduct, cityMain, productName, investmentDesign, investmentMarketing)
+    ns.corporation.makeProduct(divisionProduct, cityMain, productName, config.investment_design, config.investment_marketing)
 
     //await product development
     //while the product is not in the division product list
@@ -688,7 +664,7 @@ Function that manages the researches
 function unlockResearch(ns) {
     //get the available 
     const researchAvailable = ns.corporation.getDivision(divisionProduct).researchPoints
-    const researchLeftOver = researchAvailable * researchLeftOverPercentage
+    const research_left_over = researchAvailable * config.research_left_over_percentage 
 
     //set the priority of unlocks
     let researchPriority = [
@@ -721,7 +697,7 @@ function unlockResearch(ns) {
         //if not researched yet
         if (!ns.corporation.hasResearched(divisionProduct, researchName)) {
             //if we have enough left over
-            if ((researchAvailable - ns.corporation.getResearchCost(divisionProduct, researchName)) > researchLeftOver) {
+            if ((researchAvailable - ns.corporation.getResearchCost(divisionProduct, researchName)) > research_left_over) {
                 //research
                 ns.corporation.research(divisionProduct, researchName)
 
@@ -747,23 +723,12 @@ function that sets eployee jobs
 checks if enough employees, if not: expands if possible
 */
 async function setEmployees(ns, division, city, operations, engineer, business, managment = 0, randD = 0, intern = 0) {
-    //description of jobs
-    const employeeJob = {
-        operations: "Operations",
-        engineer: "Engineer",
-        business: "Business",
-        management: "Management",
-        randD: "Research & Development",
-        intern: "Intern",
-        unassigned: "Unassigned",
-    }
-
     //get total amount of jobs
-    let totalJobs = operations + engineer + business + managment + randD + intern
+    const totalJobs = operations + engineer + business + managment + randD + intern
     //get the office
-    let office = ns.corporation.getOffice(division, city)
+    const office = ns.corporation.getOffice(division, city)
     //set a flag to check later
-    let diff = totalJobs - office.size
+    const diff = totalJobs - office.size
     //check if we can have the amount of employees
     if (diff > 0) {
         //we need to expand
@@ -782,7 +747,7 @@ async function setEmployees(ns, division, city, operations, engineer, business, 
     }
 
     //check how much we need to hire
-    let numberOfHires = totalJobs - office.numEmployees
+    const numberOfHires = totalJobs - office.numEmployees
     //if we need to hire
     if (numberOfHires > 0) {
         //hire the amount of people
@@ -883,18 +848,12 @@ Buying coffee costs 500k per employeee, and gives +3 energy and halves the diffe
 Party: 500k per employee to get at least 5%
 */
 function manageOfficeSoftStats(ns, division, city) {
-
     //get office data
-    let office = ns.corporation.getOffice(division, city)
-    //describe the number to check for energy
-    const thresholdEnergy = office.maxEnergy - 5 //6 is the threshold, we want to act earlier quick and dirty, to be fixed later?
-    //describe the number to check for energy
-    const thresholdMorale = office.maxMorale - 5 //6 is the threshold, we want to act earlier quick and dirty, to be fixed later?
-
+    const office = ns.corporation.getOffice(division, city)
     //if research of auto brew has not been completed
     if (!ns.corporation.hasResearched(division, research.autoBrew)) {
         //if energy is below the threshold
-        if (office.avgEnergy < thresholdEnergy) {
+        if (office.avgEnergy < config.threshold_energy) {
             //TODO: how to determine cost per employee?
             let costPerEmployee = 500000
             //define costs
@@ -911,7 +870,7 @@ function manageOfficeSoftStats(ns, division, city) {
     //if research of auto part has not been completed
     if (!ns.corporation.hasResearched(division, research.autoParty)) {
         //if morale is not maxxed
-        if (office.avgMorale < thresholdMorale) {
+        if (office.avgMorale < config.threshold_morale) {
             //TODO: how to determine cost per employee?
             let costPerEmployee = 500000
             //define costs
@@ -1216,7 +1175,7 @@ Function that interacts the status with the UI
 */
 function updateUI(ns, type, message) {
     //log information
-    log(ns, logLevel, type, message)
+    log(ns, config.log_level , type, message)
     //update port
     overWritePort(ns, portCorporation, message)
 }
@@ -1278,66 +1237,3 @@ import { upgrade, unlock, material, research, citiesAll, cityMain, citySupport, 
 */
 
 
-const upgrade = {
-    smartFactories: "Smart Factories",
-    smartStorage: "Smart Storage",
-    dreamSense: "DreamSense",
-    wilsonAnalytics: "Wilson Analytics",
-    nuoptimalNootropicInjectorImplants: "Nuoptimal Nootropic Injector Implants",
-    speechProcessorImplants: "Speech Processor Implants",
-    neuralAccelerators: "Neural Accelerators",
-    focusWires: "FocusWires",
-    aBCSalesBots: "ABC SalesBots",
-    projectInsight: "Project Insight",
-}
-const unlock = {
-    export: "Export",
-    smartSupply: "Smart Supply",
-    marketResearchDemand: "Market Research - Demand",
-    marketDataCompetition: "Market Data - Competition",
-    veChain: "VeChain",
-    shadyAccounting: "Shady Accounting",
-    governmentPartnership: "Government Partnership",
-    //warehouseAPI: "Warehouse API",
-    //officeAPI: "Office API",
-}
-const material = {
-    water: "Water",
-    ore: "Ore",
-    minerals: "Minerals",
-    food: "Food",
-    plants: "Plants",
-    metal: "Metal",
-    hardware: "Hardware",
-    chemicals: "Chemicals",
-    drugs: "Drugs",
-    robots: "Robots",
-    aiCores: "AI Cores",
-    realEstate: "Real Estate",
-}
-const research = {
-    lab: "Hi-Tech R&D Laboratory",
-    autoBrew: "AutoBrew",
-    autoParty: "AutoPartyManager",
-    autoDrug: "Automatic Drug Administration",
-    cPH4Inject: "CPH4 Injections",
-    drones: "Drones",
-    dronesAssembly: "Drones - Assembly",
-    dronesTransport: "Drones - Transport",
-    goJuice: "Go-Juice",
-    recruitHR: "HRBuddy-Recruitment",
-    trainingHR: "HRBuddy-Training",
-    marketTa1: "Market-TA.I",
-    marketTa2: "Market-TA.II",
-    overclock: "Overclock",
-    selfCorrectAssemblers: "Self-Correcting Assemblers",
-    stimu: "Sti.mu",
-}
-
-const citiesAll = ["Aevum", "Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"]
-const cityMain = "Aevum"
-const citySupport = ["Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"]
-const maxProduction = "MAX"
-const marketPrice = "MP"
-const divisionMaterial = "Agriculture"
-const divisionProduct = "Tobacco"
