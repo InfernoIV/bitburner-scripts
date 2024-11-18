@@ -5,7 +5,7 @@ import { info, success, warning, error, fail, //constants
 } from "scripts/common.js"
 
 //config.
-import * as config from "config.js"
+import * as config from "./config.js"
 
 //global variables
 var counter
