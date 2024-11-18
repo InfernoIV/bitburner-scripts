@@ -44,9 +44,10 @@ export const enum_servers = {
  * Enum containing scripts
  */
 export const enum_scripts = {
-    //main
+    //script
     boot: "scripts/boot.js",
-    main: "scripts/main.js",
+    //main
+    main: "scripts/main/main.js",
     //utility
     jump: "scripts/utility/jump_script.js",
     destroyBitNode: "scripts/utility/destroy_bit_node.js",
