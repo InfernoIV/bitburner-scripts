@@ -52,10 +52,10 @@ export async function main(ns) {
         manage_factions(ns)  //10 GB
         manage_companies(ns) //3 GB
 
-        //servers & scripts: 18,5 GB
+        //servers & scripts: 18,7 GB
         manage_servers(ns, challenge_flags)   //10 GB
         manage_hacking(ns)   //4,3 GB
-        manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,2 GB
+        manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,4 GB
 
         //player, sleeve & bladeburner: 71 GB
         manage_actions(ns, sleeves_available, bit_node_multipliers, challenge_flags)   //71 GB
@@ -605,12 +605,13 @@ function manage_hacking(ns) {
 
 /**
  * Function that manages the launching of scripts
- * Cost: 4,2 GB
+ * Cost: 4,4 GB
  *  getscript_ram (0,1)
  *  scan (0.2) (inherited from get_server_specific)
  *  scp (0.6)
  *  exec (1.3)
  *  getServer (2)
+ *  ls (0.2)
  */
 function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags) {
     //get player
@@ -677,9 +678,29 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
                     const ram_available = server.maxRam - server.ramUsed
                     //if enough ram
                     if (ram_available >= script_ram) {
-                        //copy the script
-                        if (ns.scp(script, enum_servers.home, server.hostname)) {
-                            //execute the script
+                        
+                        //create the folder variable
+                        let script_folder = "" 
+                        //split into segments
+                        const script_path = script.split("/")
+                        //go over each index (except the last)
+                        for (let index = 0; index < script_path.lenght-1; index++) {
+                            //check if we need to add a '/'
+                            if(script_folder != "") {
+                                //add a slash
+                                script_folder += "/"
+                            }
+                            //add the path element
+                            script_folder += script_path[index]
+                        }           
+                        //get the scripts from the folder
+                        const scripts_in_folder = ns.ls(enum_servers.home, script_folder)
+                        //TODO REMOVE
+                        log(ns,1,info, "script folder: " + script_folder)
+                        log(ns,1,info, "scripts: " + JSON.stringify(scripts))
+                        //copy the scripts from the folder
+                        if (ns.scp(scripts_in_folder, enum_servers.home, server.hostname)) {
+                            //execute the main script
                             if (ns.exec(script, server.hostname)) {
                                 //log information
                                 log(ns, 1, success, "Launched '" + script + "'")
