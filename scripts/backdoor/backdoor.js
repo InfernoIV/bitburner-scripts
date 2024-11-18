@@ -71,6 +71,7 @@ export async function main(ns) {
  */
 function init(ns) {
     //disable logging
+    ns.disableLog("disableLog")
     ns.disableLog("scan")
     ns.disableLog("singularity.installBackdoor")
     ns.disableLog("sleep")
