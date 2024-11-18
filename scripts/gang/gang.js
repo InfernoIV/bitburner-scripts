@@ -5,41 +5,23 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/Gang.ts
 https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Constants.ts
 */
 
-import { enum_port, enum_servers, enum_scripts} from "scripts/common.js"
+import { 
+    info, success, warning, error, fail, //constants
+    enum_port, enum_servers, enum_scripts, //enums
+    log, overwritePort, //functions
+} from "scripts/common.js"
 
+//config
+import * as config from "config.js"
+//data
+import * as data from "data.js"
 
-const logLevel = -1
-
-//gang to join
-const factionGang = "Slum Snakes"
-
-//maximum number of gang members
-const gangMembersMax = 12
-
-//tasks types to be used by functions
-const enumGangtask = {
-    unassigned: "unassigned",
-    lowerWanted: "lowerWanted",
-    trainHacking: "trainHacking",
-    trainCombat: "trainCombat",
-    trainCharisma: "trainCharisma",
-    power: "power",
-    //
-    reputation: "respect",
-    money: "money",
-}
 
 //the focus of the gang, either hacking or combat, received from bitNode manager
 var gangFocus
-
 var bestPowerOfOtherGangs = 0
 var previousWantedLevel = 0
-//set train level
-const maxTrainLevel = 200//50
 
-//constants
-const desiredMult = 10
-const numberOfEquipment = 15//20 //24 takes too long... //32 total, 24 combat, 8 hacking
 
 //main function
 export async function main(ns) {
@@ -127,14 +109,6 @@ function createGang(ns) {
 
 
 
-
-
-
-
-
-
-
-
 /**
  * Function that manages the tasks of the members, according the clash
  */
@@ -163,7 +137,7 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
     //variables to save information into
     let statTrain = 0
     let statMult = 0
-    let trainAction = enumGangtask.money
+    let trainAction = data.gang_task.money
     let upgradesHave = [].concat(gangMember.upgrades, gangMember.augmentations)
     let upgradesAvailable = getUpgrades(ns) //ns.gang.getEquipmentNames()
     log(ns, logLevel, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
@@ -173,15 +147,15 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
     if (gangFocus == "combat") {
         statTrain = Math.min(gangMember.str, gangMember.agi, gangMember.def, gangMember.dex)
         statMult = Math.min(gangMember.str_asc_mult, gangMember.agi_asc_mult, gangMember.def_asc_mult, gangMember.dex_asc_mult)
-        trainAction = enumGangtask.trainCombat
+        trainAction = data.gang_task.trainCombat
     } else if (gangFocus == "hacking") {
         statTrain = gangMember.hack
         statMult = gangMember.hack_asc_mult
-        trainAction = enumGangtask.trainHacking
+        trainAction = data.gang_task.trainHacking
     } else {
         log(ns, logLevel, error, "Uncaught Gang focus: " + gangFocus)
         //defaults to raise money
-        return enumGangtask.power
+        return data.gang_task.power
     }
 
     //if the desired level is too low
@@ -195,12 +169,12 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
 
         return trainAction
         //if wanted level is too high
-    } else if (ns.gang.getMemberNames().length < gangMembersMax) {
+    } else if (ns.gang.getMemberNames().length < data.gang_members_max) {
         overWritePort(ns, enum_port.gang, "Growing gang")
-        return enumGangtask.reputation    //if members can be unlocked: gain reputation
+        return data.gang_task.reputation    //if members can be unlocked: gain reputation
         //if the multiplier is too low
     } else if (wantedLevel > previousWantedLevel) {
-        return enumGangtask.lowerWanted   //if wanted level is rising, lower wanted level    
+        return data.gang_task.lowerWanted   //if wanted level is rising, lower wanted level    
         //if not all upgrades unlocked
     } else if (upgradesHave.length < numberOfEquipment) {
         //block resets
@@ -208,7 +182,7 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
         overWritePort(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + numberOfEquipment)
         //upgradesAvailable.length) {
         //raise money to buy upgrades
-        return enumGangtask.money
+        return data.gang_task.money
         //if clashing: gain territory  
     } else if (territoryClash == 1) {
         //clear reset
@@ -216,7 +190,7 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
             ns.clearPort(enum_port.reset)
         }
         overWritePort(ns, enum_port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
-        return enumGangtask.power
+        return data.gang_task.power
         //if all territory is owned: focus on getting money   
     } else if (territoryClash == 2) {
         //indicate status
@@ -225,12 +199,14 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
         if (ns.peek(enum_port.reset) == "gang") {
             ns.clearPort(enum_port.reset)
         }
-        return enumGangtask.money
+        return data.gang_task.money
         //defaults to raise power
     } else {
-        return enumGangtask.power
+        return data.gang_task.power
     }
 }
+
+
 
 /**
  * Function that checks and recruits members
@@ -243,9 +219,9 @@ async function recruitMembers(ns) {
         //update information
         //overWritePort(ns, enum_port.gang, "Growing gang")
 
-        let names = ns.gang.getMemberNames()
+        const names = ns.gang.getMemberNames()
 
-        for (let index = 0; index < gangMembersMax; index++) {
+        for (let index = 0; index < data.gang_members_max; index++) {
             //create name
             let memberNameNew = "gangMember-" + index //ns.gang.getMemberNames().length //nameList[randomNumber]
             //if the name does not exist
@@ -260,7 +236,7 @@ async function recruitMembers(ns) {
                 return
             }
         }
-        log(ns, logLevel, error, "Unhandled: All " + gangMembersMax + " members recruited?!?")
+        log(ns, logLevel, error, "Unhandled: All " + data.gang_members_max + " members recruited?!?")
     }
 }
 
@@ -274,10 +250,9 @@ async function recruitMembers(ns) {
 /** @param {NS} ns */
 function manageTerritoryClash(ns, gangOwn) {
     //let gangOwnPower = gangOwn.power
-    //minimum percentage to start territory clashes (55%)
-    const territoryClashMinPercentage = 0.55
+
     //save information on other gangs (names)
-    let otherGangs = ns.gang.getOtherGangInformation()
+    const otherGangs = ns.gang.getOtherGangInformation()
     //save list of other gangs which have no territory anymore (e.g. are eliminated)
     let eliminatedGangs = []
     //variable to save the best gang in
@@ -286,7 +261,7 @@ function manageTerritoryClash(ns, gangOwn) {
     for (const gangName in otherGangs) {
         if (gangName == gangOwn.faction) { continue }
         //get the information
-        let gangInfo = otherGangs[gangName]
+        const gangInfo = otherGangs[gangName]
         //log(ns, 1, info, gangName + ": " + gangInfo.power + " (" + gangOwnPower + ") " + ns.gang.getChanceToWinClash(gangName) + "%" )
 
         //if no territory (= eliminated)
@@ -303,7 +278,9 @@ function manageTerritoryClash(ns, gangOwn) {
             }
         }
     }
+    
     bestPowerOfOtherGangs = bestOtherGang.power
+    
     //flag for clash
     let territoryClash = 0
     //if all other gangs have no territory
@@ -324,9 +301,9 @@ function manageTerritoryClash(ns, gangOwn) {
     //set warfare (TODO: does it matter if it is started whilst already performing warfare?)
     if (territoryClash == 1) {
         //update gang stats
-
         ns.gang.setTerritoryWarfare(true)
     } else {
+        //stop clashing
         ns.gang.setTerritoryWarfare(false)
     }
 
@@ -341,20 +318,19 @@ function manageTerritoryClash(ns, gangOwn) {
  */
 /** @param {NS} ns */
 function performTask(ns, gangOwn, gangMember, taskFocus) {
-
     //log(ns,0,info,"Task: " + taskFocus )
     //Set default task to hybrid task (Both combat and hacking)
-    let task = enumGangtask.unassigned
+    let task = data.gang_task.unassigned
 
     //depending on the focus, set the task
     switch (taskFocus) {
-        case enumGangtask.trainHacking: task = "Train Hacking"; break
-        case enumGangtask.trainCombat: task = "Train Combat"; break
-        case enumGangtask.trainCharisma: task = "Train Charisma"; break
-        case enumGangtask.power: task = "Territory Warfare"; break
+        case data.gang_task.trainHacking: task = "Train Hacking"; break
+        case data.gang_task.trainCombat: task = "Train Combat"; break
+        case data.gang_task.trainCharisma: task = "Train Charisma"; break
+        case data.gang_task.power: task = "Territory Warfare"; break
 
         //dependant on bitnode focus (either hacking or combat)
-        case enumGangtask.lowerWanted:
+        case data.gang_task.lowerWanted:
             if (gangFocus == "hacking") {
                 task = "Ethical Hacking"; break
             } else {
@@ -362,8 +338,8 @@ function performTask(ns, gangOwn, gangMember, taskFocus) {
             }
 
         //focus that needs to be calculated (depending on gang task focus)
-        case enumGangtask.reputation:
-        case enumGangtask.money:
+        case data.gang_task.reputation:
+        case data.gang_task.money:
             task = getBestTask(ns, gangOwn, gangMember, taskFocus); break
         //log(ns,1,info,"task: " + JSON.stringify(task)); break
         default: log(ns, logLevel, error, "performTask: unhandled condition '" + taskFocus + "', defaulting to " + task); break
@@ -386,13 +362,13 @@ function performTask(ns, gangOwn, gangMember, taskFocus) {
 /** @param {NS} ns */
 function getBestTask(ns, gangOwn, gangMember, type) { //type is either "reputation" or "money"
     //get the tasks
-    let tasks = getTasks(ns)
+    const tasks = getTasks(ns)
     //variable to save task to
     let best = { name: "", value: 0 }
     //for every task
-    for (let task of tasks) {
+    for (const task of tasks) {
         //calculate the gains (according to the type)
-        let gains = calculateGains(ns, gangOwn, gangMember, task, type)
+        const gains = calculateGains(ns, gangOwn, gangMember, task, type)
         //if better gains        
         if (gains > best.value) {
             //save the information
@@ -423,9 +399,9 @@ function getTasks(ns) {
     //variable to store information to
     let taskList = { hacking: [], combat: [], }
     //for every task of the available tasks
-    for (let task of ns.gang.getTaskNames()) {
+    for (const task of ns.gang.getTaskNames()) {
         //get the stats of the task
-        let stats = ns.gang.getTaskStats(task)
+        const stats = ns.gang.getTaskStats(task)
         //check where to place the task
         if (stats.isHacking && !stats.isCombat) {
             taskList.hacking.push(stats) //if hack specific
@@ -454,8 +430,8 @@ function calculateGains(ns, gang, member, task, type) {
     let typeSpecific = {}
     //determine the multipliers
     switch (type) {
-        case enumGangtask.reputation: typeSpecific = { base: task.baseRespect, statWeight: 4, final: 11, }; break
-        case enumGangtask.money: typeSpecific = { base: task.baseMoney, statWeight: 3.2, final: 5, }; break
+        case data.gang_task.reputation: typeSpecific = { base: task.baseRespect, statWeight: 4, final: 11, }; break
+        case data.gang_task.money: typeSpecific = { base: task.baseMoney, statWeight: 3.2, final: 5, }; break
         default:
             return 0
     }
@@ -488,6 +464,7 @@ function calculateGains(ns, gang, member, task, type) {
 }
 
 
+
 /**
  * function that manages upgrades of the gang member
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/GangMemberUpgrade.ts
@@ -500,9 +477,9 @@ function calculateGains(ns, gang, member, task, type) {
  */
 function manageUpgrades(ns, gangMember) {
     //get all owned upgrades (augments and equipment)
-    let ownedUpgrades = gangMember.augmentations.concat(gangMember.upgrades)
+    const ownedUpgrades = gangMember.augmentations.concat(gangMember.upgrades)
     //for every available equipment
-    for (let equipName of getUpgrades(ns)) { //ns.gang.getEquipmentNames()) {
+    for (const equipName of getUpgrades(ns)) { //ns.gang.getEquipmentNames()) {
         //if not owned
         if (ownedUpgrades.indexOf(equipName) == -1) {
             //buy it
@@ -522,7 +499,6 @@ function manageUpgrades(ns, gangMember) {
 function manageAscension(ns, gangMember) {
     //Get the result of an ascension without ascending
     let results = ns.gang.getAscensionResult(gangMember.name)
-
 
     //https://www.reddit.com/r/Bitburner/comments/x6v08l/help_with_automating_gangs/
     const fNeeded = 2 //1.26
@@ -548,10 +524,11 @@ function manageAscension(ns, gangMember) {
 /** @param {NS} ns */
 function getUpgrades(ns) {
     let upgradeList = []
-    let upgrades = ns.gang.getEquipmentNames()
+    const upgrades = ns.gang.getEquipmentNames()
 
-    for (let upgrade of upgrades) {
-        let stats = ns.gang.getEquipmentStats(upgrade)
+    for (const upgrade of upgrades) {
+        //get stats of the equipment
+        const stats = ns.gang.getEquipmentStats(upgrade)
 
         if (gangFocus == "combat") {
             if ((stats.str > 1) || (stats.def > 1) || (stats.dex > 1) || (stats.agi > 1)) {
@@ -566,61 +543,6 @@ function getUpgrades(ns) {
             return []
         }
     }
+    //return the list
     return upgradeList
-}
-
-
-/**
- * Function that overwrites the specified port with new data
- * Cost: 0
- */
-function overwritePort(ns, port, data) {
-    //clear port
-    ns.clearPort(port)
-    //write data
-    ns.writePort(port, data)
-}
-
-
-
-//log constants
-const info = "INFO"
-const success = "SUCCESS"
-const warning = "WARNING"
-const error = "ERROR"
-const fail = "FAIL"
-
-
-
-/**
- * Function that enables easy logging
- * Cost: 0
- */
-function log(ns, loglevel, type, message) {
-    //depending on loglevel
-    switch (loglevel) {
-        case 2: //alert
-            ns.alert(message)
-        case 1: //console log
-            ns.tprint(type + " " + message)
-        case 0: //log
-            ns.print(type + " " + message)
-        default:
-            //do nothing?
-            break
-    }
-}
-
-/**
- * Function that overwrites the specified port with new data
- * Cost: 0
- */
-function overWritePort(ns, port, data) {
-    //if the desired data is not already on the port
-    if (ns.peek(port) != data) {
-        //clear port
-        ns.clearPort(port)
-        //write data
-        ns.writePort(port, data)
-    }
 }
