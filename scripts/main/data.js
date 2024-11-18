@@ -1,5 +1,5 @@
 //requirements to be fulfilled
-export const enum_requirements = {
+export const requirements = {
     karma_for_gang: -54000, //-54k
     kills_for_factions: 30,
     faction_netburners: { 
@@ -12,7 +12,7 @@ export const enum_requirements = {
 
 
 //from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
-export const enum_hashUpgrades = {
+export const hash_upgrades = {
     money: "Sell for Money",
     corporationFunds: "Sell for Corporation Funds",
     corporationResearch: "Exchange for Corporation Research",
@@ -31,7 +31,7 @@ export const enum_hashUpgrades = {
 /**
  * Enum stating special augments
  */
-export const enum_augments = {
+export const augments = {
     theRedPill: "The Red Pill", //enables bitnode destruction by hacking
     neuroFluxGovernor: "NeuroFlux Governor",
     bladesSimulacrum: "The Blade's Simulacrum", //"This augmentation allows you to perform Bladeburner actions and other actions (such as working, committing crimes, etc.) at the same time.",
@@ -46,7 +46,7 @@ export const enum_augments = {
  * getCurrentAction: https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.bladeburnercuraction.md
  * getTask: https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.sleevetask.md
  */
-export const enum_activities = {
+export const activities = {
     //getCurrentWork (player)
     study: "CLASS", //properties: type, classType, location, cyclesWorked (player)
     company: "COMPANY", //properties: type, companyName, cyclesWorked (player)
@@ -77,7 +77,7 @@ export const enum_activities = {
  * homicide is used for kills (only needed for a short bit, Assassination is not used)
  * the rest doesn't matter
  */
-export const enum_crimes = {
+export const crimes = {
     shoplift: {
         type: "Shoplift",
         time: 2e3,
@@ -205,7 +205,7 @@ export const enum_crimes = {
 /**
  * Enum that provides the available focus for determining crimes
  */
-export const enum_crimeFocus = {
+export const crime_focus = {
     karma: "karma",
     kills: "kills",
     skills: "skills",
@@ -217,7 +217,7 @@ export const enum_crimeFocus = {
 /**
  * enum that holds the bladeburner skills (in priority)
  */
-export const enum_bladeburnerSkills = {
+export const bladeburner_skills = {
     //reduces time
     overclock: "Overclock", //Each level of this skill decreases the time it takes to attempt a Contract, Operation, and BlackOp by 1% (Max Level: 90)
     //raises chance
@@ -240,7 +240,7 @@ export const enum_bladeburnerSkills = {
 /**
  * Enum for going through and checking (available) actions and their requirements (if applicable)
  */
-export const enum_bladeburnerActions = {
+export const bladeburner_actions = {
     type: {
         blackOps: "Black Operations",
         operations: "Operations",
@@ -298,7 +298,7 @@ export const enum_bladeburnerActions = {
 /**
  * Enum that describes the bladeburner actions that sleeves can take
  */
-export const enum_sleeveBladeburnerActions = {
+export const sleeve_bladeburner_actions = {
     fieldAnalysis: "Field Analysis",
     recruitment: "Recruitment",
     diplomacy: "Diplomacy",
@@ -313,7 +313,7 @@ export const enum_sleeveBladeburnerActions = {
  * Enum that describes the companies we want to join, and the faction behind it
  * Only fulcrum has a different faction name
  */
-export const enum_company_factions = {
+export const company_factions = {
     //225 stat(s) required
     "Bachman & Associates": "Bachman and Associates",
     "KuaiGong International": "KuaiGong International",
@@ -333,7 +333,7 @@ export const enum_company_factions = {
 /**
  * description of all hack tools
  */
-export const enum_hack_tools = {
+export const hack_tools = {
     bruteSSH: "BruteSSH.exe",   //500e3
     fTPCrack: "FTPCrack.exe",   //1500e3
     relaySMTP: "relaySMTP.exe", //5e6
