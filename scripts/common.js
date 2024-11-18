@@ -44,22 +44,31 @@ export const enum_servers = {
  * Enum containing scripts
  */
 export const enum_scripts = {
+    //main
     boot: "scripts/boot.js",
     main: "scripts/main.js",
-    jump: "scripts/jumpScript.js",
-    destroyBitNode: "scripts/destroyBitNode.js",
-    reset: "scripts/reset.js",
-    backdoor: "scripts/backdoor.js",
-    hack: "scripts/hack.js",
-    gang: "scripts/gang.js",
-    corporation: "scripts/corporation.js",
+    //utility
+    jump: "scripts/utility/jump_script.js",
+    destroyBitNode: "scripts/utility/destroy_bit_node.js",
+    reset: "scripts/utility/reset.js",
+    //backdoor
+    backdoor: "scripts/backdoor/backdoor.js",
+    //gang
+    gang: "scripts/gang/gang.js",
+    //corporation  
+    corporation: "scripts/corporation/corporation.js",
+    //stock
     stock: "scripts/stock/stock.js",
-    workerHack: "scripts/workerHack.js",
-    workerGrow: "scripts/workerGrow.js",
-    workerWeaken: "scripts/workerWeaken.js",
-    stanekCreate: "scripts/stanekCreate.js",
-    stanekCharge: "scripts/stanekCharge.js",
-    workerCharge: "scripts/workerCharge.js",
+    //hack
+    hack: "scripts/hack/hack.js",
+    workerHack: "scripts/hack/workerHack.js",
+    workerGrow: "scripts/hack/workerGrow.js",
+    workerWeaken: "scripts/hack/workerWeaken.js",
+    //stanek
+    stanekCreate: "scripts/stanek/stanekCreate.js",
+    stanekCharge: "scripts/stanek/stanekCharge.js",
+    workerCharge: "scripts/stanek/workerCharge.js",
+    //stanekBuy: "scripts/stanek/stanekBuy.js",
 }
 
 
