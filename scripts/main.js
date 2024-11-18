@@ -1,9 +1,4 @@
-/**
- * TODO LIST:
- * manage_scripts: indicate and handle hack manager scaling up and scaling down, fill scripts
- * manageStanek: to test
- * reactive sleeves in actions and in purchase augments and update ui
- */
+//imports
 import { info, success, warning, error, fail } from "scripts/common.js"
 
 //requirements to be fulfilled
