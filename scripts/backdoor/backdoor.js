@@ -39,7 +39,8 @@ export async function main(ns) {
             try {
                 //install backdoor
                 await ns.singularity.installBackdoor()
-
+                //log locally
+                log(ns, 0, success, "Backdoored server '" + server + "'")
                 //catch error
             } catch (error) {
                 //log error
