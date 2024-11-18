@@ -215,7 +215,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
     let can_execute_destruction = false
 
     //if the red pill is installed
-    if (get_augmentations_installed(ns).indexOf(data.enum_augments.theRedPill) > -1) {
+    if (get_augmentations_installed(ns).indexOf(data.augments.theRedPill) > -1) {
         //then we can check the world daemon backdoor (otherwise the server doesn't exist)
         if (ns.getServer(enum_servers.worldDaemon).backdoorInstalled) {
             //backdoor is installed, proceed with destruction
@@ -226,7 +226,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
     //bladeburner is possible
     if (get_bladeburner_access(ns, challenge_flags)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
-        if (ns.bladeburner.getaction_countRemaining(data.enum_bladeburnerActions.type.blackOps, data.enum_bladeburnerActions.blackOps.operationDaedalus.name) == 0) {
+        if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, data.bladeburner_actions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
             can_execute_destruction = true
         }
@@ -266,7 +266,7 @@ function install_augments(ns) {
             //for every joined faction
             for (const faction of ns.getPlayer().factions) {
                 //buy as much neuro as possible
-                while (ns.singularity.purchaseAugmentation(faction, data.enum_augments.neuroFluxGovernor)) { /* Do nothing */ }
+                while (ns.singularity.purchaseAugmentation(faction, data.augments.neuroFluxGovernor)) { /* Do nothing */ }
             }
             //kill all other scripts on home
             ns.killall()
@@ -300,7 +300,7 @@ function buy_augments(ns, sleeves_available, challenge_flags) {
         //for each augment of the faction
         for (const augment of ns.singularity.getAugmentationsFromFaction(faction)) {
             //if not owned or is neuroflux
-            if (augments_installed.indexOf(augment) == -1 || augment == data.enum_augments.neuroFluxGovernor) {
+            if (augments_installed.indexOf(augment) == -1 || augment == data.augments.neuroFluxGovernor) {
                 //try to buy
                 if(ns.singularity.purchaseAugmentation(faction, augment)) {
                     log(ns,1,success,"Bought augment '" + augment + "' for player")
@@ -461,7 +461,7 @@ function manage_factions(ns) {
  */
 function manage_companies(ns) {
     //for each company
-    for (let company in data.enum_company_factions) {
+    for (let company in data.company_factions) {
         //just try to join the company, default to "software"
         //also works for getting promotion
         ns.singularity.applyToCompany(company, "Software")
@@ -512,13 +512,13 @@ function manage_servers(ns, challenge_flags) {
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.cores < data.enum_requirements.faction_netburners.cores) {
+            if (hacknet_stats.cores < data.requirements.faction_netburners.cores) {
                 //upgrade cores
                 ns.hacknet.upgradeCore(server_index)
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.level < data.enum_requirements.faction_netburners.levels) {
+            if (hacknet_stats.level < data.requirements.faction_netburners.levels) {
                 //upgrade level
                 ns.hacknet.upgradeLevel(server_index)
             }
@@ -535,7 +535,7 @@ function manage_servers(ns, challenge_flags) {
     if(!challenge_flags.disable_hacknet_servers) {
         //manage hashes
         //just spend hashes on money
-        ns.hacknet.spendHashes(data.enum_hashUpgrades.money)
+        ns.hacknet.spendHashes(data.hash_upgrades.money)
     }
 }
 
@@ -563,19 +563,19 @@ function manage_hacking(ns) {
     if (ns.singularity.purchaseTor()) {
         //buy the tools by only checking if it is usefull to do so
         if (hacking >= 50) {
-            ns.singularity.purchaseProgram(data.enum_hack_tools.bruteSSH)
+            ns.singularity.purchaseProgram(data.hack_tools.bruteSSH)
         }
         if (hacking >= 100) {
-            ns.singularity.purchaseProgram(data.enum_hack_tools.fTPCrack)
+            ns.singularity.purchaseProgram(data.hack_tools.fTPCrack)
         }
         if (hacking >= 300) {
-            ns.singularity.purchaseProgram(data.enum_hack_tools.relaySMTP)
+            ns.singularity.purchaseProgram(data.hack_tools.relaySMTP)
         }
         if (hacking >= 400) {
-            ns.singularity.purchaseProgram(data.enum_hack_tools.hTTPWorm)
+            ns.singularity.purchaseProgram(data.hack_tools.hTTPWorm)
         }
         if (hacking >= 725) {
-            ns.singularity.purchaseProgram(data.enum_hack_tools.sQLInject)
+            ns.singularity.purchaseProgram(data.hack_tools.sQLInject)
         }
     }
 
@@ -641,7 +641,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
     //check if makes sense to launch gang manager
     if ((!challenge_flags.disable_gang) && //if not performing a challenge
         (bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
-        (player.karma < data.enum_requirements.karma_for_gang)) { //and if karma threshold is reached
+        (player.karma < data.requirements.karma_for_gang)) { //and if karma threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.gang)
     }
@@ -728,7 +728,7 @@ function restart_player_actions(ns, challenge_flags) {
         }
         
         //if we have not reached target karma
-    } else if (player.karma > data.enum_requirements.karma_for_gang) {
+    } else if (player.karma > data.requirements.karma_for_gang) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug
         //commit crime for karma
@@ -750,7 +750,7 @@ function restart_player_actions(ns, challenge_flags) {
         }
 
         //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.enum_augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
@@ -819,7 +819,7 @@ function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
         //get best crime for hacking
-        const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, data.enum_crimeFocus.hacking)
+        const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.hacking)
         //if not performing the correct crime
         if (player_activity.value != crime_best) {
             //commit crime for karma
@@ -828,9 +828,9 @@ function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
             }
         }
         //if we have not reached target karma
-    } else if (player.karma > data.enum_requirements.karma_for_gang) {
+    } else if (player.karma > data.requirements.karma_for_gang) {
         //get best crime for karma
-        const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.enum_crimeFocus.karma)
+        const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.karma)
         //if not performing the correct crime
         if (player_activity.value != crime_best) {
             //commit crime for karma
@@ -857,12 +857,12 @@ function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
         }
 
         //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.enum_augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
             //get best crime for combat skills
-            const crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, player, data.enum_crimeFocus.skills)
+            const crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.skills)
             //if not performing the correct crime
             if (player_activity.value != crime_best) {
                 //commit crime for money/stats?
@@ -896,18 +896,18 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //if not doing the correct work
-            if (get_activity(ns, index).type != data.enum_activities.recovery) {
+            if (get_activity(ns, index).type != data.activities.recovery) {
                 //perform recovery
                 ns.sleeve.setToShockRecovery(index)
             }
         }
 
         //if we have not reached target karma
-    } else if (player.karma > data.enum_requirements.karma_for_gang) {
+    } else if (player.karma > data.requirements.karma_for_gang) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for karma
-            let crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.enum_crimeFocus.karma)
+            let crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.karma)
             //if not doing the correct work
             if (get_activity(ns, index).value != crime_best) {
                 //perform crime for karma
@@ -916,11 +916,11 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //not reached target kills
-    } else if (player.numPeopleKilled < data.enum_requirements.kills_for_factions) {
+    } else if (player.numPeopleKilled < data.requirements.kills_for_factions) {
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //get best crime for kills
-            let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, data.enum_crimeFocus.kills)
+            let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.kills)
             //if not performing the correct work
             if (get_activity(ns, index).value != crime_best) {
                 //perform crime
@@ -955,7 +955,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //create list of companies and their factions
         for (const company in player.jobs) {
             //if company faction is not joined
-            if (player.factions.indexOf(data.enum_company_factions[company]) == -1) {
+            if (player.factions.indexOf(data.company_factions[company]) == -1) {
                 //add company to the list
                 comanies_to_work_for.push(company)
             }
@@ -965,11 +965,11 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //keep track of sleeve actions to be done
         let sleeve_actions_future = []
         //define best crime for skills
-        const crime_best = ns.enums.CrimeType.grandTheftAuto //TODO: get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), data.enum_crimeFocus.skills)
+        const crime_best = ns.enums.CrimeType.grandTheftAuto //TODO: get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), data.crime_focus.skills)
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //set default action to crime
-            sleeve_actions_future[index] = { type: data.enum_activities.crime, value: crime_best }
+            sleeve_actions_future[index] = { type: data.activities.crime, value: crime_best }
         }
 
         //determine faction work
@@ -980,10 +980,10 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             //check if any sleeve is already performing work for this faction
             for (const sleeve_action in sleeve_actions_current) {
                 //if doing faction work and working for this faction
-                if ((sleeve_action.type == data.enum_activities.faction) && 
+                if ((sleeve_action.type == data.activities.faction) && 
                     (sleeve_action.value == faction)) {
                     //save that the sleeve is working on this
-                    sleeve_actions_future[index] = { type: data.enum_activities.faction, value: faction }
+                    sleeve_actions_future[index] = { type: data.activities.faction, value: faction }
                     //set flag that is sleeve already assigned
                     sleeve_assigned = true
                     //stop looking
@@ -996,9 +996,9 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 //go over each sleeve
                 for (let index = 0; index < sleeves_available; index++) {
                     //first sleeve that is set to crime, is set to this faction
-                    if (sleeve_actions_future[index].type == data.enum_activities.crime) {
+                    if (sleeve_actions_future[index].type == data.activities.crime) {
                         //save information
-                        sleeve_actions_future[index] = { type: data.enum_activities.faction, value: faction }
+                        sleeve_actions_future[index] = { type: data.activities.faction, value: faction }
                         //stop looking
                         break
                     }
@@ -1012,14 +1012,14 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             //set flag to check if sleeve is already working for this specific company
             let sleeve_assigned = false
             //if company faction is not joined
-            if (player.factions.indexOf(data.enum_company_factions[company]) == -1) {
+            if (player.factions.indexOf(data.company_factions[company]) == -1) {
                 //check if any sleeve is already performing work for this company
                 for (const sleeve_action in sleeve_actions_current) {
                     //if doing faction work and working for this faction
-                    if ((sleeve_action.type == data.enum_activities.company) && 
+                    if ((sleeve_action.type == data.activities.company) && 
                         (sleeve_action.value == company)) {
                         //save that the sleeve is working on this
-                        sleeve_actions_future[index] = { type: data.enum_activities.company, value: company }
+                        sleeve_actions_future[index] = { type: data.activities.company, value: company }
                         //set flag that is sleeve already assigned
                         sleeve_assigned = true
                         //stop looking
@@ -1032,9 +1032,9 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     //go over each sleeve
                     for (let index = 0; index < sleeves_available; index++) {
                         //first that is set to crime, is set to this faction
-                        if (sleeve_actions_future[index].type == data.enum_activities.crime) {
+                        if (sleeve_actions_future[index].type == data.activities.crime) {
                             //save information
-                            sleeve_actions_future[index] = { type: data.enum_activities.company, value: company }
+                            sleeve_actions_future[index] = { type: data.activities.company, value: company }
                             //stop looking
                             break 
                         }
@@ -1056,7 +1056,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
 
                         
                     //faction work
-                    case data.enum_activities.faction: 
+                    case data.activities.faction: 
                         //get faction
                         const faction = sleeve_actions_future.value
                         //get work type
@@ -1071,7 +1071,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
 
                         
                     //company work
-                    case data.enum_activities.company: 
+                    case data.activities.company: 
                         //get company
                         const company = sleeve_actions_future.value
                         //set to company work
@@ -1113,7 +1113,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                         //get activity
                         const activity = get_activity(ns, index)
                         //if a sleeve is already working for this faction
-                        if ((activity.type == data.enum_activities.faction) &&
+                        if ((activity.type == data.activities.faction) &&
                             (activity.value == faction)) {
                             //assign this job to the sleeve
                             sleeve_actions_future[index] = activity
@@ -1136,7 +1136,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                                     //work for this faction
                                     if (ns.sleeve.setToFactionWork(index, faction, faction_work_best)) {
                                         //save information
-                                        sleeve_actions_future[index] = { type: data.enum_activities.faction, value: faction }
+                                        sleeve_actions_future[index] = { type: data.activities.faction, value: faction }
                                         //stop
                                         break
                                     }
@@ -1167,7 +1167,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     //get activity
                     const activity = get_activity(ns, index)
                     //if a sleeve is already working for this company
-                    if ((activity.type == data.enum_activities.company) &&
+                    if ((activity.type == data.activities.company) &&
                         (activity.value == company)) {
                         //assign this job to the sleeve
                         sleeve_actions_future[index] = activity
@@ -1187,7 +1187,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                                 //work for company
                                 ns.sleeve.setToCompanyWork(index, company)
                                 //save information
-                                sleeve_actions_future[index] = { type: data.enum_activities.company, value: company }
+                                sleeve_actions_future[index] = { type: data.activities.company, value: company }
 
                             } catch (error) {
                                 log(ns, 1, error, "setToCompanyWork " + company + ": " + error)
@@ -1203,14 +1203,14 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             //check if the sleeve is not assigned
             if (!Object.hasOwn(sleeve_actions_future, index)) {
                 //get best crime for skills
-                let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), data.enum_crimeFocus.skills)
+                let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), data.crime_focus.skills)
                 //if not working on the desired crime
                 if (get_activity(ns, index).value != crime_best) {
                     //assign to crime
                     ns.sleeve.setToCommitCrime(index, crime_best)
                 }
                 //save information
-                sleeve_actions_future[index] = { type: data.enum_activities.crime, value: crime_best }
+                sleeve_actions_future[index] = { type: data.activities.crime, value: crime_best }
             }
         }
         */
@@ -1300,9 +1300,9 @@ function get_crime_best(ns, bit_node_multipliers, person, focus) {
     }
 
     //for each crime
-    for (let crime_index in data.enum_crimes) {
+    for (let crime_index in data.crimes) {
         //get the data
-        const crime_data = data.enum_crimes[crime_index]
+        const crime_data = data.crimes[crime_index]
 
 
         //calculate the chance
@@ -1431,9 +1431,9 @@ function bladeburner_determine_action(ns) {
     
     //upgrade skills
     //for each bladeburner skill
-    for (const skill in data.enum_bladeburnerSkills) {
+    for (const skill in data.bladeburner_skills) {
         //upgrade skill without checking details (money, level cap)
-        ns.bladeburner.upgradeSkill(data.enum_bladeburnerSkills[skill])
+        ns.bladeburner.upgradeSkill(data.bladeburner_skills[skill])
     }
 
     //check the lowest chaos city
@@ -1465,18 +1465,18 @@ function bladeburner_determine_action(ns) {
         //get current rank
         const bladeburner_rank = ns.bladeburner.getRank()
         //for each black operation
-        for (const activity in data.enum_bladeburnerActions.blackOps) {
+        for (const activity in data.bladeburner_actions.blackOps) {
             //get blackOp information
-            const blackOp = data.enum_bladeburnerActions.blackOps[activity]
+            const blackOp = data.bladeburner_actions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getaction_countRemaining(data.enum_bladeburnerActions.type.blackOps, blackOp.name) > 0) {
+            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) > 0) {
                 //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.enum_bladeburnerActions.type.blackOps, blackOp.name)
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, blackOp.name)
                 //check if we have enough rank and enough chance
                 if ((bladeburner_rank > blackOp.reqRank) &&
                     (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
                     //return this information
-                    return { type: data.enum_bladeburnerActions.type.blackOps, name: blackOp.name }
+                    return { type: data.bladeburner_actions.type.blackOps, name: blackOp.name }
                 }
                 //stop looking!
                 break
@@ -1487,17 +1487,17 @@ function bladeburner_determine_action(ns) {
 
         //operations
         //for each operation
-        for (const activity in data.enum_bladeburnerActions.operations) {
+        for (const activity in data.bladeburner_actions.operations) {
             //get operation information
-            const operation = data.enum_bladeburnerActions.operations[activity]
+            const operation = data.bladeburner_actions.operations[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.enum_bladeburnerActions.type.operations, operation)
+            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
             //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.enum_bladeburnerActions.type.operations, operation)
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.operations, operation)
             //if this action can be performed and we have enough chance
             if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
                 //return this information
-                return { type: data.enum_bladeburnerActions.type.operations, name: operation }
+                return { type: data.bladeburner_actions.type.operations, name: operation }
             }
             //add count to total actions available
             bladeburner_total_action_count += action_count
@@ -1505,17 +1505,17 @@ function bladeburner_determine_action(ns) {
 
         //contracts
         //for each contract
-        for (const activity in data.enum_bladeburnerActions.contracts) {
+        for (const activity in data.bladeburner_actions.contracts) {
             //get contract information
-            const contract = data.enum_bladeburnerActions.contracts[activity]
+            const contract = data.bladeburner_actions.contracts[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.enum_bladeburnerActions.type.contracts, contract)
+            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
             //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.enum_bladeburnerActions.type.contracts, contract)
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.contracts, contract)
             //if this action can be performed and we have enough chance
             if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
                 //return this information
-                return { type: data.enum_bladeburnerActions.type.contracts, name: contract }
+                return { type: data.bladeburner_actions.type.contracts, name: contract }
             }
             //add count to total actions available
             bladeburner_total_action_count += action_count
@@ -1528,15 +1528,15 @@ function bladeburner_determine_action(ns) {
     //if over threshold
     if (bladeburner_chaos_lowest > bladeburner_chaos_threshold) {
         //lower chaos
-        return { type: data.enum_bladeburnerActions.type.general, name: data.enum_bladeburnerActions.general.diplomacy }
+        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
     }
     //if no operations or contracts available
     if (bladeburner_total_action_count == 0) {
         //generate operations and contracts
-        return { type: data.enum_bladeburnerActions.type.general, name: data.enum_bladeburnerActions.general.inciteViolence }
+        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
     }
     //default: raise success chances
-    return { type: data.enum_bladeburnerActions.type.general, name: data.enum_bladeburnerActions.general.fieldAnalysis }
+    return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.fieldAnalysis }
 }
 
 
@@ -1621,11 +1621,11 @@ function get_activity(ns, index = -1) {
         if (player_activity != null) {
             //depending on the type
             switch (player_activity.type) {
-                case data.enum_activities.study: activity.value = player_activity.classType; break
-                case data.enum_activities.company: activity.value = player_activity.companyName; break
+                case data.activities.study: activity.value = player_activity.classType; break
+                case data.activities.company: activity.value = player_activity.companyName; break
                 //case enum_activities.createProgram: activity.value = player_activity.programName; break
-                case data.enum_activities.crime: activity.value = player_activity.crimeType; break
-                case data.enum_activities.faction: activity.value = player_activity.factionName; break
+                case data.activities.crime: activity.value = player_activity.crimeType; break
+                case data.activities.faction: activity.value = player_activity.factionName; break
                 //case enum_activities.grafting: activity.value = player_activity.augmentation; break
                 default:
                     //log information
@@ -1647,17 +1647,17 @@ function get_activity(ns, index = -1) {
         if (sleeve_activity != null) {
             //depending on the type
             switch (sleeve_activity.type) {
-                case data.enum_activities.study: activity.value = sleeve_activity.classType; break
-                case data.enum_activities.company: activity.value = sleeve_activity.companyName; break
-                case data.enum_activities.crime: activity.value = sleeve_activity.crimeType; break
-                case data.enum_activities.faction: activity.value = sleeve_activity.factionName; break
+                case data.activities.study: activity.value = sleeve_activity.classType; break
+                case data.activities.company: activity.value = sleeve_activity.companyName; break
+                case data.activities.crime: activity.value = sleeve_activity.crimeType; break
+                case data.activities.faction: activity.value = sleeve_activity.factionName; break
                 //bladeburner?
-                case data.enum_activities.bladeburner: activity.value = sleeve_activity.actionName; break
-                case data.enum_activities.infiltrate: activity.value = ""; break //only type property
-                case data.enum_activities.support: activity.value = ""; break //only type property
+                case data.activities.bladeburner: activity.value = sleeve_activity.actionName; break
+                case data.activities.infiltrate: activity.value = ""; break //only type property
+                case data.activities.support: activity.value = ""; break //only type property
                 //sleeve only
-                case data.enum_activities.recovery: activity.value = ""; break //only type property
-                case data.enum_activities.synchro: activity.value = ""; break //only type property                
+                case data.activities.recovery: activity.value = ""; break //only type property
+                case data.activities.synchro: activity.value = ""; break //only type property                
                 default:
                     //log information
                     log(ns, 1, info, "get_activity - Uncaught condition: " + sleeve_activity.type)
@@ -1689,7 +1689,7 @@ function bladeburner_get_activity(ns) {
     //if not null: player is doing bladeburner work
     if (player_activity != null) {
         //set type
-        activity.type = data.enum_activities.bladeburner
+        activity.type = data.activities.bladeburner
         //save action (to be looked up later)
         activity.value = player_activity.name
     }
@@ -1809,37 +1809,37 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
 
     //karma
     headers.push("Karma")
-    values.push(number_formatter(player.karma) + "/" + number_formatter(data.enum_requirements.karma_for_gang))
+    values.push(number_formatter(player.karma) + "/" + number_formatter(data.requirements.karma_for_gang))
 
     //kills
     headers.push("Kills")
-    values.push(number_formatter(player.numPeopleKilled) + "/" + data.enum_requirements.kills_for_factions)
+    values.push(number_formatter(player.numPeopleKilled) + "/" + data.requirements.kills_for_factions)
 
     //hack tools
     const hacking = player.skills.hacking
     let hack_tools = 0
     if (hacking >= 50) {
-        if (ns.singularity.purchaseProgram(data.enum_hack_tools.bruteSSH)) {
+        if (ns.singularity.purchaseProgram(data.hack_tools.bruteSSH)) {
             hack_tools++
         }
     }
     if (hacking >= 100) {
-        if (ns.singularity.purchaseProgram(data.enum_hack_tools.fTPCrack)) {
+        if (ns.singularity.purchaseProgram(data.hack_tools.fTPCrack)) {
             hack_tools++
         }
     }
     if (hacking >= 300) {
-        if (ns.singularity.purchaseProgram(data.enum_hack_tools.relaySMTP)) {
+        if (ns.singularity.purchaseProgram(data.hack_tools.relaySMTP)) {
             hack_tools++
         }
     }
     if (hacking >= 400) {
-        if (ns.singularity.purchaseProgram(data.enum_hack_tools.hTTPWorm)) {
+        if (ns.singularity.purchaseProgram(data.hack_tools.hTTPWorm)) {
             hack_tools++
         }
     }
     if (hacking >= 725) {
-        if (ns.singularity.purchaseProgram(data.enum_hack_tools.sQLInject)) {
+        if (ns.singularity.purchaseProgram(data.hack_tools.sQLInject)) {
             hack_tools++
         }
     }
@@ -1883,11 +1883,11 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
 
         //blackOps completed
         let blackOpsCompleted = 0
-        for (let blackOpEntry in data.enum_bladeburnerActions.blackOps) {
+        for (let blackOpEntry in data.bladeburner_actions.blackOps) {
             //get blackop name
-            const blackOp = data.enum_bladeburnerActions.blackOps[blackOpEntry]
+            const blackOp = data.bladeburner_actions.blackOps[blackOpEntry]
             //if completed
-            if (ns.bladeburner.getaction_countRemaining(data.enum_bladeburnerActions.type.blackOps, blackOp.name) == 0) {
+            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
                 //add to the counter
                 blackOpsCompleted++
             } else {
@@ -1896,7 +1896,7 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
             }
         }
         headers.push("Bladeburner BlackOps")
-        values.push(blackOpsCompleted + "/"+ (data.enum_bladeburnerActions.blackOps-1) ) //was 21 (this should be dynamic
+        values.push(blackOpsCompleted + "/"+ (data.bladeburner_actions.blackOps-1) ) //was 21 (this should be dynamic
     }
 
 
