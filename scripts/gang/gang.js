@@ -12,9 +12,9 @@ import {
 } from "scripts/common.js"
 
 //config
-import * as config from "config.js"
+import * as config from "./config.js"
 //data
-import * as data from "data.js"
+import * as data from "./data.js"
 
 
 //the focus of the gang, either hacking or combat, received from bitNode manager
