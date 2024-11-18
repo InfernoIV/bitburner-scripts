@@ -36,7 +36,7 @@ export async function main(ns) {
     //initialize
     init(ns) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
-    restart_player_actions(ns, challenge_flags)
+    restart_player_actions(ns)
     
     //wait a bit for first iteration
     await ns.sleep(config.time_between_loops)
@@ -721,17 +721,13 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
  * Used to ensure player focus is false, to enable resets after resuming play (restarting of game)
  * Quick and dirty copy of the determine player actions
  */
-function restart_player_actions(ns, challenge_flags) {
+function restart_player_actions(ns) {
     //get player
     const player = ns.getPlayer()
     //get player activity
     const player_activity = get_activity(ns)
     //set the default focus for actions (always false)
     const action_focus = false
-    //check if we joined bladeburner (default is false
-    const bladeburner_joined = get_bladeburner_access(ns, challenge_flags) 
-    //check if we can do both bladeburner and normal work
-    const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
     
     //save player desired action
     let player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.grandTheftAuto }
@@ -750,12 +746,11 @@ function restart_player_actions(ns, challenge_flags) {
     //check if we need to change
     if ((player_activity.type != player_action_desired.type) ||
        (player_activity.value != player_action_desired.value)) {
-            //check if it works
-            if (!ns.singularity.commitCrime(player_activity.value, action_focus)) {
-                log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
-            }
-        }        
-    }
+        //check if it works
+        if (!ns.singularity.commitCrime(player_activity.value, action_focus)) {
+            log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+        }
+    }        
 }
 
 
