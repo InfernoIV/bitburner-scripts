@@ -2,24 +2,24 @@
 export const corporation_requirement_money = 150e9 //corporationMoneyRequirement
 
 //all cities
-const cities_all = ["Aevum", "Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"] //citiesAll
+export const cities_all = ["Aevum", "Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"] //citiesAll
 //main city to grow
-const city_main = "Aevum" //cityMain
+export const city_main = "Aevum" //cityMain
 //cities that shoud support
-const city_support = ["Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"] //citySupport
+export const city_support = ["Chongqing", "Sector-12", "New Tokyo", "Ishima", "Volhaven"] //citySupport
 
 //initial setup
-const division_material = "Agriculture" //divisionMaterial
+export const division_material = "Agriculture" //divisionMaterial
 //main focus
-const division_product = "Tobacco" //divisionProduct
+export const division_product = "Tobacco" //divisionProduct
 
 //max productions
-const max_production = "MAX" //maxProduction
+export const max_production = "MAX" //maxProduction
 //market price
-const market_price = "MP" //marketPrice
+export const market_price = "MP" //marketPrice
 
 //description of jobs
-const employee_jobs = { //employeeJob
+export const employee_jobs = { //employeeJob
     operations: "Operations",
     engineer: "Engineer",
     business: "Business",
@@ -30,7 +30,7 @@ const employee_jobs = { //employeeJob
 }
 
 //description of upgrades
-const upgrade = {
+export const upgrade = {
     smartFactories: "Smart Factories",
     smartStorage: "Smart Storage",
     dreamSense: "DreamSense",
@@ -44,7 +44,7 @@ const upgrade = {
 }
 
 //description of unlocks
-const unlock = {
+export const unlock = {
     export: "Export",
     smartSupply: "Smart Supply",
     marketResearchDemand: "Market Research - Demand",
@@ -57,7 +57,7 @@ const unlock = {
 }
 
 //description of materials
-const material = {
+export const material = {
     water: "Water",
     ore: "Ore",
     minerals: "Minerals",
@@ -73,7 +73,7 @@ const material = {
 }
 
 //description of researches 
-const research = {
+export const research = {
     lab: "Hi-Tech R&D Laboratory",
     autoBrew: "AutoBrew",
     autoParty: "AutoPartyManager",
