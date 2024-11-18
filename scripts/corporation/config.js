@@ -4,7 +4,8 @@ export const log_level = 0 //logLevel
 //research to be left over after researching something
 export const research_left_over_percentage = 1.1 //10% //researchLeftOverPercentage
 //percentage to keep when unlocking researches
-export const research_left_over = 0.5 //50% //researchLeftOver
+//is this one still needed?
+//export const research_left_over = 0.5 //50% //researchLeftOver
 
 //amount of dividends to be paid to to the player
 export const corporation_greed = 0.01 //1% //corporationGreed
