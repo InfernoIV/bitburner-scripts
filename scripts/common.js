@@ -53,7 +53,7 @@ export const enum_scripts = {
     hack: "scripts/hack.js",
     gang: "scripts/gang.js",
     corporation: "scripts/corporation.js",
-    stock: "scripts/stock.js",
+    stock: "scripts/stock/stock.js",
     workerHack: "scripts/workerHack.js",
     workerGrow: "scripts/workerGrow.js",
     workerWeaken: "scripts/workerWeaken.js",
