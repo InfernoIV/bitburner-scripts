@@ -8,7 +8,7 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Const
 import { 
     info, success, warning, error, fail, //constants
     enum_port, enum_servers, enum_scripts, //enums
-    log, overwritePort, //functions
+    log, overwrite_port, //functions
 } from "scripts/common.js"
 
 //config
@@ -160,17 +160,17 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
 
     //if the desired level is too low
     if (statTrain < config.desired_training_Level) {
-        overWritePort(ns, enum_port.gang, "Training")
+        overwrite_port(ns, enum_port.gang, "Training")
 
         return trainAction
         //if not enough members unlocked
     } else if (statMult < config.desired_multiplier) {
-        overWritePort(ns, enum_port.gang, "Training")
+        overwrite_port(ns, enum_port.gang, "Training")
 
         return trainAction
         //if wanted level is too high
     } else if (ns.gang.getMemberNames().length < data.gang_members_max) {
-        overWritePort(ns, enum_port.gang, "Growing gang")
+        overwrite_port(ns, enum_port.gang, "Growing gang")
         return data.gang_task.reputation    //if members can be unlocked: gain reputation
         //if the multiplier is too low
     } else if (wantedLevel > previousWantedLevel) {
@@ -178,8 +178,8 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
         //if not all upgrades unlocked
     } else if (upgradesHave.length < config.desired_equipment) {
         //block resets
-        overWritePort(ns, enum_port.reset, "gang")
-        overWritePort(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
+        overwrite_port(ns, enum_port.reset, "gang")
+        overwrite_port(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
         //upgradesAvailable.length) {
         //raise money to buy upgrades
         return data.gang_task.money
@@ -189,12 +189,12 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
         if (ns.peek(enum_port.reset) == "gang") {
             ns.clearPort(enum_port.reset)
         }
-        overWritePort(ns, enum_port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
+        overwrite_port(ns, enum_port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
         return data.gang_task.power
         //if all territory is owned: focus on getting money   
     } else if (territoryClash == 2) {
         //indicate status
-        overWritePort(ns, enum_port.gang, "Farming")
+        overwrite_port(ns, enum_port.gang, "Farming")
         //clear reset
         if (ns.peek(enum_port.reset) == "gang") {
             ns.clearPort(enum_port.reset)
@@ -217,7 +217,7 @@ async function recruitMembers(ns) {
     if (ns.gang.canRecruitMember()) {
         log(ns, 0, info, "Recruiting Member")
         //update information
-        //overWritePort(ns, enum_port.gang, "Growing gang")
+        //overwrite_port(ns, enum_port.gang, "Growing gang")
 
         const names = ns.gang.getMemberNames()
 
@@ -292,7 +292,7 @@ function manageTerritoryClash(ns, gangOwn) {
         //if we have more than the minimum chance
         if (ns.gang.getChanceToWinClash(bestOtherGang.faction) > config.territory_clash_minimum_percentage) {
             //update information
-            //overWritePort(ns, portGang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
+            //overwrite_port(ns, portGang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
             //start clashing 
             territoryClash = 1
             log(ns, 0, info, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
