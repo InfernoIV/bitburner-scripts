@@ -36,7 +36,7 @@ export async function main(ns) {
     let launched_scripts = []
 
     //initialize
-    init(ns, bit_node_multipliers) //1,5 GB
+    init(ns) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
     restart_player_actions(ns, challenge_flags)
     
@@ -86,7 +86,7 @@ export async function main(ns) {
  *  getreset_info (1)
  *  read (0)
  */
-function init(ns, bit_node_multipliers) {
+function init(ns) {
 
     //disable unwanted logs
     ns.disableLog("disableLog")
@@ -131,9 +131,6 @@ function init(ns, bit_node_multipliers) {
         //kill all scripts
         ns.killall(server, is_server_home)
     }
-
-    //get reset info
-    const reset_info = ns.getResetInfo()
 
     //signal hackManager to stop
     over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
