@@ -1,5 +1,9 @@
 //imports
-import { enum_port, enum_servers, portNoData } from "scripts/common.js"
+import {  
+    success, error, portNoData, //constants
+    enum_port, enum_servers, //enums
+    log, //functions
+} from "scripts/common.js"
 
 
 
@@ -42,9 +46,9 @@ export async function main(ns) {
                 //log locally
                 log(ns, 0, success, "Backdoored server '" + server + "'")
                 //catch error
-            } catch (error) {
+            } catch (err) {
                 //log error
-                ns.tprint(error)
+                log(ns, 0, error, "Failed to backdoored server '" + server + "': " + err)
             }
             //connect to home
             ns.singularity.connect(enum_servers.home)
