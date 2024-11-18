@@ -18,17 +18,6 @@ export async function main(ns) {
     //CotMG faction
     const faction = "Church of the Machine God"
 
-    //disable logs
-    ns.disableLog("disableLog")
-    ns.disableLog("sleep")
-    ns.disableLog("killall")
-    ns.disableLog("scp")
-    ns.disableLog("stanek.activeFragments")
-    ns.disableLog("scan")
-    //ns.disableLog("exec")
-    //ns.disableLog("run")
-    ns.disableLog("getServerMaxRam")
-
     //if we can charge fragments (faction COTMG is joined)
     if (ns.getPlayer().factions.indexOf(faction) > -1) {
 
@@ -70,6 +59,24 @@ export async function main(ns) {
 
 
 /**
+ * Function that initializes
+ */
+function init(ns) {
+    //disable logs
+    ns.disableLog("disableLog")
+    ns.disableLog("sleep")
+    ns.disableLog("killall")
+    ns.disableLog("scp")
+    ns.disableLog("stanek.activeFragments")
+    ns.disableLog("scan")
+    //ns.disableLog("exec")
+    //ns.disableLog("run")
+    ns.disableLog("getServerMaxRam")
+}
+
+
+
+/**
  * Function that charges the installed fargments
  */
 async function chargeFragments(ns, threads) {
@@ -81,8 +88,6 @@ async function chargeFragments(ns, threads) {
         let fragment = ns.stanek.activeFragments()[fragmentIndex]
         //check for booster fragments (cannot be charged)
         if (fragment.id < 100) {
-
-
             //charge the fragment
             ns.run(enum_scripts.workerCharge, threads,
                 //arguments: root x, root y, amount of charges
@@ -91,7 +96,7 @@ async function chargeFragments(ns, threads) {
             const portStanek = 99
             //wait for the script to complete
             //while not getting the "Done" message
-            while (ns.readPort(portStanek) != messageDone) {
+            while (ns.readPort(enum_port.stanek) != messageDone) {
                 //wait a bit
                 await ns.sleep(1)
             }
