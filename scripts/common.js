@@ -10,6 +10,14 @@ import {
 */
 
 
+//log constants
+export const info = "INFO"
+export const success = "SUCCESS"
+export const warning = "WARNING"
+export const error = "ERROR"
+export const fail = "FAIL"
+
+
 //communication port definitions
 export const enum_port = {
   //external scripts
@@ -93,11 +101,106 @@ export function log(ns, loglevel, type, message) {
     }
 }
 
+/**
+ * Function that formats numbers
+ * Cost: 0
+ */
+export function number_formatter(number) {
+    const fraction_digits = 3
+    if (number == 0) {
+        return 0
+    }
+    //round the number
+    number = Math.round(number)
+
+    const symbols = ["", "k", "m", "b", "t"]
+    let largestIndex = 0
+    for (let index = 0; index < symbols.length; index++) {
+        if (Math.abs(number) >= Math.pow(1000, index)) {
+            largestIndex = index
+        } else {
+            break
+        }
+    }
+    let numberReturn = number
+    if (largestIndex > 0) {
+        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
+    }
+    return numberReturn + symbols[largestIndex]
+}
+
+/**
+ * Enum of all factions with their work types
+ * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
+ * Work types: "field", "hacking", "security" 	
+ */
+export const enum_factions = {
+    //special factions (no faction work available)
+    slumSnakes: { name: "Slum Snakes" },
+    bladeburners: { name: "Bladeburners" },
+    churchOfTheMachineGod: { name: "Church of the Machine God" },
+    shadowsOfAnarchy: { name: "Shadows of Anarchy" },
+
+    //important factions
+    daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
+    illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
+    theCovenant: { name: "The Covenant", work_types: ["field", "hacking"] },
+
+    //company factions
+    eCorp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
+    megaCorp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
+    bachmanAssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
+    bladeIndustries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
+    nWO: { name: "NWO", work_types: ["field", "hacking", "security"] },
+    clarkeIncorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
+    omniTekIncorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
+    fourSigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
+    kuaiGongInternational: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
+    fulcrumSecretTechnologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
+
+    //hacking factions
+    bitRunners: { name: "BitRunners", work_types: ["hacking"] },
+    theBlackHand: { name: "The Black Hand", work_types: ["field", "hacking"] },
+    niteSec: { name: "NiteSec", work_types: ["hacking"] },
+    cyberSec: { name: "CyberSec", work_types: ["hacking"] },
+
+    //location factions
+    aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
+    chongqing: { name: "Chongqing", work_types: ["field", "hacking", "security"] },
+    ishima: { name: "Ishima", work_types: ["field", "hacking", "security"] },
+    newTokyo: { name: "New Tokyo", work_types: ["field", "hacking", "security"] },
+    sector12: { name: "Sector-12", work_types: ["field", "hacking", "security"] },
+    volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
+
+    //crime factions
+    speakersForTheDead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
+    theDarkArmy: { name: "The Dark Army", work_types: ["field", "hacking"] },
+    theSyndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
+    silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
+    tetrads: { name: "Tetrads", work_types: ["field", "security"] },
+
+    //other factions
+    netburners: { name: "Netburners", work_types: ["hacking"] },
+    tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
+}
 
 
-//log constants
-export const info = "INFO"
-export const success = "SUCCESS"
-export const warning = "WARNING"
-export const error = "ERROR"
-export const fail = "FAIL"
+/**
+ * Enum stating all cities
+ */
+export const enum_cities = {
+    aevum: "Aevum",
+    chongqing: "Chongqing",
+    ishima: "Ishima",
+    newTokyo: "New Tokyo",
+    sector12: "Sector-12",
+    volhaven: "Volhaven",
+}
+
+
+
+// hacking commands
+export const enum_hackingCommands = {
+    start: "Start",
+    stop: "Stop",
+}
