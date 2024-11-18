@@ -28,6 +28,7 @@ export const enum_port = {
   stock: 5,
   backdoor: 6,
   stopHack: 7,
+  stanek: 8,
 }
 
 
