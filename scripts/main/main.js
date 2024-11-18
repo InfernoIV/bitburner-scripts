@@ -972,7 +972,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             //if company faction is not joined
             if (player.factions.indexOf(data.company_factions[company]) == -1) {
                 //add company to the list
-                comanies_to_work_for.push(company)
+                companies_to_work_for.push(company)
             }
         }
 
