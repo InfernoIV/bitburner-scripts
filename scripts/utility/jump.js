@@ -1,12 +1,7 @@
 import {log, error} from "scripts/common.js"
 
 /** @param {NS} ns */
-export async function main(ns) {
-    //is this script used?
-    log(ns,1,error,"jump is used, is this correct?")
-    //stop the script
-    return
-    
+export async function main(ns) { 
     
     let script = ""
 
