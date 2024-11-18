@@ -1,3 +1,6 @@
+//imports
+import { enum_port, } from "scripts/common.js"
+
 /** @param {NS} ns */
 export async function main(ns) {
     //if we have coordinates
@@ -9,9 +12,6 @@ export async function main(ns) {
         //charge the fragment
         await ns.stanek.chargeFragment(x, y)
     }
-    //definition of the port
-    const portStanek = 99
     //use ports to indicate status
-    ns.writePort(portStanek, "Done")
+    ns.writePort(enum_port.stanek, "Done")
 }
-
