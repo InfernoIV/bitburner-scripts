@@ -29,8 +29,6 @@ export async function main(ns) {
     const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + reset_info.currentNode + ".json"))
     //get challenge config
     const challenge_flags = JSON.parse(ns.read("challenge.json"))
-    //number of sleeves available
-    const sleeves_available = 8
 
     //keep track of launched scripts
     let launched_scripts = []
@@ -58,14 +56,14 @@ export async function main(ns) {
         manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,4 GB
 
         //player, sleeve & bladeburner: 71 GB
-        manage_actions(ns, sleeves_available, bit_node_multipliers, challenge_flags)   //71 GB
+        manage_actions(ns, data.sleeves_available, bit_node_multipliers, challenge_flags)   //71 GB
 
         //update ui
-        update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags) //0 GB
+        update_ui(ns, data.sleeves_available, bit_node_multipliers, challenge_flags) //0 GB
 
         //reset & destruction: 18 GB
         execute_bit_node_destruction(ns, challenge_flags)   //0 GB
-        buy_augments(ns, sleeves_available, challenge_flags)  //18 GB
+        buy_augments(ns, data.sleeves_available, challenge_flags)  //18 GB
         install_augments(ns)    //0 GB
         
 
@@ -282,7 +280,7 @@ function install_augments(ns) {
  *  purchaseSleeveAug (4)
  *  getSleevePurchasableAugs (4)
  */
-function buy_augments(ns, sleeves_available, challenge_flags) {
+function buy_augments(ns, data.sleeves_available, challenge_flags) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
     if (ns.peek(enum_port.reset) == "gang") {
         //do not buy augments
@@ -307,7 +305,7 @@ function buy_augments(ns, sleeves_available, challenge_flags) {
     //if sleeves are not disabled
     if(challenge_flags.disable_sleeves != true) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //for each sleeve augment
             //TODO: possible to hardcode the augment list?
             //TODO: get rid of try / catch
@@ -810,14 +808,14 @@ function restart_player_actions(ns, challenge_flags) {
  *      Inherited: 4 GB
  *          get_activity (4)       
  */
-function manage_actions(ns, sleeves_available, bit_node_multipliers, challenge_flags) {
+function manage_actions(ns, data.sleeves_available, bit_node_multipliers, challenge_flags) {
     //first manage player
     manage_actions_player(ns, bit_node_multipliers, challenge_flags)
 
     //if sleeves are not disabled
     if(challenge_flags.disable_sleeves != true) {
         //then manange sleeves
-        manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers)
+        manage_actions_sleeves(ns, data.sleeves_available, bit_node_multipliers)
     }
 }
 
@@ -889,7 +887,7 @@ function manage_actions_player(ns, bit_node_multipliers, challenge_flags) {
     }
 }
     
-function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
+function manage_actions_sleeves(ns, data.sleeves_available, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //sleeve actions
@@ -899,7 +897,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
     let sleeve_shock = []
 
     //for each sleeve
-    for (let index = 0; index < sleeves_available; index++) {
+    for (let index = 0; index < data.sleeves_available; index++) {
         //get shock value
         const shock = ns.sleeve.getSleeve(index).shock
         //add the shock to the list
@@ -909,7 +907,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
     //if there is a sleeve with too much shock
     if (Math.max(sleeve_shock) > sleeve_shock_desired_maximum) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //if not doing the correct work
             if (get_activity(ns, index).type != data.activities.recovery) {
                 //perform recovery
@@ -920,7 +918,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //if we have not reached target karma
     } else if (player.karma > data.requirements.karma_for_gang) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //get best crime for karma
             let crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.karma)
             //if not doing the correct work
@@ -933,7 +931,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //not reached target kills
     } else if (player.numPeopleKilled < data.requirements.kills_for_factions) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //get best crime for kills
             let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.kills)
             //if not performing the correct work
@@ -948,7 +946,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //get all the current actions
         let sleeve_actions_current = []
         //get all sleeve actions
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //add activity of the specific sleeve to the list
             sleeve_actions_current.push(get_activity(ns, index))
         }
@@ -982,7 +980,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //define best crime for skills
         const crime_best = ns.enums.CrimeType.grandTheftAuto //TODO: get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), data.crime_focus.skills)
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //set default action to crime
             sleeve_actions_future[index] = { type: data.activities.crime, value: crime_best }
         }
@@ -1009,7 +1007,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             //if no sleeve assigned
             if (!sleeve_assigned) {
                 //go over each sleeve
-                for (let index = 0; index < sleeves_available; index++) {
+                for (let index = 0; index < data.sleeves_available; index++) {
                     //first sleeve that is set to crime, is set to this faction
                     if (sleeve_actions_future[index].type == data.activities.crime) {
                         //save information
@@ -1045,7 +1043,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 //if no sleeve assigned
                 if (!sleeve_assigned) {
                     //go over each sleeve
-                    for (let index = 0; index < sleeves_available; index++) {
+                    for (let index = 0; index < data.sleeves_available; index++) {
                         //first that is set to crime, is set to this faction
                         if (sleeve_actions_future[index].type == data.activities.crime) {
                             //save information
@@ -1060,7 +1058,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
 
         
         //set all sleeve actions
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //compare current vs wanted
             if ((sleeve_actions_current[index].type = sleeve_actions_future[index].type) &&
                (sleeve_actions_current[index].value = sleeve_actions_future[index].value)) {
@@ -1124,7 +1122,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     //set a flag to check
                     let already_working_for_faction = false
                     //check other sleeves
-                    for (let index = 0; index < sleeves_available; index++) {
+                    for (let index = 0; index < data.sleeves_available; index++) {
                         //get activity
                         const activity = get_activity(ns, index)
                         //if a sleeve is already working for this faction
@@ -1141,7 +1139,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     //if flag is not set
                     if (!already_working_for_faction) {
                         //check each sleeve
-                        for (let index = 0; index < sleeves_available; index++) {
+                        for (let index = 0; index < data.sleeves_available; index++) {
                             //check if the sleeve is not assigned
                             if (!Object.hasOwn(sleeve_actions_future, index)) {
                                 //get best faction work
@@ -1178,7 +1176,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 //set a flag to check
                 let company_already_working = false
                 //check other sleeves
-                for (let index = 0; index < sleeves_available; index++) {
+                for (let index = 0; index < data.sleeves_available; index++) {
                     //get activity
                     const activity = get_activity(ns, index)
                     //if a sleeve is already working for this company
@@ -1195,7 +1193,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 //if flag is not set
                 if (!company_already_working) {
                     //check each sleeve
-                    for (let index = 0; index < sleeves_available; index++) {
+                    for (let index = 0; index < data.sleeves_available; index++) {
                         //check if the sleeve is not assigned
                         if (!Object.hasOwn(sleeve_actions_future, index)) {
                             try {
@@ -1214,7 +1212,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         }
 
         //check each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //check if the sleeve is not assigned
             if (!Object.hasOwn(sleeve_actions_future, index)) {
                 //get best crime for skills
@@ -1801,7 +1799,7 @@ function over_write_port(ns, port, data) {
  * @param {NS} ns
  * Cost: 0 GB
  */
-function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags) {
+function update_ui(ns, data.sleeves_available, bit_node_multipliers, challenge_flags) {
     //get the UI
     const doc = eval('document')
     //left side
@@ -1873,7 +1871,7 @@ function update_ui(ns, sleeves_available, bit_node_multipliers, challenge_flags)
     if(challenge_flags.disable_sleeves != true) {
         //sleeves
         //want to log augments of sleeves, but this costs 4 GB...
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < data.sleeves_available; index++) {
             //get sleeve activity
             const activity = get_activity(ns, index)
             //add to header
