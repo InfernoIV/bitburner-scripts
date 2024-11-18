@@ -1,10 +1,15 @@
 //imports
-import { enum_scripts} from "scripts/common.js"
+import { enum_scripts, log, error } from "scripts/common.js"
 
 
 
 /** @param {NS} ns */
 export async function main(ns) {
+    //is this script used?
+    log(ns,1,error,"StanekBuy is used, is this correct?")
+    //stop the script
+    return
+    
     //describe the CotMG faction
     const faction = "Church of the Machine God"
     //set flag to check
