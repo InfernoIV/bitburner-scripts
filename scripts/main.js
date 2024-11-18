@@ -954,11 +954,126 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
             }
         }
 
-        //sleeves to be divided over work
+        //sleeves are to be divided over work (faction > company > crime)
     } else {
-        //keep track of sleeve actions
-        let sleeve_actions = {}
+        //get all the current actions
+        let sleeve_actions_current = []
+        //get all sleeve actions
+        for (let index = 0; index < sleeves_available; index++) {
+            //add activity of the specific sleeve to the list
+            sleeve_actions_current.push(get_activity(ns, index))
+        }
 
+        //get a list of all factions to work for
+        let factions_to_work_for = []
+        //for each unlocked faction
+        for (const faction of player.factions) {
+            //if the faction has work types and if there are still augments available
+            if ((get_faction_work_types(faction).length > 0) &&
+               (should_work_for_faction(ns, faction))) {
+                //add faction to the list
+                factions_to_work_for.push(faction)
+            }
+        }
+        
+        //get a list of all companies to work for
+        let companies_to_work_for = []
+        //create list of companies and their factions
+        for (const company in player.jobs) {
+            //if company faction is not joined
+            if (player.factions.indexOf(enum_company_factions[company]) == -1) {
+                //add company to the list
+                comanies_to_work_for.push(company)
+            }
+        }
+
+        
+        //keep track of sleeve actions to be done
+        let sleeve_actions_future = []
+        //for each sleeve
+        for (let index = 0; index < sleeves_available; index++) {
+            //set default action to crime
+            sleeve_actions_future[index] = { type: enum_activities.crime, value: crime_best }
+        }
+
+        //determine faction work
+        for (const faction in factions_to_work_for) {
+            //set flag to check if sleeve is already working for this specific faction
+            let sleeve_assigned = false
+            
+            //check if any sleeve is already performing work for this faction
+            for (const sleeve_action in sleeve_actions_current) {
+                //if doing faction work and working for this faction
+                if ((sleeve_action.type == enum_activities.faction) && 
+                    (sleeve_action.value == faction)) {
+                    //save that the sleeve is working on this
+                    sleeve_actions_future[index] = { type: enum_activities.faction, value: faction }
+                    //set flag that is sleeve already assigned
+                    sleeve_assigned = true
+                    //stop looking
+                    break
+                }
+            }
+            
+            //if no sleeve assigned
+            if (!sleeve_assigned) {
+                //go over each sleeve
+                for (let index = 0; index < sleeves_available; index++) {
+                    //first sleeve that is set to crime, is set to this faction
+                    if (sleeve_actions_future[index].type == enum_activities.crime) {
+                        //work for this faction
+                        if (ns.sleeve.setToFactionWork(index, faction, determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction)))) {
+                            //save information
+                            sleeve_actions_future[index] = { type: enum_activities.faction, value: faction }
+                            //stop looking
+                            break
+                        }     
+                    }
+                }
+            }
+        }
+
+        
+        //determine company work
+         for (const company in companies_to_work_for) {
+            //set flag to check if sleeve is already working for this specific company
+            let sleeve_assigned = false
+            //if company faction is not joined
+            if (player.factions.indexOf(enum_company_factions[company]) == -1) {
+                //check if any sleeve is already performing work for this company
+                for (const sleeve_action in sleeve_actions_current) {
+                    //if doing faction work and working for this faction
+                    if ((sleeve_action.type == enum_activities.company) && 
+                        (sleeve_action.value == company)) {
+                        //save that the sleeve is working on this
+                        sleeve_actions_future[index] = { type: enum_activities.company, value: company }
+                        //set flag that is sleeve already assigned
+                        sleeve_assigned = true
+                        //stop looking
+                        break
+                    }
+                }
+                
+                //if no sleeve assigned
+                if (!sleeve_assigned) {
+                    //go over each sleeve
+                    for (let index = 0; index < sleeves_available; index++) {
+                        //first that is set to crime, is set to this faction
+                        if (sleeve_actions_future[index].type == enum_activities.crime) {
+                            //work for this company
+                            if (ns.sleeve.setToCompanyWork(index, company)) {
+                                //save information
+                                sleeve_actions_future[index] = { type: enum_activities.company, value: company }
+                                //stop looking
+                                break
+                            }     
+                        }
+                    }
+                }
+            }
+        }
+        
+        /*
         //factions
         //get available factions
         for (const faction of player.factions) {
@@ -978,7 +1093,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                         if ((activity.type == enum_activities.faction) &&
                             (activity.value == faction)) {
                             //assign this job to the sleeve
-                            sleeve_actions[index] = activity
+                            sleeve_actions_future[index] = activity
                             //set flag to indicate someone is already working on this
                             already_working_for_faction = true
                             //stop searching
@@ -990,7 +1105,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                         //check each sleeve
                         for (let index = 0; index < sleeves_available; index++) {
                             //check if the sleeve is not assigned
-                            if (!Object.hasOwn(sleeve_actions, index)) {
+                            if (!Object.hasOwn(sleeve_actions_future, index)) {
                                 //get best faction work
                                 const faction_work_best = determine_faction_work(ns.sleeve.getSleeve(index), work_types)
                                 //try to start
@@ -998,7 +1113,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                                     //work for this faction
                                     if (ns.sleeve.setToFactionWork(index, faction, faction_work_best)) {
                                         //save information
-                                        sleeve_actions[index] = { type: enum_activities.faction, value: faction }
+                                        sleeve_actions_future[index] = { type: enum_activities.faction, value: faction }
                                         //stop
                                         break
                                     }
@@ -1011,7 +1126,9 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 }
             }
         }
+        */
 
+        /*
         //companies
         //create list of companies and their factions
         for (const company in player.jobs) {
@@ -1030,7 +1147,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     if ((activity.type == enum_activities.company) &&
                         (activity.value == company)) {
                         //assign this job to the sleeve
-                        sleeve_actions[index] = activity
+                        sleeve_actions_future[index] = activity
                         //set flag to indicate someone is already working on this
                         company_already_working = true
                         //stop searching
@@ -1042,12 +1159,12 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     //check each sleeve
                     for (let index = 0; index < sleeves_available; index++) {
                         //check if the sleeve is not assigned
-                        if (!Object.hasOwn(sleeve_actions, index)) {
+                        if (!Object.hasOwn(sleeve_actions_future, index)) {
                             try {
                                 //work for company
                                 ns.sleeve.setToCompanyWork(index, company)
                                 //save information
-                                sleeve_actions[index] = { type: enum_activities.company, value: company }
+                                sleeve_actions_future[index] = { type: enum_activities.company, value: company }
 
                             } catch (error) {
                                 log(ns, 1, error, "setToCompanyWork " + company + ": " + error)
@@ -1061,7 +1178,7 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         //check each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //check if the sleeve is not assigned
-            if (!Object.hasOwn(sleeve_actions, index)) {
+            if (!Object.hasOwn(sleeve_actions_future, index)) {
                 //get best crime for skills
                 let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
                 //if not working on the desired crime
@@ -1070,9 +1187,10 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     ns.sleeve.setToCommitCrime(index, crime_best)
                 }
                 //save information
-                sleeve_actions[index] = { type: enum_activities.crime, value: crime_best }
+                sleeve_actions_future[index] = { type: enum_activities.crime, value: crime_best }
             }
         }
+        */
     }
 }
 
@@ -1840,9 +1958,16 @@ function number_formatter(number) {
 
 /**
  * Function that a boolean if enough rep is reached for a faction
+ * Always returns true if faction is sector-12 (to ensure grinding for neurflux governor
  * @param {NS} ns
  */
 function should_work_for_faction(ns, faction) {
+    //if sector-12
+    if (faction == enum_factions.sector12.name) {
+        //always work for neuroflux governor
+        return true
+    }
+    
     //check if we need to work for faction
     if (ns.singularity.getAugmentationsFromFaction(faction).length > 0) {
         //keep track of the highest rep
@@ -1854,23 +1979,17 @@ function should_work_for_faction(ns, faction) {
             //if augment is not owned
             if (ownedAugs.indexOf(augment) == -1) {
                 //update the highest rep if needed
-                rep_highest = Math.max(rep_highest, ns.singularity.getAugmentationRepReq(augment)) //enum_augmentsRep[augment])
+                rep_highest = Math.max(rep_highest, ns.singularity.getAugmentationRepReq(augment))
             }
         }
+        //return if there is enough rep (false) or if rep is still needed (true)
         return rep_highest >= ns.singularity.getFactionRep(faction)
     }
     return false
 }
 
-/**
- * list of all augments and their rep requirement
- */
-const enum_augmentsRep = {
-    "": 0,
-}
 
-
-
+    
 /**
  * enum of special servers
  * All servers will be backdoored, if possible
