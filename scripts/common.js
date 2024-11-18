@@ -44,6 +44,9 @@ export const enum_servers = {
     home: "home",   //no effect
     worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
+    zb_institute: "zb-institute", 
+    universal_energy: "univ-energy", 
+    titan_labs: "titan-labs",
 }
 
 
