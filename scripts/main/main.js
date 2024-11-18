@@ -5,9 +5,9 @@ import {
     log, number_formatter, //functions
 } from "scripts/common.js"
 
-//constants.
+//config
 import * as config from "config.js"
-//data.
+//data
 import * as data from "data.js"
 
 
@@ -32,13 +32,11 @@ export async function main(ns) {
     //number of sleeves available
     const sleeves_available = 8
 
-    //stanek information
-    let stanek_grid = { width: 0, height: 0 }
     //keep track of launched scripts
     let launched_scripts = []
 
     //initialize
-    init(ns, bit_node_multipliers, stanek_grid) //1,5 GB
+    init(ns, bit_node_multipliers) //1,5 GB
     //restart work (to ensure it is set to non-focussed in case of restarting the game)
     restart_player_actions(ns, challenge_flags)
     
@@ -88,7 +86,7 @@ export async function main(ns) {
  *  getreset_info (1)
  *  read (0)
  */
-function init(ns, bit_node_multipliers, stanek_grid) {
+function init(ns, bit_node_multipliers) {
 
     //disable unwanted logs
     ns.disableLog("disableLog")
@@ -241,7 +239,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
         //launch script to destroy bitnode
         ns.exec(enum_scripts.jump, enum_servers.home, 1,
             enum_scripts.destroyBitNode, true, //which script to launch, kill other scripts
-            enum_scripts.main, bit_node_next) //arguments (TODO: not boot to STANEK?)
+            enum_scripts.boot, bit_node_next) //arguments
     }
 }
 
