@@ -1,10 +1,14 @@
+import { 
+  enum_scripts, enum_servers,
+  log, info, success, warning, error, fail,
+} from "scripts/common.js"
+
+
 /** @param {NS} ns */
 export async function main(ns) {
-    const serverHome = "home"
     let script = ""
     let killAll = false
     let parameters = []
-    const jumpScript = "scripts/jump.js"
     //ns.tprint("args: " + JSON.stringify(ns.args))
 
     try {
@@ -17,7 +21,7 @@ export async function main(ns) {
         }
         //if kill all other scripts
         if (killAll) {
-            ns.killall(serverHome, true)
+            ns.killall(enum_servers.home, true)
         }
 
         if (ns.args.length > 2) {
@@ -28,13 +32,13 @@ export async function main(ns) {
             const arg1 = ns.args[2]
             const arg2 = ns.args[3]
             //start script on on home
-            ns.run(jumpScript, 1, script, arg1, arg2)
+            ns.run(enum_scripts.jump2, 1, script, arg1, arg2)
         } else {
             //start script on on home
-            ns.run(jumpScript, 1, script)
+            ns.run(enum_scripts.jump2, 1, script)
 
         }
-    } catch (error) {
-        ns.tprint("1. " + error)
+    } catch (err) {
+        log(ns, 1, error, err)
     }
 }
