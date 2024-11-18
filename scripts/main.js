@@ -985,6 +985,8 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
         
         //keep track of sleeve actions to be done
         let sleeve_actions_future = []
+        //define best crime for skills
+        const crime_best = ns.enums.CrimeType.grandTheftAuto //TODO: get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), enum_crimeFocus.skills)
         //for each sleeve
         for (let index = 0; index < sleeves_available; index++) {
             //set default action to crime
@@ -1016,13 +1018,10 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                 for (let index = 0; index < sleeves_available; index++) {
                     //first sleeve that is set to crime, is set to this faction
                     if (sleeve_actions_future[index].type == enum_activities.crime) {
-                        //work for this faction
-                        if (ns.sleeve.setToFactionWork(index, faction, determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction)))) {
-                            //save information
-                            sleeve_actions_future[index] = { type: enum_activities.faction, value: faction }
-                            //stop looking
-                            break
-                        }     
+                        //save information
+                        sleeve_actions_future[index] = { type: enum_activities.faction, value: faction }
+                        //stop looking
+                        break
                     }
                 }
             }
@@ -1055,15 +1054,65 @@ function manage_actions_sleeves(ns, sleeves_available, bit_node_multipliers) {
                     for (let index = 0; index < sleeves_available; index++) {
                         //first that is set to crime, is set to this faction
                         if (sleeve_actions_future[index].type == enum_activities.crime) {
-                            //work for this company
-                            if (ns.sleeve.setToCompanyWork(index, company)) {
-                                //save information
-                                sleeve_actions_future[index] = { type: enum_activities.company, value: company }
-                                //stop looking
-                                break
-                            }     
+                            //save information
+                            sleeve_actions_future[index] = { type: enum_activities.company, value: company }
+                            //stop looking
+                            break 
                         }
                     }
+                }
+            }
+        }
+
+        
+        //set all sleeve actions
+        for (let index = 0; index < sleeves_available; index++) {
+            //compare current vs wanted
+            if ((sleeve_actions_current[index].type = sleeve_actions_future[index].type) &&
+               (sleeve_actions_current[index].value = sleeve_actions_future[index].value)) {
+                //doing correct work, no change needed
+            } else {
+                //change in work is needed
+                switch (sleeve_actions_future.type) {
+
+                        
+                    //faction work
+                    case enum_activities.faction: 
+                        //get faction
+                        const faction = sleeve_actions_future.value
+                        //get work type
+                        const work_type = determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction))
+                        //set to faction work
+                        if (!ns.sleeve.setToFactionWork(index, faction, work_type)) {
+                            //if failed, log!
+                            log(ns,1,error,"Failed to start sleeve " + index + " on faction work @ " + faction + "(" + work_type + ")")
+                        }
+                        //stop looking
+                        break
+
+                        
+                    //company work
+                    case enum_activities.company: 
+                        //get company
+                        const company = sleeve_actions_future.value
+                        //set to company work
+                        if(!ns.sleeve.setToCompanyWork(index, company)) {
+                            //if failed, log!
+                            log(ns,1,error,"Failed to start sleeve " + index + " on company work @ " + company)
+                        }
+                        //stop looking
+                        break
+                        
+                    //crime
+                    default:
+                        //if not working on the desired crime
+                        if (get_activity(ns, index).value != crime_best) {
+                            //assign to crime
+                            if(!ns.sleeve.setToCommitCrime(index, crime_best)) {
+                                //if failed, log!
+                                log(ns,1,error,"Failed to start sleeve " + index + " on crime: " + crime_best)
+                            }
+                        }
                 }
             }
         }
