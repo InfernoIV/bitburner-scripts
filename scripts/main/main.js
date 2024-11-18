@@ -730,50 +730,31 @@ function restart_player_actions(ns, challenge_flags) {
     const action_focus = false
     //check if we joined bladeburner (default is false
     const bladeburner_joined = get_bladeburner_access(ns, challenge_flags) 
-
+    //check if we can do both bladeburner and normal work
+    const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
+    
+    //save player desired action
+    let player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.grandTheftAuto }
+    
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
-        //get best crime for hacking
-        const crime_best = ns.enums.CrimeType.robStore
-        //commit crime for karma
-        if (!ns.singularity.commitCrime(crime_best, action_focus)) {
-            log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
-        }
-        
+        //raise hacking
+        player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.robStore }
         //if we have not reached target karma
     } else if (player.karma > data.requirements.karma_for_gang) {
         //get best crime for karma
-        const crime_best = ns.enums.CrimeType.mug
-        //commit crime for karma
-        if (!ns.singularity.commitCrime(crime_best, action_focus)) {
-            log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
-        }
+        player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.mug }
         
-    } else {
-        //if bladeburner joined: work for bladeburner
-        if (bladeburner_joined) {
-            //check what ae are doing for bladeburner
-            const bladeburner_action_current = bladeburner_get_activity(ns)
-            //do bladeburner stuff
-            const bladeburner_action_wanted = bladeburner_determine_action(ns, player)
-            //start bladeburner action
-            if (!ns.bladeburner.startAction(bladeburner_action_wanted.type, bladeburner_action_wanted.name)) {
-                log(ns, 1, warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
+    }
+    
+    //check if we need to change
+    if ((player_activity.type != player_action_desired.type) ||
+       (player_activity.value != player_action_desired.value)) {
+            //check if it works
+            if (!ns.singularity.commitCrime(player_activity.value, action_focus)) {
+                log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
-        }
-
-        //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
-
-        //if bladeburner is not joined or augment for dual work is installed
-        if ((!bladeburner_joined) || (can_perform_dual_actions)) {
-            //get best crime for combat skills
-            const crime_best = ns.enums.CrimeType.grandTheftAuto
-            //commit crime for money/stats?
-            if (ns.singularity.commitCrime(crime_best, action_focus)) {
-                log(ns, 1, warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
-            }
-        }
+        }        
     }
 }
 
