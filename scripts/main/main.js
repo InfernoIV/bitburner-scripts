@@ -2,9 +2,11 @@
 import {
     info, success, warning, error, fail, portNoData, //constants 
     enum_scripts, enum_servers, enum_factions, enum_cities, enum_port, enum_hackingCommands, //enums
-    log, number_formatter, //functions
+    log, number_formatter, get_reset_info, get_bit_node_multipliers, get_challenge_flags, //functions
 } from "scripts/common.js"
 
+//common functions
+//import * as common from "../common.js"
 //config
 import * as config from "./config.js"
 //data
@@ -16,19 +18,17 @@ import * as data from "./data.js"
  * Function that handles everything
  * @param {NS} ns
  * 
- * Costs: 3,1 GB
+ * Costs: 2,1 GB
  *  Base cost (1,6)
  *  killall (0,5) (inherited from init)
- *  getResetInfo (1)
  */
 export async function main(ns) {    
-    
     //get reset info
-    const reset_info = ns.getResetInfo()
+    const reset_info = get_reset_info(ns) 
     //get bitnode information from file
-    const bit_node_multipliers = JSON.parse(ns.read("bitNode/" + reset_info.currentNode + ".json"))
+    const bit_node_multipliers = get_bit_node_multipliers(ns)
     //get challenge config
-    const challenge_flags = JSON.parse(ns.read("challenge.json"))
+    const challenge_flags = get_challenge_flags(ns)
 
     //keep track of launched scripts
     let launched_scripts = []
