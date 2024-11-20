@@ -8,7 +8,10 @@ import {
   log, info, success, warning, error, fail,
 } from "scripts/common.js"
 */
-
+//file constants
+export const file_bit_node = "bit_node.json"
+export const file_reset_info = "reset_info.json"
+export const file_challenge_flags = "challenge.json"
 
 //log constants
 export const info = "INFO"
@@ -221,4 +224,34 @@ export function overwrite_port(ns, port, data) {
     ns.clearPort(port)
     //write data
     ns.writePort(port, data)
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_bit_node_multipliers(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_bit_node))
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_reset_info(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_reset_info))
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_challenge_flags(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_challenge_flags))
 }
