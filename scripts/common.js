@@ -296,7 +296,7 @@ export function has_completed_bit_node_level(ns, bit_node, level = 1) {
       }
   //otherwise if we are looking for the 1st level, and we are in the specific bitnode: the functionality can already be used
   } else if((level == 1) && 
-            (reset_info.currentNode == bit_node) {
+            (reset_info.currentNode == bit_node)) {
       //we are in the specific bitnode, functionality should be available
       return true
   }
