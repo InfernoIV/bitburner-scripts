@@ -281,9 +281,9 @@ export function get_next_bit_node(ns) {
 /**
  * Function that returns if the specific bit node has been completed on a specific level (otherwise level 1) 
  */
-export function has_completed_bit_node_level(bit_node, level = 1) {
+export function has_completed_bit_node_level(ns, bit_node, level = 1) {
     //get the map of owned source files (completed bitnodes) 
-    let owned_source_files = get_reset_info(ns).ownedSF
+    const owned_source_files = get_reset_info(ns).ownedSF
     
     //check if we already have completed the current node
   if (owned_source_files.has(reset_info.currentNode)) {
