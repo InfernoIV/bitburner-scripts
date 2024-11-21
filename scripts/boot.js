@@ -1,6 +1,6 @@
 //imports
 import { 
-    log, info, success, warning, error, fail, file_bit_node, file_reset_info, //const
+    log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, //const
     enum_servers, enum_scripts, //enums
     get_challenge_flags, //functions
 } from "scripts/js"
@@ -37,7 +37,7 @@ export async function main(ns) {
     //get the multipliers of this bitnode
     const bitNodeMultiplier = ns.getBitNodeMultipliers(bitNode, level)
     //write data to file
-    ns.write(file_bit_node, JSON.stringify(bitNodeMultiplier), "w")
+    ns.write(file_bit_node_multipliers, JSON.stringify(bitNodeMultiplier), "w")
     //log information
     log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
     
