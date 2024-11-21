@@ -1,3 +1,6 @@
+//imports
+import file_challenge_flags from "scripts/common.js
+
 /**
  * Script that writes config to file (JSON)
  * To be read (parsed) by other scripts
@@ -18,8 +21,6 @@ export async function main(ns) {
     //no challenges for bitnode 11 and 12
     disable_stanek: false, //disables stanek (challenge bitnode 13)
   }
-  //create filename
-  const file_name_challenge = "challenge.json"
   //write data to file
-  ns.write(file_name_challenge, JSON.stringify(challenge), "w")  
+  ns.write(file_challenge_flags, JSON.stringify(challenge), "w")  
 }
