@@ -7,11 +7,6 @@ import {
 
 
 
-//common functions
-//import * as common from "../js"
-
-
-
 /** @param {NS} ns */
 export async function main(ns) {
     //log next target bit node
@@ -42,19 +37,17 @@ export async function main(ns) {
         }
     }
     //get the multipliers of this bitnode
-    const bitNodeMultiplier = ns.getBitNodeMultipliers(bitNode, level)
+    let bit_node_multipliers = dummy_bit_node_multipliers
+    //check if we get bit node multipliers (needs bit node 
+    if (has_completed_bit_node_level(ns, 5)) {
+        //add the actual bitnode multipliers
+        bit_node_multipliers = ns.getBitNodeMultipliers(bitNode, level)
+    }
     //write data to file
-    ns.write(file_bit_node_multipliers, JSON.stringify(bitNodeMultiplier), "w")
+    ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
     log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
     
-    //still needed?
-    /*
-    const filenameAugmentsOwned = "augmentsOwned.json"
-    //write data to file
-    ns.write(filenameAugmentsOwned, JSON.stringify(ns.singularity.getOwnedAugmentations(false)), "w")
-    */
-
     //if not disabled
     if (challenge_flags.disable_stanek != true) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
@@ -226,4 +219,64 @@ const bit_node_lookup_data = {
     StaneksGiftPowerMultiplier: { higher_is_better: true, }, /** Influences the power of the gift. */
     StaneksGiftExtraSize: { higher_is_better: true, }, /** Influences the size of the gift. */
     WorldDaemonDifficulty: { }, /** Influences the hacking skill required to backdoor the world daemon. */    
+}
+
+
+
+/**
+ * Dummy to return when no access to bit node multipliers
+ */
+const dummy_bit_node_multipliers = {
+    AgilityLevelMultiplier: 1,
+    AugmentationMoneyCost: 1,
+    AugmentationRepCost: 1,
+    BladeburnerRank: 1,
+    BladeburnerSkillCost: 1,
+    CharismaLevelMultiplier: 1, 
+    ClassGymExpGain: 1, 
+    CodingContractMoney: 1, 
+    CompanyWorkExpGain: 1, 
+    CompanyWorkMoney: 1, 
+    CompanyWorkRepGain: 1, 
+    CorporationDivisions: 1, 
+    CorporationSoftcap: 1, 
+    CorporationValuation: 1, 
+    CrimeExpGain: 1, 
+    CrimeMoney: 1, 
+    CrimeSuccessRate: 1, 
+    DaedalusAugsRequirement: 30, 
+    DefenseLevelMultiplier: 1, 
+    DexterityLevelMultiplier: 1, 
+    FactionPassiveRepGain: 1, 
+    FactionWorkExpGain: 1, 
+    FactionWorkRepGain: 1, 
+    FourSigmaMarketDataApiCost: 1, 
+    FourSigmaMarketDataCost: 1, 
+    GangSoftcap: 1, 
+    GangUniqueAugs: 1, 
+    GoPower: 1, 
+    HackExpGain: 1, 
+    HackingLevelMultiplier: 1, 
+    HackingSpeedMultiplier: 1, 
+    HacknetNodeMoney: 1, 
+    HomeComputerRamCost: 1, 
+    InfiltrationMoney: 1, 
+    InfiltrationRep: 1, 
+    ManualHackMoney: 1, 
+    PurchasedServerCost: 1, 
+    PurchasedServerLimit: 1,
+    PurchasedServerMaxRam: 1,
+    PurchasedServerSoftcap: 1, 
+    RepToDonateToFaction: 1, 
+    ScriptHackMoney: 1, 
+    ScriptHackMoneyGain: 1, 
+    ServerGrowthRate: 1, 
+    ServerMaxMoney: 1, 
+    ServerStartingMoney: 1, 
+    ServerStartingSecurity: 1, 
+    ServerWeakenRate: 1, 
+    StaneksGiftExtraSize: 0, 
+    StaneksGiftPowerMultiplier: 1, 
+    StrengthLevelMultiplier: 1, 
+    WorldDaemonDifficulty: 1,
 }
