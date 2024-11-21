@@ -8,10 +8,7 @@ import {
 
 
 /** @param {NS} ns */
-export async function main(ns) {
-    //log next target bit node
-    log(ns, 1, info, "Next bit node: " + get_next_bit_node(ns))
-    
+export async function main(ns) {    
     //get the challenge flags
     const challenge_flags = get_challenge_flags(ns) //JSON.parse(ns.read("challenge.json"))
     //log active challenge settings
@@ -48,8 +45,9 @@ export async function main(ns) {
     //log information
     log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
     
-    //if not disabled
-    if (challenge_flags.disable_stanek != true) {
+    //if unlocked and not disabled
+    if ((has_completed_bit_node_level(ns, 13)) && 
+        (challenge_flags.disable_stanek != true)) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
         ns.run(enum_scripts.jump, 1,
             enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
@@ -85,6 +83,12 @@ function log_challenge_flags(ns, challenge_flags) {
 function log_bit_node_information(ns, bit_node_multipliers, reset_info) {   
     //get the bitnode
     let bitnode = reset_info.currentNode
+
+    //log information on completed bitnodes
+    log(ns, 1, info, "Completed following bit nodes: " + JSON.Stringify(reset_info.ownedSF))
+    //log next target bit node
+    log(ns, 1, info, "Next bit node: " + get_next_bit_node(ns))
+    
     //set level
     let sourceFile = 1
     //if we have source file
