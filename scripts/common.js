@@ -223,25 +223,25 @@ export function get_next_bit_node(ns) {
     let owned_source_files_after_destruction = reset_info.ownedSF
     
     //check if we already have completed the current node
-    if (owned_source_files.has(reset_info.currentNode)) {
+    if (owned_source_files_after_destruction.has(reset_info.currentNode)) {
         //get the level of the node
-        const bit_node_level = owned_source_files.get(reset_info.currentNode)
+        const bit_node_level = owned_source_files_after_destruction.get(reset_info.currentNode)
         
         //if bitnode 12
         if (reset_info.currentNode == 12) {
             //just add the counter
-            owned_source_files.set(reset_info.currentNode, bit_node_level + 1)
+            owned_source_files_after_destruction.set(reset_info.currentNode, bit_node_level + 1)
         
         //if not maxxed
         } else if (bit_node_level < 3) {
             //add the level
-            owned_source_files.set(reset_info.currentNode, bit_node_level + 1)
+            owned_source_files_after_destruction.set(reset_info.currentNode, bit_node_level + 1)
         }
         
     //otherwise add it to the map (this should be the overview AFTER the bitnode
     } else {
         //add the bitnode to the source file list at level 1 (first completion)
-        owned_source_files.set(reset_info.currentNode, 1)
+        owned_source_files_after_destruction.set(reset_info.currentNode, 1)
     }
 
     //get the planned progression from file
@@ -275,6 +275,29 @@ export function get_next_bit_node(ns) {
     //failsafe: default target bit node 12, since it is endless
     return 12
 }
+
+
+
+/**
+ * Function that returns if the specific bit node has been completed on a specific level (otherwise level 1) 
+ */
+export function has_completed_bit_node_level(bit_node, level = 1) {
+    //get the map of owned source files (completed bitnodes) 
+    let owned_source_files = get_reset_info(ns).ownedSF
+    
+    //check if we already have completed the current node
+  if (owned_source_files.has(reset_info.currentNode)) {
+      //if we have the level required
+      if(owned_source_files.get(reset_info.currentNode) >= level) {
+        //indicate success
+        return true
+      }
+    }
+    //either bit node is not present in map (not completed) or doesn't have the correct level
+    return false
+}
+
+
 
 /**
  * Enum of all factions with their work types
