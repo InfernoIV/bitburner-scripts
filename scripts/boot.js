@@ -9,8 +9,31 @@ import {
 
 /** @param {NS} ns */
 export async function main(ns) {    
+    //prepare information to be used later by other functions
+    prepare_information(ns)
+    
+    //if unlocked and not disabled
+    if ((has_completed_bit_node_level(ns, 13)) && 
+        (get_challenge_flags(ns).disable_stanek != true)) {
+        //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
+        ns.run(enum_scripts.jump, 1,
+            enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
+    } else {
+        //launch directly to main
+        //run jumpscript to boot main
+        ns.run(enum_scripts.jump, 1, 
+        enum_scripts.main, true)
+    } 
+}
+
+
+
+/**
+ * Function that retrieves information (challenge flags, reset info, bitnode multipliers) and saves it to file
+ */
+function prepare_information(ns) {
     //get the challenge flags
-    const challenge_flags = get_challenge_flags(ns) //JSON.parse(ns.read("challenge.json"))
+    const challenge_flags = get_challenge_flags(ns)
     //log active challenge settings
     log_challenge_flags(ns, challenge_flags)
     
@@ -44,19 +67,6 @@ export async function main(ns) {
     ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
     log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
-    
-    //if unlocked and not disabled
-    if ((has_completed_bit_node_level(ns, 13)) && 
-        (challenge_flags.disable_stanek != true)) {
-        //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
-        ns.run(enum_scripts.jump, 1,
-            enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
-    } else {
-        //launch directly to main
-        //run jumpscript to boot main
-        ns.run(enum_scripts.jump, 1, 
-        enum_scripts.main, true)
-    } 
 }
 
 
