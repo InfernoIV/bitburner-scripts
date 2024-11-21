@@ -1,6 +1,6 @@
 //imports
 import {
-    info, success, warning, error, fail, portNoData, //constants 
+    info, success, warning, error, fail, portNoData, file_num_sleeves, //constants 
     enum_scripts, enum_servers, enum_factions, enum_cities, enum_port, enum_hackingCommands, //enums
     log, number_formatter, get_reset_info, get_bit_node_multipliers, get_challenge_flags, //functions
 } from "scripts/common.js"
@@ -29,6 +29,8 @@ export async function main(ns) {
     const bit_node_multipliers = get_bit_node_multipliers(ns)
     //get challenge config
     const challenge_flags = get_challenge_flags(ns)
+    //get the sleeves available
+    const sleeve_available = get_num_sleeve(ns)
 
     //keep track of launched scripts
     let launched_scripts = []
@@ -56,10 +58,10 @@ export async function main(ns) {
         manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,4 GB
 
         //player, sleeve & bladeburner: 71 GB
-        manage_actions(ns, data.sleeves_available, bit_node_multipliers, challenge_flags)   //71 GB
+        manage_actions(ns, sleeve_available, bit_node_multipliers, challenge_flags)   //71 GB
 
         //update ui
-        update_ui(ns, data.sleeves_available, bit_node_multipliers, challenge_flags) //0 GB
+        update_ui(ns, sleeve_available, bit_node_multipliers, challenge_flags) //0 GB
 
         //reset & destruction: 18 GB
         execute_bit_node_destruction(ns, challenge_flags)   //0 GB
@@ -1960,3 +1962,11 @@ function get_bladeburner_access(ns, challenge_flags) {
     }
 }
 
+
+/**
+ * Function that reads number of sleeves from file
+ */
+function get_num_sleeves(ns) {
+    //read data from file (single int)
+    return JSON.parse(ns.read(file_num_sleeves))
+}
