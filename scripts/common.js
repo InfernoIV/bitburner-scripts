@@ -1,7 +1,8 @@
 /*
-This file shows the commons used in other scripts
-  script names, ports, hostnames
+This file shows the commons used in other scripts: script names, ports, hostnames
+THIS FILE SHOULD NOT HAVE EXTRA RAM IMPACT ON OTHER FILES, IT SHOULD ONLY HAVE THE BASE COST FOR RAM!!!
 */
+
 /*
 import { 
   enum_port, enum_servers, enum_scripts
