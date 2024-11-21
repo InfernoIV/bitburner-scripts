@@ -9,8 +9,7 @@ export const requirements = {
     },
 }
 
-//number of sleeves available
-const data.sleeves_available = 8
+
 
 //from https://github.com/bitburner-official/bitburner-src/blob/dev/src/Hacknet/data/HashUpgradesMetadata.tsx
 export const hash_upgrades = {
