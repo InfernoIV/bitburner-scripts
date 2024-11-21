@@ -1,5 +1,5 @@
 //imports
-import file_challenge_flags from "scripts/common.js
+import file_challenge_flags from "scripts/common.js"
 
 /**
  * Script that writes config to file (JSON)
