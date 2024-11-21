@@ -2,7 +2,7 @@
 import { 
     log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, //const
     enum_servers, enum_scripts, //enums
-    get_challenge_flags, get_next_bit_node, //functions
+    get_challenge_flags, get_next_bit_node, has_completed_bit_node_level, //functions
 } from "scripts/js"
 
 
