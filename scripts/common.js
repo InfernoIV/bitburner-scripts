@@ -15,6 +15,7 @@ export const file_bit_node_multipliers = "bit_node_multipliers.json"
 export const file_reset_info = "reset_info.json"
 export const file_challenge_flags = "challenge.json"
 export const file_bit_node_progression = "bit_node_progression.json"
+export const file_num_sleeves = "sleeves.json"
 
 
 
