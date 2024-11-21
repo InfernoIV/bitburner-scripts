@@ -1,6 +1,6 @@
 //imports
 import { 
-    log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, //const
+    log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, file_num_sleeves, //const
     enum_servers, enum_scripts, //enums
     get_challenge_flags, get_next_bit_node, has_completed_bit_node_level, //functions
 } from "scripts/js"
@@ -67,6 +67,16 @@ function prepare_information(ns) {
     ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
     log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
+
+    //set to 0 by default
+    let num_sleeves = 0
+    //check if we have unlocked sleeve
+    if(has_completed_bit_node_level(10, 1)) {
+        //get the actual number
+        num_sleeves = ns.sleeve.getNumSleeves()
+    }
+    //write data to file
+    ns.write(file_num_sleeves, JSON.stringify(num_sleeves), "w")
 }
 
 
