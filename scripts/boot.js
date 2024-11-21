@@ -2,14 +2,21 @@
 import { 
     log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, //const
     enum_servers, enum_scripts, //enums
-    get_challenge_flags, //functions
+    get_challenge_flags, get_next_bit_node, //functions
 } from "scripts/js"
+
+
 
 //common functions
 //import * as common from "../js"
 
+
+
 /** @param {NS} ns */
 export async function main(ns) {
+    //log next target bit node
+    log(ns, 1, info, "Next bit node: " + get_next_bit_node(ns))
+    
     //get the challenge flags
     const challenge_flags = get_challenge_flags(ns) //JSON.parse(ns.read("challenge.json"))
     //log active challenge settings
