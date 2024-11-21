@@ -1,0 +1,3 @@
+/*
+File to use when hacknet functionality IS unlocked
+*/
