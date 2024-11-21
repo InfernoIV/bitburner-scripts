@@ -8,11 +8,15 @@ import {
   log, info, success, warning, error, fail,
 } from "scripts/common.js"
 */
+
+
 //file constants
 export const file_bit_node_multipliers = "bit_node_multipliers.json"
 export const file_reset_info = "reset_info.json"
 export const file_challenge_flags = "challenge.json"
 export const file_bit_node_progression = "bit_node_progression.json"
+
+
 
 //log constants
 export const info = "INFO"
@@ -20,6 +24,7 @@ export const success = "SUCCESS"
 export const warning = "WARNING"
 export const error = "ERROR"
 export const fail = "FAIL"
+
 
 
 //communication port definitions
@@ -34,6 +39,7 @@ export const enum_port = {
   stopHack: 7,
   stanek: 8,
 }
+
 
 
 //no port data definition
@@ -110,6 +116,8 @@ export function log(ns, loglevel, type, message) {
     }
 }
 
+
+
 /**
  * Function that formats numbers
  * Cost: 0
@@ -137,6 +145,83 @@ export function number_formatter(number) {
     }
     return numberReturn + symbols[largestIndex]
 }
+
+
+
+/**
+ * Enum stating all cities
+ */
+export const enum_cities = {
+    aevum: "Aevum",
+    chongqing: "Chongqing",
+    ishima: "Ishima",
+    newTokyo: "New Tokyo",
+    sector12: "Sector-12",
+    volhaven: "Volhaven",
+}
+
+
+
+// hacking commands
+export const enum_hackingCommands = {
+    start: "Start",
+    stop: "Stop",
+}
+
+
+
+/**
+ * Function that overwrites the specified port with new data
+ * Cost: 0
+ */
+export function overwrite_port(ns, port, data) {
+    //clear port
+    ns.clearPort(port)
+    //write data
+    ns.writePort(port, data)
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_bit_node_multipliers(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_bit_node_multipliers))
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_reset_info(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_reset_info))
+}
+
+
+
+/**
+ * Function that retrieves bitnode information from file
+ */
+export function get_challenge_flags(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_challenge_flags))
+}
+
+
+
+/**
+ * Function that retrieves bitnode progression from file
+ */
+export function get_bit_node_progression(ns) {
+  //read data from file
+  return JSON.parse(ns.read(file_bit_node_progression))
+}
+
+
 
 /**
  * Enum of all factions with their work types
@@ -191,68 +276,4 @@ export const enum_factions = {
     //other factions
     netburners: { name: "Netburners", work_types: ["hacking"] },
     tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
-}
-
-
-/**
- * Enum stating all cities
- */
-export const enum_cities = {
-    aevum: "Aevum",
-    chongqing: "Chongqing",
-    ishima: "Ishima",
-    newTokyo: "New Tokyo",
-    sector12: "Sector-12",
-    volhaven: "Volhaven",
-}
-
-
-
-// hacking commands
-export const enum_hackingCommands = {
-    start: "Start",
-    stop: "Stop",
-}
-
-
-
-/**
- * Function that overwrites the specified port with new data
- * Cost: 0
- */
-export function overwrite_port(ns, port, data) {
-    //clear port
-    ns.clearPort(port)
-    //write data
-    ns.writePort(port, data)
-}
-
-
-
-/**
- * Function that retrieves bitnode information from file
- */
-export function get_bit_node_multipliers(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_bit_node))
-}
-
-
-
-/**
- * Function that retrieves bitnode information from file
- */
-export function get_reset_info(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_reset_info))
-}
-
-
-
-/**
- * Function that retrieves bitnode information from file
- */
-export function get_challenge_flags(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_challenge_flags))
 }
