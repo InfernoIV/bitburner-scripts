@@ -9,9 +9,10 @@ import {
 } from "scripts/common.js"
 */
 //file constants
-export const file_bit_node = "bit_node.json"
+export const file_bit_node_multipliers = "bit_node_multipliers.json"
 export const file_reset_info = "reset_info.json"
 export const file_challenge_flags = "challenge.json"
+export const file_bit_node_progression = "bit_node_progression.json"
 
 //log constants
 export const info = "INFO"
