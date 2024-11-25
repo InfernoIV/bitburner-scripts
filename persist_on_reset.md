@@ -10,7 +10,7 @@
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts#L56
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts#L94
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Faction/Faction.ts#L77
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Faction/FactionInfo.tsx
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Faction/FactionInfo.tsx#L53
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Company/Company.ts#L77
 
 ## Persists
@@ -28,7 +28,7 @@
 ## Information
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts#79
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/Player/PlayerObjectGeneralMethods.ts#L74
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/AugmentationHelpers.ts
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/AugmentationHelpers.ts#L66
 ## Persists
  * Augmentations
  * Intelligence stat
