@@ -26,7 +26,7 @@
 ## Does no persist
  * All other factions
  * All company work progress
- * Rep from factions and companies is converted to favor
+ * Rep from factions and companies: the rep is converted to favor
 
 # Player (extended by bit node 5 (intelligence) and 10 (Grafting))
 ## Information
