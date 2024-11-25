@@ -20,7 +20,7 @@
 ## Persists
  * If unlocked company faction: ECorp, MegaCorp, Bachman And Associates, Blade Industries, NWO, Clarke Incorporated, OmniTek Incorporated, Four Sigma, KuaiGong International, Fulcrum Secret Technologies
  * If Stanek's gift was accepted: Church Of The Machine God
- * If infiltrated: Shadows Of Anarchy
+ * If infiltrated at least once: Shadows Of Anarchy
  * If enough Bladeburner rank: Bladeburner
  * Favor of factions and companies
 ## Does no persist
