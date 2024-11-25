@@ -113,12 +113,16 @@
    
 # Sleeve (Bit node 10)
 ## Information
- * 
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/Player/PlayerObjectGeneralMethods.ts#L113
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/Sleeve/Sleeve.ts#L560
 ## Persists
- * Augments
+ * a
 ## Does not persist
  * Stats
  * Sleeve actions
+## To be checked (also resets??)
+ * Augments
+ * Shock
   
 ## Stanek (Bit node 13)
 ## Information
