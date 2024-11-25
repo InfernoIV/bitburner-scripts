@@ -29,11 +29,14 @@
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts#79
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/Player/PlayerObjectGeneralMethods.ts#L74
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/AugmentationHelpers.ts#L66
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/Augmentations.ts#L322
 ## Persists
  * Augmentations
  * Intelligence stat
- * Karma
+ * Karma stat
  * if specific augments are installed: hacking programs
+   * CashRoot: BruteSSH 
+   * Neurolink: ftpCrack and relaySmt
 ## Does no persist   
  * Money
  * Player actions
