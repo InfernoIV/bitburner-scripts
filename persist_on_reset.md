@@ -18,7 +18,7 @@
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Company/Company.ts#L77
 
 ## Persists
- * if unlocked company faction: ECorp, MegaCorp, Bachman And Associates, Blade Industries, NWO, Clarke Incorporated, OmniTek Incorporated, Four Sigma, KuaiGong International, Fulcrum Secret Technologies
+ * If unlocked company faction: ECorp, MegaCorp, Bachman And Associates, Blade Industries, NWO, Clarke Incorporated, OmniTek Incorporated, Four Sigma, KuaiGong International, Fulcrum Secret Technologies
  * If Stanek's gift was accepted: Church Of The Machine God
  * If infiltrated: Shadows Of Anarchy
  * If enough Bladeburner rank: Bladeburner
