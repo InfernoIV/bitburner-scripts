@@ -51,6 +51,8 @@
 ## Does no persist   
  * Augmentations bought: bought augments are converted to installed augments
  * Money
+   * Set to 1000 + blood donations
+   * If augment 'CashRoot' is installed, set to or added 1e6
  * Player actions
    * Grafting progress (should be finished before reset)
  * Stats (hacking, strength, defense, dexterity, agility, charisma)
@@ -89,12 +91,12 @@
 
 # Corporation (Bit node 3)
 ## Information
-* 
+* https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/Augmentations.ts#L303
 ## Persists
 * Divisions
 * Products
 ## Does not persist
- * None
+ * Industry research trees
 
 # Bladeburner (Bit node 6, 7)
 ## Information
