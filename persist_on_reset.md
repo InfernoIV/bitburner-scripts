@@ -1,7 +1,11 @@
 # What is considered a reset?
 ## Types
  * Install augments
+   * This converts the bought augments into installed augments 
  * Soft reset
+   * No conversion, just a reset to start
+ * Bit node destruction
+   * Destroys the bit node, allows you to enter another bit node. Technically resets all progress of the bit node.   
 ## Information
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts
 
