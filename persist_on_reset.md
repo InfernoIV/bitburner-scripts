@@ -1,11 +1,18 @@
 # What is considered a reset?
+## Purpose
+* The purpose of a reset it twofold:
+  * Convert bought augments into installed augments
+  * Convert reputation of factions and company into favor 
 ## Types
  * Install augments
-   * This converts the bought augments into installed augments 
+   * Converts the bought augments into installed augments
+   * Converts reputation to favor
  * Soft reset
-   * No conversion, just a reset to start
+   * Only converts reputation to favor
+   * TODO: can remove bought augments???
  * Bit node destruction
-   * Destroys the bit node, allows you to enter another bit node. Technically resets all progress of the bit node.   
+   * Destroys the bit node, allows you to enter another bit node.
+   * Technically resets all progress of the bit node.   
 ## Information
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Prestige.ts
 
@@ -35,13 +42,14 @@
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/AugmentationHelpers.ts#L66
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Augmentation/Augmentations.ts#L322
 ## Persists
- * Augmentations
+ * Augmentations installed
  * Intelligence stat
  * Karma stat
  * if specific augments are installed: hacking programs
    * CashRoot: BruteSSH 
    * Neurolink: ftpCrack and relaySmt
 ## Does no persist   
+ * Augmentations bought: bought augments are converted to installed augments
  * Money
  * Player actions
    * Grafting progress (should be finished before reset)
