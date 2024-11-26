@@ -1,5 +1,24 @@
 //stub
 
+
+
+/*
+    sleeve bladeburner actions:
+    https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/Sleeve/Sleeve.ts#L479
+    Normal bladeburner actions:
+        Training (raise stats)
+        Field Analysis (improves synthoid population estimation -> improved success chance)
+        Recruitment (recruits team members)
+        Diplomacy (Lowers chaos)
+        Hyperbolic Regeneration Chamber (regenerate health -> lowers shock)
+    Sleeve unique bladeburner actions:
+        Infiltrate synthoids (add action count to operations and contracts)
+        Support main sleeve (become part of team, like a team member)
+        Take on contracts (perform contract work)   
+*/
+
+
+
 /**
  * Function that checks the best work type for bladeburner for sleeve
  * Only perform 100% chance work, else we get shock
