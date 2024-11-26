@@ -1,5 +1,5 @@
 //threshold on which chaos will effect actions (only done when chance for other actions is too low)
-export const bladeburner_chaos_threshold = 50
+export const bladeburner_chaos_value_for_penalty = 50
 
 
 
