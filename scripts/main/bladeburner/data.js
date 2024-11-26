@@ -1,6 +1,8 @@
 //threshold on which chaos will effect actions (only done when chance for other actions is too low)
 export const bladeburner_chaos_threshold = 50
 
+
+
 /**
  * enum that holds the bladeburner skills (in priority)
  */
@@ -92,18 +94,4 @@ export const bladeburner_actions = {
         support_main_sleeve: "Support main sleeve", //become part of team, like a team member
         take_on_contracts: "Take on contracts", //perform contract work
     },
-}
-
-
-
-/**
- * Enum that describes the bladeburner actions that sleeves can take
- */
-export const sleeve_bladeburner_actions = {
-    fieldAnalysis: "Field Analysis",
-    recruitment: "Recruitment",
-    diplomacy: "Diplomacy",
-    infiltratesynthoids: "Infiltrate synthoids",
-    supportmainsleeve: "Support main sleeve",
-    takeonContracts: "Take on Contracts",
 }
