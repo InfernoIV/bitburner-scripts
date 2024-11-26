@@ -69,10 +69,7 @@ function bladeburner_determine_action(ns) {
     //upgrade skills
     bladeburner_raise_skills(ns)
     //check if we need to travel elsewhere
-    
-
-    
-
+    bladeburner_travel_to_best_city(ns)
     //get stamina
     const bladeburner_stamina = ns.bladeburner.getStamina()
     //if current stamina is higher than half max stamina (no penalties)
@@ -98,9 +95,6 @@ function bladeburner_determine_action(ns) {
                 break
             }
         }
-
-
-
         //operations
         //for each operation
         for (const activity in data.bladeburner_actions.operations) {
@@ -116,7 +110,6 @@ function bladeburner_determine_action(ns) {
                 return { type: data.bladeburner_actions.type.operations, name: operation }
             }
         }
-
         //contracts
         //for each contract
         for (const activity in data.bladeburner_actions.contracts) {
@@ -133,7 +126,6 @@ function bladeburner_determine_action(ns) {
             }
         }
     }
-
     //general
     //if over threshold
     if (bladeburner_chaos_lowest > data.bladeburner_chaos_threshold) {
@@ -141,7 +133,7 @@ function bladeburner_determine_action(ns) {
         return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
     }
     //if no operations or contracts available
-    if (bladeburner_get_action_count(ns) == 0) {
+    if (bladeburner_get_lowest_action_count(ns) == 0) {
         //generate operations and contracts
         return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
     }
@@ -170,7 +162,7 @@ export function bladeburner_raise_skills(ns) {
  * Chaos should be lowest possible
  * Population should be more than 0 (otherwise we cannot do anything)
 **/
-export function bladeburner_travel_to_best_city(ns) {
+export function bladeburner_get_best_city(ns) {
     //go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
     let bladeburner_chaos_lowest = 999999
@@ -198,10 +190,9 @@ export function bladeburner_travel_to_best_city(ns) {
  * Function that get the lowest action count of all operations and contracts
  * Enables determination when sleeves should do infiltrations to raise the counts\
 **/
-export function bladeburner_get_action_count(ns) {
+export function bladeburner_get_lowest_action_count(ns) {
     //set variable to return, set to high so it can be lowered
     let lowest_action_count = 999
-    
     //for each operation
     for (const activity in data.bladeburner_actions.operations) {
         //get operation information
@@ -214,7 +205,6 @@ export function bladeburner_get_action_count(ns) {
             lowest_action_count = action_count
         }
     }
-
     //for each contract
     for (const activity in data.bladeburner_actions.contracts) {
         //get contract information
@@ -227,7 +217,6 @@ export function bladeburner_get_action_count(ns) {
             lowest_action_count = action_count
         }
     }
-    
     //return the action count
     return lowest_action_count
 }
