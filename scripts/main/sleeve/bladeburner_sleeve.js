@@ -52,4 +52,3 @@ function bladeburner_get_actions_sleeve(ns, sleeveIndex) {
     //return the list of possible actions
     return action_list_possible
 }
-
