@@ -1,6 +1,11 @@
-//imports
-//import  from "scripts/common.js"
+//common
+import * as common from "scripts/common.js"
+//data
 import * as data from "./data.js"
+//config
+//import * as config from "./config.js"
+
+
 
 /**
  * Function to do a check for bladeburner access 
@@ -61,42 +66,17 @@ function bladeburner_get_activity(ns) {
  *  getActionEstimatedSuccessChance (4)
  */
 function bladeburner_determine_action(ns) {
-    //go to lowest chaos city (lower chaos = higher success chances)
-    //keep track of previous chaos
-    let bladeburner_chaos_lowest = 999999
-    
     //upgrade skills
-    //for each bladeburner skill
-    for (const skill in data.bladeburner_skills) {
-        //upgrade skill without checking details (money, level cap)
-        ns.bladeburner.upgradeSkill(data.bladeburner_skills[skill])
-    }
+    bladeburner_raise_skills(ns)
+    //check if we need to travel elsewhere
+    
 
-    //check the lowest chaos city
-    for (const cityEntry in enum_cities) {
-        //get city
-        const city = enum_cities[cityEntry]
-        //get chaos of current city
-        const cityChaos = ns.bladeburner.getCityChaos(city)
-        //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
-        //and actions will default to Field analysis, which will do nothing...
-        //if lower than previous and there is synthoids in the city
-        if (cityChaos < bladeburner_chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
-            //switch city
-            ns.bladeburner.switchCity(city)
-            //update lowest chaos
-            bladeburner_chaos_lowest = cityChaos
-        }
-    }
+    
 
-    //keep track of action count
-    let bladeburner_total_action_count = -1
     //get stamina
     const bladeburner_stamina = ns.bladeburner.getStamina()
     //if current stamina is higher than half max stamina (no penalties)
     if (bladeburner_stamina[0] > (bladeburner_stamina[1] / 2)) {
-        //set to 0. then it will be checked
-        bladeburner_total_action_count = 0
         //blackops
         //get current rank
         const bladeburner_rank = ns.bladeburner.getRank()
@@ -135,8 +115,6 @@ function bladeburner_determine_action(ns) {
                 //return this information
                 return { type: data.bladeburner_actions.type.operations, name: operation }
             }
-            //add count to total actions available
-            bladeburner_total_action_count += action_count
         }
 
         //contracts
@@ -153,8 +131,6 @@ function bladeburner_determine_action(ns) {
                 //return this information
                 return { type: data.bladeburner_actions.type.contracts, name: contract }
             }
-            //add count to total actions available
-            bladeburner_total_action_count += action_count
         }
     }
 
@@ -165,7 +141,7 @@ function bladeburner_determine_action(ns) {
         return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
     }
     //if no operations or contracts available
-    if (bladeburner_total_action_count == 0) {
+    if (bladeburner_get_action_count(ns) == 0) {
         //generate operations and contracts
         return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
     }
@@ -174,6 +150,84 @@ function bladeburner_determine_action(ns) {
 }
 
 
-function bladeburner_get_action_count(ns) {
 
+/**
+ * Function that raises the skill of bladeburner
+ * Just raises all, no focus
+**/
+export function bladeburner_raise_skills(ns) {
+    //for each bladeburner skill
+    for (const skill in data.bladeburner_skills) {
+        //upgrade skill without checking details (money, level cap)
+        ns.bladeburner.upgradeSkill(data.bladeburner_skills[skill])
+    }
+}
+
+
+
+/**
+ * Function that determines the best city for bladeburner actions
+ * Chaos should be lowest possible
+ * Population should be more than 0 (otherwise we cannot do anything)
+**/
+export function bladeburner_travel_to_best_city(ns) {
+    //go to lowest chaos city (lower chaos = higher success chances)
+    //keep track of previous chaos
+    let bladeburner_chaos_lowest = 999999
+    //check the lowest chaos city
+    for (const cityEntry in enum_cities) {
+        //get city
+        const city = enum_cities[cityEntry]
+        //get chaos of current city
+        const cityChaos = ns.bladeburner.getCityChaos(city)
+        //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
+        //and actions will default to Field analysis, which will do nothing...
+        //if lower than previous and there is synthoids in the city
+        if (cityChaos < bladeburner_chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
+            //switch city
+            ns.bladeburner.switchCity(city)
+            //update lowest chaos
+            bladeburner_chaos_lowest = cityChaos
+        }
+    }
+}
+
+
+
+/**
+ * Function that get the lowest action count of all operations and contracts
+ * Enables determination when sleeves should do infiltrations to raise the counts\
+**/
+export function bladeburner_get_action_count(ns) {
+    //set variable to return, set to high so it can be lowered
+    let lowest_action_count = 999
+    
+    //for each operation
+    for (const activity in data.bladeburner_actions.operations) {
+        //get operation information
+        const operation = data.bladeburner_actions.operations[activity]
+        //get action count
+        const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
+        //check if lower
+        if (action_count < lowest_action_count) {
+            //set action count
+            lowest_action_count = action_count
+        }
+    }
+
+    //for each contract
+    for (const activity in data.bladeburner_actions.contracts) {
+        //get contract information
+        const contract = data.bladeburner_actions.contracts[activity]
+        //get action count
+        const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
+        //check if lower
+        if (action_count < lowest_action_count) {
+            //set action count
+            lowest_action_count = action_count
+        }
+    }
+    
+    //return the action count
+    return lowest_action_count
 }
