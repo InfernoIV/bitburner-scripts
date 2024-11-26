@@ -8,47 +8,74 @@ import * as bladeburner from "../bladeburner/bladeburner.js"
 
 
 /**
- * Function that checks the best work type for bladeburner for sleeve, returns it in order of priority
- * returns empty list if no work is applicable
- * Only perform 100% chance work, else we get shock
- * cannot lower chaos, requires to get city, which increases ram usage -> just selected to lowest chaos city and check threshold
- * @param {NS} ns
- * Cost: 0 GB
- */
-function bladeburner_get_actions_sleeve(ns, sleeveIndex) {
-    //create a variable to store actions into that are wanted
-    let action_list_wanted = []
-    //create a variable to store actions into that are possible (enough chance)
-    let action_list_possible = []
-    
-    //if available actions are getting too low 
-    if (bladeburner_get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
-        //if enough chance
-        
-        //add to the list
-        action_list_wanted.push({ type: data.bladeburner_actions.sleeve.infiltrate_synthoids, name: true })
+ * Function that determines the sleeve work for bladeburner
+ * tries to assign bladeburner work from the lowest index, not checking stats
+ * function should be executed before assigning normal work!
+**/
+export function bladeburner_manage_actions(ns, sleeve_actions) {
+    //check if we have enough chance to recruit, default to sleeve 0
+    if(ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.sleeve.recruitment, 0) >= config.bladeburner_success_chance_minimum_sleeve   {
+        //set sleeve 0 to recruit
+         sleeve_actions[0] = { type: data.bladeburner_actions.sleeve.recruitment }
     }
     
-    //lower city chaos (if needed)
-    if (ns.bladeburner.getCityChaos(bladeburner_get_best_city(ns)) > config.bladeburner_chaos_threshold) {
-        //lower chaos
-        action_list_wanted.push({ type: data.bladeburner_actions.sleeve.diplomacy, name: true })
+    //if action count is too low
+    if (bladeburner.bladeburner_get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
+        //set index to 0
+        let index = 0
+        //if sleeve 0 is already doing work
+        if (sleeve_actions[index].type == data.bladeburner_actions.sleeve.recruitment) {
+            //set index to 1
+            index = 1
+        }
+        //set sleeve to work on this
+        sleeve_actions[index] = { type: data.bladeburner_actions.sleeve.infiltrate_synthoids }
     }
-    
-    //recruit members
-    action_list_wanted.push({ type: data.bladeburner_actions.sleeve.recruitment, name: true })
-    
-    //for each action in the list (from most important to least important)
-    for (const action in action_list_wanted) {
-        //get chance
-        const chance = ns.bladeburner.getActionEstimatedSuccessChance(action.type, sleeveIndex)
-        //if enough chance
-        if (chance >= config.bladeburner_success_chance_minimum_sleeve) {
-            //add to the list of possible actions
-            action_list_possible.push(action)
+
+    //if city chaos is over threshold
+    if (ns.bladeburner.getCityChaos(bladeburner.bladeburner_get_best_city(ns)) > config.bladeburner_chaos_threshold) {
+        //set index to 0
+        let index = 0
+        //if sleeve 0 is already doing work
+        if (sleeve_actions[index].type == data.bladeburner_actions.sleeve.recruitment || sleeve_actions[index].type == data.bladeburner_actions.sleeve.infiltrate_synthoids) {
+            //up the index
+            index = 1
+            //check again
+            //if sleeve 1 is already doing work
+            if (sleeve_actions[index].type == data.bladeburner_actions.sleeve.recruitment || sleeve_actions[index].type == data.bladeburner_actions.sleeve.infiltrate_synthoids) {
+                //up the index
+                index = 2
+            }
+        }
+        //set sleeve to work on lowering chaos
+        sleeve_actions[index] = { type: data.bladeburner_actions.sleeve.diplomacy }
+    }
+}
+
+
+
+/**
+ * Function that executes the bladeburner actions for the sleeves
+ * This way, the bladeburner functions for sleeves are contained in in this script
+**/
+export function bladeburner_execute_actions(ns, sleeve_actions) {
+    //for each sleeve
+    for (let index = 0; index < sleeve_actions.length; index++) {
+        //get the action
+        const sleeve_action = sleeve_actions[index]
+        //check if we want to handle it
+        switch (sleeve_action.type) {
+            //if the type is a blade burner action
+            case data.bladeburner_actions.sleeve.recruitment:
+            case data.bladeburner_actions.sleeve.infiltrate_synthoids: 
+            case data.bladeburner_actions.sleeve.diplomacy: 
+                //set to bladeburner action
+                ns.sleeve.setToBladeburnerAction(index, sleeve_action.type)
+                //only handle bladeburner stuff
+                break
+                
+            default:
+                //do not handle, is a normal actin
         }
     }
-    
-    //return the list of possible actions
-    return action_list_possible
 }
