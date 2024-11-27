@@ -3,12 +3,15 @@ import {
     log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, file_num_sleeves, //const
     enum_servers, enum_scripts, //enums
     get_challenge_flags, get_next_bit_node, has_completed_bit_node_level, //functions
-} from "scripts/js"
+} from "scripts/common.js"
 
 
 
 /** @param {NS} ns */
 export async function main(ns) {    
+    //TODO: check if getRestInfo is still broken (ownedSF is empty)
+    log(ns, 1, info, "ns.getResetInfo(): " + JSON.stringify(ns.getResetInfo()))
+    
     //prepare information to be used later by other functions
     prepare_information(ns)
     
@@ -41,7 +44,7 @@ function prepare_information(ns) {
     const resetInfo = ns.getResetInfo()
     //write data to file
     ns.write(file_reset_info, JSON.stringify(resetInfo), "w")
-    
+
     //get bitnode
     const bitNode = resetInfo.currentNode
     //start at level 1
@@ -66,7 +69,7 @@ function prepare_information(ns) {
     //write data to file
     ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
-    log_bit_node_information(ns, bitNodeMultiplier, resetInfo)
+    log_bit_node_information(ns, bit_node_multipliers, resetInfo)
 
     //set to 0 by default
     let num_sleeves = 0
@@ -105,7 +108,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
     let bitnode = reset_info.currentNode
 
     //log information on completed bitnodes
-    log(ns, 1, info, "Completed following bit nodes: " + JSON.Stringify(reset_info.ownedSF))
+    log(ns, 1, info, "Completed following bit nodes: " + JSON.stringify(reset_info.ownedSF))
     //log next target bit node
     log(ns, 1, info, "Next bit node: " + get_next_bit_node(ns))
     
@@ -296,7 +299,7 @@ const dummy_bit_node_multipliers = {
     ScriptHackMoneyGain: 1, 
     ServerGrowthRate: 1, 
     ServerMaxMoney: 1, 
-    ServerStartingMoney: 1, 
+    ServerStartingMoney: 1,
     ServerStartingSecurity: 1, 
     ServerWeakenRate: 1, 
     StaneksGiftExtraSize: 0, 
