@@ -391,3 +391,155 @@ export const enum_factions = {
     netburners: { name: "Netburners", work_types: ["hacking"] },
     tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
 }
+
+
+
+//enum for checking features
+export const functionality = {
+  //genesis: bit node 1: -
+  gang: "gang", //bit node 2: namespace gang
+  corporation: "corporation", //bit node 3: namespace corporation
+  //singularity: bit node 4: namespace singularity
+  intelligence: "intelligence", //bit node 5: function bitnodeMultipliers, namespace formula's
+  bladeburner: "bladeburner", //bit node 6 & 7: namespace bladeburner
+  stocks: "stocks", //bit node 8: namespace Tix (short and limit orders)
+  hacknet: "hacknet", //bit node 9: namespace hacknet
+  sleeve: "sleeve", //bit node 10: namespace sleeve, grafting
+  //Company: bit node 11: -
+  //Neuroflux: bit node 12: -
+  stanek: "stanek", //bit node 13: namespace stanek
+  ipvgo: "ipvgo", //bit node 14: namespace ipvgo
+}
+
+
+
+/**
+  * Function that checks if functionality is available
+  * either by being in the bitnode that enables it
+  * or by having it unlocked by destroying the corresponding bit node
+  * also checked if not disabled by challenge config or bit node multipliers
+  * returns boolean indicating access to functionality
+**/
+export function get_availability_functionality(ns, functionality) {
+  //stub
+  return false
+  
+  //get challenge flags -> to transfer to bit node options???
+  const challenge_flags = get_challenge_flags(ns)
+  //get current bit node and level
+  const reset_info = get_reset_info(ns)
+  const source_files = 0
+  const bit_node = -1
+  const bit_node_level = -1
+  //get bit node multipliers
+  const bit_node_multipliers = 0
+  
+  switch (functionality) {
+      
+  case functionality.gang: //bit node 2: namespace gang
+    if((bit_node == 2) || //if in bit node
+      (source_files.has(2)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.corporation: //bit node 3: namespace corporation
+    if((bit_node == 3) || //if in bit node
+      (source_files.has(3)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.intelligence: //bit node 5: function bitnodeMultipliers, namespace formula's
+    if((bit_node == 5) || //if in bit node
+      (source_files.has(5)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.bladeburner: //bit node 6 & 7: namespace bladeburner
+    if((bit_node == 6) || //if in bit node
+      (source_files.has(6)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.stocks: //bit node 8: namespace Tix (short and limit orders)
+    if((bit_node == 8) || //if in bit node
+      (source_files.has(8)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.hacknet: //bit node 9: namespace hacknet
+    if((bit_node == 9) || //if in bit node
+      (source_files.has(9)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.sleeve: //bit node 10: namespace sleeve, grafting
+    if((bit_node == 10) || //if in bit node
+      (source_files.has(10)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+
+  case functionality.stanek: //bit node 13: namespace stanek
+    if((bit_node == 13) || //if in bit node
+      (source_files.has(13)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+  
+  case functionality.ipvgo: //bit node 14: namespace ipvgo
+    if((bit_node == 14) || //if in bit node
+      (source_files.has(14)) && //or has source file
+      (challenge_flags == false) && //not disabled by challenge
+      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      //we should have access
+      return true
+    }  
+    //indicate failure
+    return false
+
+  //uncaught condition
+  default:
+    //unknown = no access
+    return false
+  }
+  //failsafe
+  return false
+}
