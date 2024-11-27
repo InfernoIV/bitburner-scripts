@@ -14,6 +14,15 @@ import * as data from "./data.js"
 
 
 
+//sleeve
+import * as sleeve from "./sleeve/sleeve.js" //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
+//bladeburner
+import * as bladeburner from "./bladeburner/bladeburner.js" //todo
+//hacknet
+import * as server from "./hacknet/hacknet.js"
+
+
+
 /**
  * Function that handles everything
  * Mandatory: 
@@ -41,7 +50,7 @@ export async function main(ns) {
     let launched_scripts = []
 
     //conditional imports, TODO: can be part of init or other function???
-
+    /*
     //import hacknet
     let import_hacknet_file = "./hacknet/server.js"
     //check if we need to change
@@ -58,8 +67,8 @@ export async function main(ns) {
     //check if we need to change (either not unlocked or disabled)
     if((common.has_completed_bit_node_level(ns, 10)) &&
       challenge_flags.disable_sleeves != true) {
-        //import hacknet
-        import_sleeve_file = "./sleeve/sleeve_dummy.js"
+        //import sleeve
+        import_sleeve_file = "./sleeve/sleeve.js"
     }
     //import the functions
     import * as sleeve from import_sleeve_file //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
@@ -72,11 +81,11 @@ export async function main(ns) {
        (common.has_completed_bit_node_level(ns, 7)) &&
        (challenge_flags.disable_bladeburner != true)) {
         //import hacknet
-        import_bladeburner_file = "./bladeburner/bladeburner_dummy.js"
+        import_bladeburner_file = "./bladeburner/bladeburner.js"
     }
     //import the functions
     import * as bladeburner from import_bladeburner_file //todo
-
+    */
 
 
 
@@ -186,7 +195,7 @@ function init(ns) {
     ns.clearPort(common.enum_port.reset)
 
     //for each server
-    for (let server of common.get_servers(ns)) {
+    for (let server of get_servers(ns)) {
         //check if it is home
         const is_server_home = (server == common.enum_servers.home)
         //kill all scripts
@@ -209,25 +218,6 @@ function init(ns) {
         hook1.innerHTML = ''
         ns.closeTail()
     })
-}
-
-
-
-/**
- * Function that returns the installed augments
- */
-function get_augmentations_installed(ns) {
-    //owned augments
-    const augments_owned = get_reset_info(ns).ownedAugs
-    //create return value
-    let augments_list = []
-    //for each augment
-    for (let key of augments_owned) {
-        //use only the name
-        augments_list.push(key[0])
-    }
-    //return the list
-    return augments_list
 }
 
 
@@ -271,7 +261,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
     let can_execute_destruction = false
 
     //if the red pill is installed
-    if (get_augmentations_installed(ns).indexOf(data.augments.theRedPill) > -1) {
+    if (common.get_augmentations_installed(ns).indexOf(data.augments.theRedPill) > -1) {
         //then we can check the world daemon backdoor (otherwise the server doesn't exist)
         if (ns.getServer(enum_servers.worldDaemon).backdoorInstalled) {
             //backdoor is installed, proceed with destruction
@@ -282,7 +272,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
     //bladeburner is possible
     if (get_bladeburner_access(ns, challenge_flags)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
-        if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, data.bladeburner_actions.blackOps.operationDaedalus.name) == 0) {
+        if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, data.bladeburner_actions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
             can_execute_destruction = true
         }
@@ -377,7 +367,7 @@ function manage_factions(ns) {
     //get the player factions
     const factions = player.factions
     //get the owned augments (not bought)
-    const augments_installed = get_augmentations_installed(ns)
+    const augments_installed = common.get_augmentations_installed(ns)
     //check for multual exlusive factions
     //TODO: are the city_group names (cities) the same as the faction names?
     const city_group_1 = [enum_cities.sector12, enum_cities.aevum]
@@ -633,7 +623,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
             //if not already launched
             if (launched_scripts.indexOf(script) == -1) {
                 //signal hackManager to stop
-                over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
+                common.over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
                 //get all servers that can run scripts
                 const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
@@ -678,7 +668,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
             }
         }
         //indicate to hack manager that it can resume
-        over_write_port(ns, enum_port.stopHack, enum_hackingCommands.start)
+        common.over_write_port(ns, enum_port.stopHack, enum_hackingCommands.start)
     }
 }
 
@@ -793,7 +783,7 @@ function manage_actions(ns, bit_node_multipliers, challenge_flags) {
         }
 
         //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (common.get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
@@ -980,33 +970,6 @@ function calculate_intelligence_bonus(intelligence, weight = 1) {
 
 
 /**
- * Function that returns an array of available work types
- * Sadly, no easy way to directly link with using destroying the option to easily link
- */
-function get_faction_work_types(faction) {
-    //for each faction
-    for (const faction_index in enum_factions) {
-        //get the faction data
-        const data = enum_factions[faction_index]
-        //if the names match
-        if (data.name == faction) {
-            //if it has work_types
-            if (Object.hasOwn(data, "work_types")) {
-                //return the work types
-                return data.work_types
-            } else {
-                //return empty list
-                return []
-            }
-        }
-    }
-    //failsafe: return empty list
-    return []
-}
-
-
-
-/**
  * Function that manages the bladeburner stuff
  * @param {NS} ns
  * Cost: 28 GB
@@ -1131,64 +1094,6 @@ function bladeburner_determine_action(ns) {
     }
     //default: raise success chances
     return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.fieldAnalysis }
-}
-
-
-
-/**
- * Function that calculates the best faction work type
- * From: https://github.com/bitburner-official/bitburner-src/blob/dev/src/PersonObjects/formulas/reputation.ts
- * Cost: 0 GB
- */
-function determine_faction_work(person, work_types) {
-    //set max skill level
-    const crime_skill_level_maximum = 975
-    //save best rep
-    let best_rep = -1
-    //save best work type
-    let best_work_type = work_types[0]
-
-    //for each work_type
-    for (let work_type of work_types) {
-        //create variable to check later
-        let rep = -1
-
-        //check how to calculate
-        switch (work_type) {
-            case "field":
-                rep = (0.9 *
-                    (person.skills.strength +
-                        person.skills.defense +
-                        person.skills.dexterity +
-                        person.skills.agility +
-                        person.skills.charisma +
-                        (person.skills.hacking + person.skills.intelligence))) / crime_skill_level_maximum / 5.5
-                break
-
-            case "hacking":
-                rep = (person.skills.hacking + person.skills.intelligence / 3) / crime_skill_level_maximum
-                break
-
-            case "security":
-                rep = (0.9 *
-                    (person.skills.strength +
-                        person.skills.defense +
-                        person.skills.dexterity +
-                        person.skills.agility +
-                        (person.skills.hacking + person.skills.intelligence))) / crime_skill_level_maximum / 4.5
-                break
-
-            default:
-                log(ns, 1, warning, "determine_faction_work - uncaught condition: " + work_type);
-                break
-        }
-        //if the rep is better than what is saved
-        if (rep > best_rep) {
-            //save the work type
-            best_work_type = work_type
-        }
-    }
-    return best_work_type
 }
 
 
@@ -1326,19 +1231,6 @@ function scan_server(ns, hostname, server_list) {
 
 
 /**
- * Function that overwrites the specified port with new data
- * Cost: 0
- */
-function over_write_port(ns, port, data) {
-    //clear port
-    ns.clearPort(port)
-    //write data
-    ns.writePort(port, data)
-}
-
-
-
-/**
  * Function that will display port data on UI
  * @param {NS} ns
  * Cost: 0 GB
@@ -1405,7 +1297,7 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
     //add augments bought
     headers.push("Augments bought")
     //add global
-    values.push(get_augmentations_installed(ns).length + "+" + get_augments_to_be_installed() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
+    values.push(common.get_augmentations_installed(ns).length + "+" + get_augments_to_be_installed() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
     //sleeve, should not do anything if not unlocked
     //add sleeve values
@@ -1414,7 +1306,7 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
     const sleeve_headers = sleeve_data[0]
     const sleeve_values = sleeve_data[1]
     //for each header
-    for (let index = 0; index < sleeve_headers.lenght; index++) {
+    for (let index = 0; index < sleeve_headers.length; index++) {
         //add to header
         headers.push(sleeve_headers[index])
         //add specifics to data
@@ -1438,7 +1330,7 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
             //get blackop name
             const blackOp = data.bladeburner_actions.blackOps[blackOpEntry]
             //if completed
-            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
+            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
                 //add to the counter
                 blackOpsCompleted++
             } else {
@@ -1474,37 +1366,7 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
 
 
 
-/**
- * Function that a boolean if enough rep is reached for a faction
- * Always returns true if faction is sector-12 (to ensure grinding for neurflux governor
- * @param {NS} ns
- */
-function should_work_for_faction(ns, faction) {
-    //if sector-12
-    if (faction == enum_factions.sector12.name) {
-        //always work for neuroflux governor
-        return true
-    }
-    
-    //check if we need to work for faction
-    if (ns.singularity.getAugmentationsFromFaction(faction).length > 0) {
-        //keep track of the highest rep
-        let rep_highest = -1
-        //get owned augments
-        let ownedAugs = get_augmentations_installed(ns)
-        //for each augment of the faction
-        for (let augment of ns.singularity.getAugmentationsFromFaction(faction)) {
-            //if augment is not owned
-            if (ownedAugs.indexOf(augment) == -1) {
-                //update the highest rep if needed
-                rep_highest = Math.max(rep_highest, ns.singularity.getAugmentationRepReq(augment))
-            }
-        }
-        //return if there is enough rep (false) or if rep is still needed (true)
-        return rep_highest >= ns.singularity.getFactionRep(faction)
-    }
-    return false
-}
+
 
 
 
