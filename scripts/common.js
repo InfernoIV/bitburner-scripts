@@ -423,7 +423,7 @@ export const functionality = {
 export function get_availability_functionality(ns, functionality) {
   //stub
   return false
-  
+  /*
   //get challenge flags -> to transfer to bit node options???
   const challenge_flags = get_challenge_flags(ns)
   //get current bit node and level
@@ -440,7 +440,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 2) || //if in bit node
       (source_files.has(2)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -451,7 +451,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 3) || //if in bit node
       (source_files.has(3)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -462,7 +462,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 5) || //if in bit node
       (source_files.has(5)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -473,7 +473,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 6) || //if in bit node
       (source_files.has(6)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -484,7 +484,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 8) || //if in bit node
       (source_files.has(8)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -495,7 +495,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 9) || //if in bit node
       (source_files.has(9)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -506,7 +506,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 10) || //if in bit node
       (source_files.has(10)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -517,7 +517,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 13) || //if in bit node
       (source_files.has(13)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -528,7 +528,7 @@ export function get_availability_functionality(ns, functionality) {
     if((bit_node == 14) || //if in bit node
       (source_files.has(14)) && //or has source file
       (challenge_flags == false) && //not disabled by challenge
-      (bit_node_multipliers.x > y) { //not disabled by bit node multipliers
+      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
@@ -540,6 +540,8 @@ export function get_availability_functionality(ns, functionality) {
     //unknown = no access
     return false
   }
+  */
   //failsafe
   return false
 }
+
