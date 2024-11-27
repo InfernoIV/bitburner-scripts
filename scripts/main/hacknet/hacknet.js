@@ -10,7 +10,7 @@ File to use when hacknet functionality IS unlocked
  *  upgradeHomeRam (3)
  *  hacknet (4)
  */
-function manage_servers(ns, challenge_flags) {
+export function manage_servers(ns, challenge_flags) {
     //if not limiting home for challenge
     if(!challenge_flags.limit_home_server) {
         //try to upgrade home RAM first
