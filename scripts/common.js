@@ -31,15 +31,15 @@ export const fail = "FAIL"
 
 //communication port definitions
 export const enum_port = {
-  //external scripts
-  reset: 1,
-  hack: 2,
-  gang: 3,
-  corporation: 4,
-  stock: 5,
-  backdoor: 6,
-  stopHack: 7,
-  stanek: 8,
+    //external scripts
+    reset: 1,
+    hack: 2,
+    gang: 3,
+    corporation: 4,
+    stock: 5,
+    backdoor: 6,
+    stopHack: 7,
+    stanek: 8,
 }
 
 
@@ -57,8 +57,8 @@ export const enum_servers = {
     home: "home",   //no effect
     worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
-    zb_institute: "zb-institute", 
-    universal_energy: "univ-energy", 
+    zb_institute: "zb-institute",
+    universal_energy: "univ-energy",
     titan_labs: "titan-labs",
 }
 
@@ -176,7 +176,7 @@ export const enum_hackingCommands = {
  * Function that overwrites the specified port with new data
  * Cost: 0
  */
-export function overwrite_port(ns, port, data) {
+export function over_write_port(ns, port, data) {
     //clear port
     ns.clearPort(port)
     //write data
@@ -189,8 +189,8 @@ export function overwrite_port(ns, port, data) {
  * Function that retrieves bitnode information from file
  */
 export function get_bit_node_multipliers(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_bit_node_multipliers))
+    //read data from file
+    return JSON.parse(ns.read(file_bit_node_multipliers))
 }
 
 
@@ -199,8 +199,8 @@ export function get_bit_node_multipliers(ns) {
  * Function that retrieves bitnode information from file
  */
 export function get_reset_info(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_reset_info))
+    //read data from file
+    return JSON.parse(ns.read(file_reset_info))
 }
 
 
@@ -209,8 +209,8 @@ export function get_reset_info(ns) {
  * Function that retrieves bitnode information from file
  */
 export function get_challenge_flags(ns) {
-  //read data from file
-  return JSON.parse(ns.read(file_challenge_flags))
+    //read data from file
+    return JSON.parse(ns.read(file_challenge_flags))
 }
 
 
@@ -219,28 +219,31 @@ export function get_challenge_flags(ns) {
  * Function that returns the next target bit node
  */
 export function get_next_bit_node(ns) {
+    //TODO: getResetInfo is broken, return 12
+    return 12
+
     //get the current bit node information from file
     const reset_info = get_reset_info(ns)
     //get the map of owned source files (completed bitnodes) 
     let owned_source_files_after_destruction = reset_info.ownedSF
-    
+
     //check if we already have completed the current node
     if (owned_source_files_after_destruction.has(reset_info.currentNode)) {
         //get the level of the node
         const bit_node_level = owned_source_files_after_destruction.get(reset_info.currentNode)
-        
+
         //if bitnode 12
         if (reset_info.currentNode == 12) {
             //just add the counter
             owned_source_files_after_destruction.set(reset_info.currentNode, bit_node_level + 1)
-        
-        //if not maxxed
+
+            //if not maxxed
         } else if (bit_node_level < 3) {
             //add the level
             owned_source_files_after_destruction.set(reset_info.currentNode, bit_node_level + 1)
         }
-        
-    //otherwise add it to the map (this should be the overview AFTER the bitnode
+
+        //otherwise add it to the map (this should be the overview AFTER the bitnode
     } else {
         //add the bitnode to the source file list at level 1 (first completion)
         owned_source_files_after_destruction.set(reset_info.currentNode, 1)
@@ -252,21 +255,21 @@ export function get_next_bit_node(ns) {
     for (const step of get_bit_node_progression(ns)) {    //bit_node_progression = [ { bit_node: 1, level: 1 } ]
         //if we have completed the bit node (and thus it is present in the map)
         if (owned_source_files.has(step.bit_node)) {
-            
+
             //if we have the required level
-            if(owned_source_files.get(step.bit_node) == step.level) {
+            if (owned_source_files.get(step.bit_node) == step.level) {
                 //everything is in order, go to next
                 continue
-                
-            //we do not have the required level
+
+                //we do not have the required level
             } else {
                 //set the target to this bit node
                 return step.bit_node
                 //stop searching
                 break
             }
-            
-        //bitnode has not been tackled yet
+
+            //bitnode has not been tackled yet
         } else {
             //set the target to this bit node
             return step.bit_node
@@ -284,25 +287,52 @@ export function get_next_bit_node(ns) {
  * Function that returns if the specific bit node has been completed on a specific level (otherwise level 1) 
  */
 export function has_completed_bit_node_level(ns, bit_node, level = 1) {
-    //get the map of owned source files (completed bitnodes) 
-    const owned_source_files = get_reset_info(ns).ownedSF
+    //TODO: getResetInfo is currently broken
+    return true
     
+    //get reset info
+    const reset_info = get_reset_info(ns)
+    //get the map of owned source files (completed bitnodes) 
+    const owned_source_files = reset_info.ownedSF
+
+    log(ns, 1, info, JSON.stringify(reset_info))
+
     //check if we already have completed the current node
-  if (owned_source_files.has(reset_info.currentNode)) {
-      //if we have the level required
-      if(owned_source_files.get(reset_info.currentNode) >= level) {
-        //indicate success
+    if (owned_source_files.has(reset_info.currentNode)) {
+        //if we have the level required
+        if (owned_source_files.get(reset_info.currentNode) >= level) {
+            //indicate success
+            return true
+        }
+        //otherwise if we are looking for the 1st level, and we are in the specific bitnode: the functionality can already be used
+    } else if ((level == 1) &&
+        (reset_info.currentNode == bit_node)) {
+        //we are in the specific bitnode, functionality should be available
         return true
-      }
-  //otherwise if we are looking for the 1st level, and we are in the specific bitnode: the functionality can already be used
-  } else if((level == 1) && 
-            (reset_info.currentNode == bit_node)) {
-      //we are in the specific bitnode, functionality should be available
-      return true
-  }
-  
-  //either bit node is not present in map (not completed) or doesn't have the correct level
-  return false
+    }
+
+    //either bit node is not present in map (not completed) or doesn't have the correct level
+    return false
+}
+
+
+
+/**
+ * Function that returns the installed augments
+ * @param {NS} ns
+ */
+export function get_augmentations_installed(ns) {
+    //owned augments
+    const augments_owned = ns.getResetInfo().ownedAugs//get_reset_info(ns).ownedAugs
+    //create return value
+    let augments_list = []
+    //for each augment
+    for (let key of augments_owned) {
+        //use only the name
+        augments_list.push(key[0])
+    }
+    //return the list
+    return augments_list
 }
 
 
