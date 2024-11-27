@@ -19,8 +19,8 @@ import * as sleeve from "./sleeve/sleeve.js" //sleeve.manage_actions, sleeve.buy
 //bladeburner
 import * as bladeburner from "./bladeburner/bladeburner.js" //todo
 //hacknet
-import * as server from "./hacknet/hacknet.js"
-
+//import * as server from "./hacknet/hacknet.js"
+import { manage_servers, } from "./hacknet/hacknet.js"
 
 
 /**
@@ -122,8 +122,9 @@ export async function main(ns) {
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
-        server.manage_servers(ns, challenge_flags)   // GB
-        
+        //server.manage_servers(ns, challenge_flags)   // GB
+        manage_servers(ns, challenge_flags)   // GB
+
         //update ui: 0 GB
         update_ui(ns, bit_node_multipliers, challenge_flags) //0 GB
         //reset & destruction: 0 GB
@@ -978,7 +979,7 @@ function calculate_intelligence_bonus(intelligence, weight = 1) {
  *  switchCity(4)
  *  getStamina (4)
  *  getRank (4)
- *  getaction_countRemaining (4)
+ *  getActionCountRemaining (4)
  *  getActionEstimatedSuccessChance (4)
  */
 function bladeburner_determine_action(ns) {
