@@ -1,3 +1,8 @@
+//data
+import * as data from "../data.js"
+
+
+
 /*
 File to use when hacknet functionality IS unlocked
 */
