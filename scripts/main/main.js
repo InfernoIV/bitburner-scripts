@@ -829,7 +829,7 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
         //get contract information
         const contract = enum_bladeburnerActions.contracts[operation]
         //get action count
-        const action_count = ns.bladeburner.getaction_countRemaining(enum_bladeburnerActions.type.contracts, contract)
+        const action_count = ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.contracts, contract)
         //get chance
         const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.contracts, contract, sleeveIndex)
         //if this action can be performed and we have enough chance
@@ -1026,7 +1026,7 @@ function bladeburner_determine_action(ns) {
             //get blackOp information
             const blackOp = data.bladeburner_actions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) > 0) {
+            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) > 0) {
                 //get chance
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, blackOp.name)
                 //check if we have enough rank and enough chance
@@ -1048,7 +1048,7 @@ function bladeburner_determine_action(ns) {
             //get operation information
             const operation = data.bladeburner_actions.operations[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
+            const action_count = ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.operations, operation)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.operations, operation)
             //if this action can be performed and we have enough chance
@@ -1066,7 +1066,7 @@ function bladeburner_determine_action(ns) {
             //get contract information
             const contract = data.bladeburner_actions.contracts[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
+            const action_count = ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.contracts, contract)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.contracts, contract)
             //if this action can be performed and we have enough chance
