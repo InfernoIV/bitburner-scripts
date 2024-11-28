@@ -104,6 +104,20 @@ export const enum_scripts = {
  * Cost: 0
  */
 export function log(ns, loglevel, type, message) {
+  //get time
+    const date = new Date()
+    let hour = "" + date.getHours()
+    let min = "" + date.getMinutes()
+    //add leading 0's
+    if (hour.length == 1) {
+        hour = "0" + hour
+    }
+    if (min.length == 1) {
+        min = "0" + min
+    }
+    
+    //update message
+    message = hour + ":" + min + " " + message
     //depending on loglevel
     switch (loglevel) {
         case 2: //alert
