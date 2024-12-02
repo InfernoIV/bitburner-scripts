@@ -1,6 +1,6 @@
 # Factions
-- [ ] CyberSec - Join CyberSec
-- [ ] avmnite-02h - Join NiteSec
+- [x] CyberSec - Join CyberSec
+- [X] avmnite-02h - Join NiteSec
 - [ ] I.I.I.I - Join the Black Hand
 - [ ] run4theh111z - Join the bitRunners
 - [ ] fl1ght.exe - Join Daedalus
