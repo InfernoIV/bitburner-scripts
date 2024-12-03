@@ -10,7 +10,9 @@ import * as data from "./data.js"
 /**
  * Function to do a check for bladeburner access 
  */
-export function get_access(ns, challenge_flags) {
+export function get_access(ns) {
+    //get challenge config
+    const challenge_flags = common.get_challenge_flags(ns)
     //if unlocked (API and division) and not performing the challenge
     if(!has_completed_bit_node_level(ns, 6) || 
        !has_completed_bit_node_level(ns, 7) || 
@@ -223,6 +225,12 @@ export function get_lowest_action_count(ns) {
  * used to block resets
 **/
 export function is_perform_blackop(ns) {
+    //if no access
+    if(!get_access(ns)) {
+        //not possible
+        return false
+    }
+    
     //get bladeburner activity
     const activity = get_activity(ns)
     //check the type
