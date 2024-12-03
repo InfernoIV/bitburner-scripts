@@ -688,35 +688,38 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
  * Quick and dirty copy of the determine player actions
  */
 function restart_player_actions(ns) {
-    //get player
-    const player = ns.getPlayer()
-    //get player activity
-    const player_activity = get_activity(ns)
-    //set the default focus for actions (always false)
-    const action_focus = false
-    
-    //save player desired action
-    let player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.grandTheftAuto }
-    
-    //if not enough hacking skill
-    if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
-        //raise hacking
-        player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.robStore }
-        //if we have not reached target karma
-    } else if (player.karma > data.requirements.karma_for_gang) {
-        //get best crime for karma
-        player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.mug }
+    //check if we need to switch
+    if(ns.singularity.isFocused()) {
+        //get player
+        const player = ns.getPlayer()
+        //get player activity
+        const player_activity = get_activity(ns)
+        //set the default focus for actions (always false)
+        const action_focus = false
         
-    }
-    
-    //check if we need to change
-    if ((player_activity.type != player_action_desired.type) ||
-       (player_activity.value != player_action_desired.value)) {
-        //check if it works
-        if (!ns.singularity.commitCrime(player_action_desired.value, action_focus)) {
-            log(ns, 1, warning, "restart_player_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+        //save player desired action
+        let player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.grandTheftAuto }
+        
+        //if not enough hacking skill
+        if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
+            //raise hacking
+            player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.robStore }
+            //if we have not reached target karma
+        } else if (player.karma > data.requirements.karma_for_gang) {
+            //get best crime for karma
+            player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.mug }
+            
         }
-    }        
+        
+        //check if we need to change
+        if ((player_activity.type != player_action_desired.type) ||
+           (player_activity.value != player_action_desired.value)) {
+            //check if it works
+            if (!ns.singularity.commitCrime(player_action_desired.value, action_focus)) {
+                log(ns, 1, warning, "restart_player_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+            }
+        }        
+    }
 }
 
 
