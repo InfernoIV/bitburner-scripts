@@ -1,12 +1,12 @@
 //threshold on which chaos will effect actions (only done when chance for other actions is too low)
-export const bladeburner_chaos_value_for_penalty = 50
+export const chaos_value_for_penalty = 50
 
 
 
 /**
  * enum that holds the bladeburner skills (in priority)
  */
-export const bladeburner_skills = {
+export const skills = {
     //reduces time
     overclock: "Overclock", //Each level of this skill decreases the time it takes to attempt a Contract, Operation, and BlackOp by 1% (Max Level: 90)
     //raises chance
@@ -29,7 +29,7 @@ export const bladeburner_skills = {
 /**
  * Enum for going through and checking (available) actions and their requirements (if applicable)
  */
-export const bladeburner_actions = {
+export const actions = {
     type: {
         blackOps: "Black Operations",
         operations: "Operations",
