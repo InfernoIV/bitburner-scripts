@@ -299,6 +299,13 @@ function execute_bit_node_destruction(ns, challenge_flags) {
 function install_augments(ns) {
     //get number of bought augments
     const augments_to_be_installed = get_augments_to_be_installed()
+
+    //check if player is busy
+    if (bladeburner.is_perform_blackop(ns)) {
+        //do not proceed
+        return
+    }
+    
     //TODO: check for bonus time? (if applicable)
     //if enough augments bought for a reset
     if (augments_to_be_installed >= config.augments_minimum_for_reset) {
