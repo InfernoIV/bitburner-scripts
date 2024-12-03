@@ -10,7 +10,7 @@ import * as data from "./data.js"
 /**
  * Function to do a check for bladeburner access 
  */
-export function get_bladeburner_access(ns, challenge_flags) {
+export function get_access(ns, challenge_flags) {
     //if unlocked (API and division) and not performing the challenge
     if(!has_completed_bit_node_level(ns, 6) || 
        !has_completed_bit_node_level(ns, 7) || 
@@ -31,21 +31,17 @@ export function get_bladeburner_access(ns, challenge_flags) {
  * Cost: 1 GB
  *  getCurrentAction (1)
  */
-function bladeburner_get_activity(ns) {
-    //create a return value
+function get_activity(ns) {
     //type is work type, value is the specific name of the work
-    let activity = { type: "", value: "" }
     //if bladeburner work
     let player_activity = ns.bladeburner.getCurrentAction()
     //if not null: player is doing bladeburner work
     if (player_activity != null) {
-        //set type
-        activity.type = data.activities.bladeburner
-        //save action (to be looked up later)
-        activity.value = player_activity.name
+        //return the activity
+        return player_activity
     }
-    //return the value
-    return activity
+    //return an empty value
+    return { type: "", value: "" }
 }
 
 
@@ -65,7 +61,7 @@ function bladeburner_get_activity(ns) {
  *  getaction_countRemaining (4)
  *  getActionEstimatedSuccessChance (4)
  */
-function bladeburner_determine_action(ns) {
+function determine_action(ns) {
     //upgrade skills
     bladeburner_raise_skills(ns)
     //check if we need to travel elsewhere
@@ -147,7 +143,7 @@ function bladeburner_determine_action(ns) {
  * Function that raises the skill of bladeburner
  * Just raises all, no focus
 **/
-export function bladeburner_raise_skills(ns) {
+export function raise_skills(ns) {
     //for each bladeburner skill
     for (const skill in data.bladeburner_skills) {
         //upgrade skill without checking details (money, level cap)
@@ -162,7 +158,7 @@ export function bladeburner_raise_skills(ns) {
  * Chaos should be lowest possible
  * Population should be more than 0 (otherwise we cannot do anything)
 **/
-export function bladeburner_get_best_city(ns) {
+export function get_best_city(ns) {
     //go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
     let bladeburner_chaos_lowest = 999999
@@ -190,7 +186,7 @@ export function bladeburner_get_best_city(ns) {
  * Function that get the lowest action count of all operations and contracts
  * Enables determination when sleeves should do infiltrations to raise the counts\
 **/
-export function bladeburner_get_lowest_action_count(ns) {
+export function get_lowest_action_count(ns) {
     //set variable to return, set to high so it can be lowered
     let lowest_action_count = 999
     //for each operation
@@ -219,4 +215,21 @@ export function bladeburner_get_lowest_action_count(ns) {
     }
     //return the action count
     return lowest_action_count
+}
+
+
+/**
+ * Function that returns if the player is performing a blackop
+ * used to block resets
+**/
+export function is_perform_blackop(ns) {
+    //get bladeburner activity
+    const activity = get_activity(ns)
+    //check the type
+    if(activity.type == data.actions.type.blackOps) {
+        //indicate busy
+        return true
+    }
+    //not busy
+    return false
 }
