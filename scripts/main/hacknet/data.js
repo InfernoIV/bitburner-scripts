@@ -12,3 +12,10 @@ export const hash_upgrades = {
     codingContract: "Generate Coding Contract",
     companyFavor: "Company Favor",
 }
+
+//requirements to be fulfilled
+export const hacknet_requirements = {
+        levels: 100,
+        ram: 8,
+        cores: 4,
+}
