@@ -2,11 +2,6 @@
 export const requirements = {
     karma_for_gang: -54000, //-54k
     kills_for_factions: 30,
-    faction_netburners: { 
-        levels: 100,
-        ram: 8,
-        cores: 4,
-    },
 }
 
 
