@@ -13,7 +13,7 @@ export async function main(ns) {
     //main loop
     while (true) {
         //get hostname (only remove data when finished)
-        let server = ns.peek(enum_port.backdoor)
+        let server = ns.peek(common.port.backdoor)
         //if set
         if (server != common.portNoData) {
             //backdoor the server
@@ -38,8 +38,9 @@ function init(ns) {
     ns.disableLog("scan")
     ns.disableLog("singularity.installBackdoor")
     ns.disableLog("sleep")
-    //connect to home
-    ns.singularity.connect(enum_servers.home)
+    
+    //connect to home to ensure proper starting state 
+    ns.singularity.connect(common.servers.home)
 }
 
 
