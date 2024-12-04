@@ -1,4 +1,12 @@
 /*
+Exports:
+  init(ns)
+  manage_actions(ns)
+  buy_augments(ns)
+  update_ui(ns)
+*/
+
+/*
 File to use for import when sleeve functionality IS unlocked
 Functions and cost
   0 GB  init
@@ -39,10 +47,11 @@ export function init(ns) {
  *      Inherited: 4 GB
  *          get_activity (4)   
  */
-export function manage_actions(ns, bit_node_multipliers) {
+export function manage_actions(ns) {
     //get the number of sleeves available
     const sleeves_available = get_num_sleeves(ns)
-
+    //get the bitnode multipliers
+    const bit_node_multipliers = common.get_bit_node_multipliers(ns)
     //get player
     const player = ns.getPlayer()
     //sleeve actions
