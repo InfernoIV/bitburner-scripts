@@ -52,13 +52,13 @@ export function manage_servers(ns) {
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.cores < data.hacknet_requirements.cores) {
+            if (hacknet_stats.cores < data.hacknet_faction_requirements.cores) {
                 //upgrade cores
                 ns.hacknet.upgradeCore(server_index)
             }
     
             //only conditionally level the levels
-            if (hacknet_stats.level < data.hacknet_requirements.levels) {
+            if (hacknet_stats.level < data.hacknet_faction_requirements.levels) {
                 //upgrade level
                 ns.hacknet.upgradeLevel(server_index)
             }
