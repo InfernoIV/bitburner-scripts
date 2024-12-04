@@ -1,6 +1,7 @@
 //data
 import * as data from "../data.js"
-
+//common
+import * as common from "../common.js"
 
 
 /*
@@ -15,7 +16,9 @@ File to use when hacknet functionality IS unlocked
  *  upgradeHomeRam (3)
  *  hacknet (4)
  */
-export function manage_servers(ns, challenge_flags) {
+export function manage_servers(ns) {
+    //get challenge flags
+    const challenge_flags = get_challenge_flags(ns)
     //if not limiting home for challenge
     if(!challenge_flags.limit_home_server) {
         //try to upgrade home RAM first
