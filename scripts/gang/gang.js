@@ -7,10 +7,13 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Const
 
 import { 
     info, success, warning, error, fail, //constants
-    enum_port, enum_servers, enum_scripts, //enums
+    common.port, common.servers, common.scripts, //enums
     log, over_write_port, //functions
 } from "scripts/common.js"
 
+
+//common
+import * as common from "../common.js"
 //config
 import * as config from "./config.js"
 //data
@@ -20,32 +23,29 @@ import * as data from "./data.js"
 //the focus of the gang, either hacking or combat, received from bitNode manager
 var gangFocus
 var bestPowerOfOtherGangs = 0
-var previousWantedLevel = 0
+var previous_wanted_level = 0
 
 
 //main function
 export async function main(ns) {
     //init stuff
-    init(ns)
-    //create a gang
-    while (!createGang(ns)) {
-        //wait a second
-        await ns.sleep(1000 * 10)
-    }
+    await init(ns)
+        
     //try to recruit new members
     await recruitMembers(ns)
+    
     //main loop
     while (true) {
         //for every member
-        for (let gangMemberName of ns.gang.getMemberNames()) {
+        for (let gang_memberName of ns.gang.getMemberNames()) {
             //get information of own gang (updated)
             let gangOwn = ns.gang.getGangInformation()
             //try to recruit new members
             await recruitMembers(ns)
             //checks for clash and sets flag
-            let territoryClash = manageTerritoryClash(ns, gangOwn)
+            let territory_clash = manageterritory_clash(ns, gangOwn)
             //manages member tasks
-            manageMembers(ns, gangOwn, territoryClash, gangMemberName)
+            manageMembers(ns, gangOwn, territory_clash, gang_memberName)
             //wait for next update, so the effect of the task is taken into account (e.g. lowering wanted level)
             await ns.gang.nextUpdate()
             //update UI
@@ -66,19 +66,17 @@ function init(ns) {
     ns.disableLog("gang.purchaseEquipment")
     ns.disableLog("gang.setMemberTask")
     ns.disableLog("gang.setTerritoryWarfare")
-    //get argument for focus type of gang (hacking or combat)
-    //if(ns.args.length < 1) {
-    //log information
-    //log(ns,1,warning,"Not enough arguments, defaulting to hacking focus")
-    gangFocus = "combat"
-    //} else {
-    //    gangFocus = ns.args[0]
-    //}
-    //if in a gang
-
+    
+    //if already in a gang
     if (ns.gang.inGang()) {
         //set clash to false
         ns.gang.setTerritoryWarfare(false)
+    }
+
+    //create a gang
+    while (!createGang(ns)) {
+        //wait a second
+        await ns.sleep(1000 * 10)
     }
 }
 
@@ -89,22 +87,25 @@ function init(ns) {
  */
 /** @param {NS} ns */
 function createGang(ns) {
-    //check if we are in a gang
-    let flagInGang = ns.gang.inGang()
-    //if not in a gang
-    if (!flagInGang) {
-        //defaulting to Slum Snakes 
-        let gangFaction = config.faction_gang
-        //create a gang
-        if (ns.gang.createGang(gangFaction)) {
-            //set flag
-            flagInGang = true
-            //set clash to false
-            //log information
-            log(ns, config.log_level, success, "Created gang " + gangFaction)
-        }
+    //if already in a gang
+    if (ns.gang.inGang()) {
+        //indicate success
+        return true
     }
-    return flagInGang
+    
+    //create a gang
+    if (ns.gang.createGang(config.faction_gang)) {
+        //set flag
+        flagInGang = true
+        //set clash to false
+        //log information
+        log(ns, config.log_level, success, "Created gang " + config.faction_gang)
+        //indicate success
+        return true
+    }
+    
+    //indicate failure
+    return false
 }
 
 
@@ -113,94 +114,122 @@ function createGang(ns) {
  * Function that manages the tasks of the members, according the clash
  */
 /** @param {NS} ns */
-async function manageMembers(ns, gangOwn, territoryClash, gangMemberName) {
+async function manageMembers(ns, gangOwn, territory_clash, gang_memberName) {
     //if name exisist (only changes when killed)
-    if (ns.gang.getMemberNames().indexOf(gangMemberName) > -1) {
+    if (ns.gang.getMemberNames().indexOf(gang_memberName) > -1) {
         //get information of the member 
-        let gangMember = ns.gang.getMemberInformation(gangMemberName)
+        const gang_member = ns.gang.getMemberInformation(gang_memberName)
         //upgrade equipment
-        manageUpgrades(ns, gangMember)
+        manageUpgrades(ns, gang_member)
         //ascend to get better multipliers
-        manageAscension(ns, gangMember)
+        manageAscension(ns, gang_member)
         //set member to perform task
-        performTask(ns, gangOwn, gangMember, determineMemberAction(ns, gangOwn.wantedLevel, territoryClash, gangMember))
+        performTask(ns, gangOwn, gang_member, determineMemberAction(ns, gangOwn.wantedLevel, territory_clash, gang_member))
         //save wanted level
-        previousWantedLevel = gangOwn.wantedLevel
+        previous_wanted_level = gangOwn.wantedLevel
     }
 }
 
 
 
-/** @param {NS} ns */
-function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
-    
-    //variables to save information into
+/** 
+ * Function that determines the action for the specific gang member
+ * @param {NS} ns */
+function determineMemberAction(ns, wanted_level, territory_clash, gang_member) {
+    //level of stat(s) to train
     let statTrain = 0
+    //multiplier of stat(s) to traini
     let statMult = 0
+    //default action
     let trainAction = data.gang_task.money
-    let upgradesHave = [].concat(gangMember.upgrades, gangMember.augmentations)
-    let upgradesAvailable = getUpgrades(ns) //ns.gang.getEquipmentNames()
-    log(ns, config.log_level, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
-    //let augmentationAvailable = ns.gang.
+    //upgrades that are in possession
+    let upgradesHave = [].concat(gang_member.upgrades, gang_member.augmentations)
+    //get availaable upgrades
+    let upgradesAvailable = getUpgrades(ns)
+    //log information
+    common.log(ns, config.log_level, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
 
     //things to check for specific gang focus
-    if (gangFocus == "combat") {
-        statTrain = Math.min(gangMember.str, gangMember.agi, gangMember.def, gangMember.dex)
-        statMult = Math.min(gangMember.str_asc_mult, gangMember.agi_asc_mult, gangMember.def_asc_mult, gangMember.dex_asc_mult)
+    //focus is combat
+    if (config.focus == data.focus_area.combat) {
+        //get the lowest level
+        statTrain = Math.min(gang_member.str, gang_member.agi, gang_member.def, gang_member.dex)
+        //get the lowest multiplier
+        statMult = Math.min(gang_member.str_asc_mult, gang_member.agi_asc_mult, gang_member.def_asc_mult, gang_member.dex_asc_mult)
+        //action set to train
         trainAction = data.gang_task.trainCombat
-    } else if (gangFocus == "hacking") {
-        statTrain = gangMember.hack
-        statMult = gangMember.hack_asc_mult
+
+    //focus is hacking
+    } else if (config.focus == data.focus_area.hacking) {
+        //get the hacking level
+        statTrain = gang_member.hack
+        //get the hacking multiplier
+        statMult = gang_member.hack_asc_mult
+        //set to training hacking
         trainAction = data.gang_task.trainHacking
+
+    //incorrect or undefined focus
     } else {
-        log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
+        //log error
+        common.log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
         //defaults to raise money
         return data.gang_task.power
     }
 
-    //if the desired level is too low
-    if (statTrain < config.desired_training_Level) {
-        over_write_port(ns, enum_port.gang, "Training")
-
+    //if the desired level or mulitplier is too low
+    if ((statTrain < config.desired_training_Level) ||
+        (statMult < config.desired_multiplier)) {
+        //update UI
+        over_write_port(ns, common.port.gang, "Training")
+        //return the action
         return trainAction
+        
         //if not enough members unlocked
-    } else if (statMult < config.desired_multiplier) {
-        over_write_port(ns, enum_port.gang, "Training")
-
-        return trainAction
-        //if wanted level is too high
-    } else if (ns.gang.getMemberNames().length < data.gang_members_max) {
-        over_write_port(ns, enum_port.gang, "Growing gang")
-        return data.gang_task.reputation    //if members can be unlocked: gain reputation
-        //if the multiplier is too low
-    } else if (wantedLevel > previousWantedLevel) {
-        return data.gang_task.lowerWanted   //if wanted level is rising, lower wanted level    
-        //if not all upgrades unlocked
+    } else if (ns.gang.getMemberNames().length < data.members_max) {
+        //update UI
+        over_write_port(ns, common.port.gang, "Growing gang")
+        //if members can be unlocked: gain reputation
+        return data.gang_task.reputation
+        
+    //if the wanted level is rising
+    } else if (wanted_level > previous_wanted_level) {
+        //lower wanted level
+        return data.gang_task.lowerWanted
+        
+    //if not all upgrades unlocked
     } else if (upgradesHave.length < config.desired_equipment) {
         //block resets
-        over_write_port(ns, enum_port.reset, "gang")
-        over_write_port(ns, enum_port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
-        //upgradesAvailable.length) {
+        over_write_port(ns, common.port.reset, "gang")
+        //update UI
+        over_write_port(ns, common.port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
         //raise money to buy upgrades
         return data.gang_task.money
-        //if clashing: gain territory  
-    } else if (territoryClash == 1) {
-        //clear reset
-        if (ns.peek(enum_port.reset) == "gang") {
-            ns.clearPort(enum_port.reset)
+        
+    //if clashing: gain territory  
+    } else if (territory_clash == 1) {
+        //if we are still blocking resets
+        if (ns.peek(common.port.reset) == "gang") {
+            //remove this message
+            ns.readPort(common.port.reset)
         }
-        over_write_port(ns, enum_port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
+        //update UI
+        over_write_port(ns, common.port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
+        //perform gang war
         return data.gang_task.power
-        //if all territory is owned: focus on getting money   
-    } else if (territoryClash == 2) {
+        
+    //if all territory is owned: focus on getting money   
+    } else if (territory_clash == 2) {
         //indicate status
-        over_write_port(ns, enum_port.gang, "Farming")
-        //clear reset
-        if (ns.peek(enum_port.reset) == "gang") {
-            ns.clearPort(enum_port.reset)
+        over_write_port(ns, common.port.gang, "Farming")
+        //if we are still blocking resets
+        if (ns.peek(common.port.reset) == "gang") {
+            //remove this message
+            ns.readPort(common.port.reset)
         }
+        //raise money
         return data.gang_task.money
-        //defaults to raise power
+        
+    //defaults to raise power
     } else {
         return data.gang_task.power
     }
@@ -215,15 +244,14 @@ function determineMemberAction(ns, wantedLevel, territoryClash, gangMember) {
 async function recruitMembers(ns) {
     //if a new member can be recruited
     if (ns.gang.canRecruitMember()) {
-        log(ns, 0, info, "Recruiting Member")
-        //update information
-        //over_write_port(ns, enum_port.gang, "Growing gang")
-
+        //log information
+        common.log(ns, 0, common.info, "Recruiting Member")
+        
         const names = ns.gang.getMemberNames()
 
-        for (let index = 0; index < data.gang_members_max; index++) {
+        for (let index = 0; index < data.members_max; index++) {
             //create name
-            let memberNameNew = "gangMember-" + index //ns.gang.getMemberNames().length //nameList[randomNumber]
+            let memberNameNew = "gang_member-" + index //ns.gang.getMemberNames().length //nameList[randomNumber]
             //if the name does not exist
             if (names.indexOf(memberNameNew) == -1) {
                 //recruit a new member
@@ -236,7 +264,7 @@ async function recruitMembers(ns) {
                 return
             }
         }
-        log(ns, config.log_level, error, "Unhandled: All " + data.gang_members_max + " members recruited?!?")
+        log(ns, config.log_level, error, "Unhandled: All " + data.members_max + " members recruited?!?")
     }
 }
 
@@ -248,7 +276,7 @@ async function recruitMembers(ns) {
  * return 2 if all territory is owned
  */
 /** @param {NS} ns */
-function manageTerritoryClash(ns, gangOwn) {
+function manageterritory_clash(ns, gangOwn) {
     //let gangOwnPower = gangOwn.power
 
     //save information on other gangs (names)
@@ -282,11 +310,11 @@ function manageTerritoryClash(ns, gangOwn) {
     bestPowerOfOtherGangs = bestOtherGang.power
     
     //flag for clash
-    let territoryClash = 0
+    let territory_clash = 0
     //if all other gangs have no territory
     if (eliminatedGangs.length >= otherGangs.length || bestOtherGang.faction == "") {        //update information
         //we've won, no further actions are needed
-        territoryClash = 2
+        territory_clash = 2
         //clear blockage        
     } else {        //update information
         //if we have more than the minimum chance
@@ -294,12 +322,12 @@ function manageTerritoryClash(ns, gangOwn) {
             //update information
             //over_write_port(ns, portGang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
             //start clashing 
-            territoryClash = 1
+            territory_clash = 1
             log(ns, 0, info, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
         }
     }
     //set warfare (TODO: does it matter if it is started whilst already performing warfare?)
-    if (territoryClash == 1) {
+    if (territory_clash == 1) {
         //update gang stats
         ns.gang.setTerritoryWarfare(true)
     } else {
@@ -308,7 +336,7 @@ function manageTerritoryClash(ns, gangOwn) {
     }
 
     //return the flag
-    return territoryClash
+    return territory_clash
 }
 
 
@@ -317,7 +345,7 @@ function manageTerritoryClash(ns, gangOwn) {
  * Function that starts a task for the given member
  */
 /** @param {NS} ns */
-function performTask(ns, gangOwn, gangMember, taskFocus) {
+function performTask(ns, gangOwn, gang_member, taskFocus) {
     //log(ns,0,info,"Task: " + taskFocus )
     //Set default task to hybrid task (Both combat and hacking)
     let task = data.gang_task.unassigned
@@ -340,15 +368,15 @@ function performTask(ns, gangOwn, gangMember, taskFocus) {
         //focus that needs to be calculated (depending on gang task focus)
         case data.gang_task.reputation:
         case data.gang_task.money:
-            task = getBestTask(ns, gangOwn, gangMember, taskFocus); break
+            task = getBestTask(ns, gangOwn, gang_member, taskFocus); break
         //log(ns,1,info,"task: " + JSON.stringify(task)); break
         default: log(ns, config.log_level, error, "performTask: unhandled condition '" + taskFocus + "', defaulting to " + task); break
     }
 
     //If the member is not performing the task
-    if (gangMember.task != task) {
+    if (gang_member.task != task) {
         //set member to perform task
-        ns.gang.setMemberTask(gangMember.name, task)
+        ns.gang.setMemberTask(gang_member.name, task)
     }
 }
 
@@ -356,11 +384,11 @@ function performTask(ns, gangOwn, gangMember, taskFocus) {
 
 /**
  * Function that gets the best task for the given type
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/GangMemberTask.ts
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/gang_memberTask.ts
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/tasks.ts
  */
 /** @param {NS} ns */
-function getBestTask(ns, gangOwn, gangMember, type) { //type is either "reputation" or "money"
+function getBestTask(ns, gangOwn, gang_member, type) { //type is either "reputation" or "money"
     //get the tasks
     const tasks = getTasks(ns)
     //variable to save task to
@@ -368,7 +396,7 @@ function getBestTask(ns, gangOwn, gangMember, type) { //type is either "reputati
     //for every task
     for (const task of tasks) {
         //calculate the gains (according to the type)
-        const gains = calculateGains(ns, gangOwn, gangMember, task, type)
+        const gains = calculateGains(ns, gangOwn, gang_member, task, type)
         //if better gains        
         if (gains > best.value) {
             //save the information
@@ -467,23 +495,23 @@ function calculateGains(ns, gang, member, task, type) {
 
 /**
  * function that manages upgrades of the gang member
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/GangMemberUpgrade.ts
- * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/GangMemberUpgrades.ts
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/gang_memberUpgrade.ts
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/gang_memberUpgrades.ts
  * https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/upgrades.ts
  * 
  * every augment will result into lower ascension points (95%)
  * need to use??
  *  getInstallResult(memberName) 	            Get the effect of an install on ascension multipliers without installing.
  */
-function manageUpgrades(ns, gangMember) {
+function manageUpgrades(ns, gang_member) {
     //get all owned upgrades (augments and equipment)
-    const ownedUpgrades = gangMember.augmentations.concat(gangMember.upgrades)
+    const ownedUpgrades = gang_member.augmentations.concat(gang_member.upgrades)
     //for every available equipment
     for (const equipName of getUpgrades(ns)) { //ns.gang.getEquipmentNames()) {
         //if not owned
         if (ownedUpgrades.indexOf(equipName) == -1) {
             //buy it
-            ns.gang.purchaseEquipment(gangMember.name, equipName)
+            ns.gang.purchaseEquipment(gang_member.name, equipName)
         }
     }
 }
@@ -492,13 +520,13 @@ function manageUpgrades(ns, gangMember) {
 
 /**
  * function that manages augments and ascension of the gang member
- * https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.gangmemberascension.md
- * https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.gangmemberinfo.md
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.gang_memberascension.md
+ * https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.gang_memberinfo.md
  */
 /** @param {NS} ns */
-function manageAscension(ns, gangMember) {
+function manageAscension(ns, gang_member) {
     //Get the result of an ascension without ascending
-    let results = ns.gang.getAscensionResult(gangMember.name)
+    let results = ns.gang.getAscensionResult(gang_member.name)
 
     //https://www.reddit.com/r/Bitburner/comments/x6v08l/help_with_automating_gangs/
     const fNeeded = 2 //1.26
@@ -513,8 +541,8 @@ function manageAscension(ns, gangMember) {
         }
     }
     if (fNeeded < f) {
-        if (ns.gang.ascendMember(gangMember.name)) {
-            log(ns, config.log_level, success, "Ascended " + gangMember.name + "!")
+        if (ns.gang.ascendMember(gang_member.name)) {
+            log(ns, config.log_level, success, "Ascended " + gang_member.name + "!")
         }
     }
 }
