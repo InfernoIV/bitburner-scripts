@@ -18,7 +18,7 @@ File to use when hacknet functionality IS unlocked
  */
 export function manage_servers(ns) {
     //get challenge flags
-    const challenge_flags = get_challenge_flags(ns)
+    const challenge_flags = common.get_challenge_flags(ns)
     //if not limiting home for challenge
     if(!challenge_flags.limit_home_server) {
         //try to upgrade home RAM first
