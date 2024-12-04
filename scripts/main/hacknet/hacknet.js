@@ -1,5 +1,5 @@
 //data
-import * as data from "../data.js"
+import * as data from "./data.js"
 //common
 import * as common from "../common.js"
 
@@ -19,6 +19,7 @@ File to use when hacknet functionality IS unlocked
 export function manage_servers(ns) {
     //get challenge flags
     const challenge_flags = common.get_challenge_flags(ns)
+    
     //if not limiting home for challenge
     if(!challenge_flags.limit_home_server) {
         //try to upgrade home RAM first
@@ -51,13 +52,13 @@ export function manage_servers(ns) {
             }
     
             //only conditionally level the cores
-            if (hacknet_stats.cores < data.requirements.faction_netburners.cores) {
+            if (hacknet_stats.cores < data.hacknet_requirements.cores) {
                 //upgrade cores
                 ns.hacknet.upgradeCore(server_index)
             }
     
-            //only conditionally level the cores
-            if (hacknet_stats.level < data.requirements.faction_netburners.levels) {
+            //only conditionally level the levels
+            if (hacknet_stats.level < data.hacknet_requirements.levels) {
                 //upgrade level
                 ns.hacknet.upgradeLevel(server_index)
             }
