@@ -508,7 +508,7 @@ function get_num_sleeves(ns) {
  * Sleeve: 4 GB
  *  getTask (4)
  */
-export function get_activity(ns, index = -1) {
+function get_activity(ns, index = -1) {
     //create a return value
     //type is work type, value is the specific name of the work
     let activity = { type: "", value: "" }
