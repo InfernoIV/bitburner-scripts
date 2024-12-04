@@ -14,7 +14,7 @@ export const hash_upgrades = {
 }
 
 //requirements to be fulfilled
-export const hacknet_requirements = {
+export const hacknet_faction_requirements = {
         levels: 100,
         ram: 8,
         cores: 4,
