@@ -1,9 +1,9 @@
 //bladeburner config
-import * as config from "../bladeburner/config.js"
+import * as config from "../../bladeburner/config.js"
 //bladeburner data
-import * as data from "../bladeburner/data.js"
+import * as data from "../../bladeburner/data.js"
 //bladeburner functions
-import * as bladeburner from "../bladeburner/bladeburner.js"
+import * as bladeburner from "../../bladeburner/bladeburner.js"
 
 
 
