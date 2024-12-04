@@ -30,7 +30,7 @@ export const fail = "FAIL"
 
 
 //communication port definitions
-export const enum_port = {
+export const port = {
     //external scripts
     reset: 1,
     hack: 2,
@@ -53,7 +53,7 @@ export const portNoData = "NULL PORT DATA"
  * enum of special servers
  * All servers will be backdoored, if possible
  */
-export const enum_servers = {
+export const servers = {
     home: "home",   //no effect
     worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
@@ -67,7 +67,7 @@ export const enum_servers = {
 /**
  * Enum containing scripts
  */
-export const enum_scripts = {
+export const scripts = {
     //script
     boot: "scripts/boot.js",
     //main
@@ -167,7 +167,7 @@ export function number_formatter(number) {
 /**
  * Enum stating all cities
  */
-export const enum_cities = {
+export const cities = {
     aevum: "Aevum",
     chongqing: "Chongqing",
     ishima: "Ishima",
@@ -179,7 +179,7 @@ export const enum_cities = {
 
 
 // hacking commands
-export const enum_hackingCommands = {
+export const hackingCommands = {
     start: "Start",
     stop: "Stop",
 }
@@ -356,7 +356,7 @@ export function get_augmentations_installed(ns) {
  * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
  * Work types: "field", "hacking", "security" 	
  */
-export const enum_factions = {
+export const factions = {
     //special factions (no faction work available)
     slumSnakes: { name: "Slum Snakes" },
     bladeburners: { name: "Bladeburners" },
