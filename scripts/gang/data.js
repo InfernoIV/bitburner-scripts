@@ -1,5 +1,5 @@
 //maximum number of gang members
-export const gang_members_max = 12
+export const members_max = 12
 
 //tasks types to be used by functions
 export const gang_task = { 
@@ -12,4 +12,15 @@ export const gang_task = {
     //
     reputation: "respect",
     money: "money",
+}
+
+//available focus area of the gang
+export const focus_area = {
+  hacking: "hacking",
+  combat: "combat",
+}
+
+//available factions that can be joined as a gang
+export const factions = {
+    slum_snakes: "Slum Snakes",
 }
