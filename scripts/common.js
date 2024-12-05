@@ -358,33 +358,33 @@ export function get_augmentations_installed(ns) {
  */
 export const factions = {
     //special factions (no faction work available)
-    slumSnakes: { name: "Slum Snakes" },
+    slum_snakes: { name: "Slum Snakes" },
     bladeburners: { name: "Bladeburners" },
-    churchOfTheMachineGod: { name: "Church of the Machine God" },
-    shadowsOfAnarchy: { name: "Shadows of Anarchy" },
+    church_of_the_machine_god: { name: "Church of the Machine God" },
+    shadows_of_anarchy: { name: "Shadows of Anarchy" },
 
     //important factions
     daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
     illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
-    theCovenant: { name: "The Covenant", work_types: ["field", "hacking"] },
+    the_covenant: { name: "The Covenant", work_types: ["field", "hacking"] },
 
     //company factions
-    eCorp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
-    megaCorp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
-    bachmanAssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
-    bladeIndustries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
-    nWO: { name: "NWO", work_types: ["field", "hacking", "security"] },
-    clarkeIncorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
-    omniTekIncorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
-    fourSigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
-    kuaiGongInternational: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
-    fulcrumSecretTechnologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
+    e_corp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
+    mega_corp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
+    bachman_and_ssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
+    blade_industries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
+    nwo: { name: "NWO", work_types: ["field", "hacking", "security"] },
+    clarke_incorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
+    omni_tek_incorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
+    four_sigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
+    kuai_gong_international: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
+    fulcrum_secret_technologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
 
     //hacking factions
-    bitRunners: { name: "BitRunners", work_types: ["hacking"] },
-    theBlackHand: { name: "The Black Hand", work_types: ["field", "hacking"] },
-    niteSec: { name: "NiteSec", work_types: ["hacking"] },
-    cyberSec: { name: "CyberSec", work_types: ["hacking"] },
+    bit_runners: { name: "BitRunners", work_types: ["hacking"] },
+    the_black_hand: { name: "The Black Hand", work_types: ["field", "hacking"] },
+    nite_sec: { name: "NiteSec", work_types: ["hacking"] },
+    cyber_sec: { name: "CyberSec", work_types: ["hacking"] },
 
     //location factions
     aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
@@ -395,15 +395,15 @@ export const factions = {
     volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
 
     //crime factions
-    speakersForTheDead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
-    theDarkArmy: { name: "The Dark Army", work_types: ["field", "hacking"] },
-    theSyndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
+    speakers_for_the_dead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
+    the_dark_army: { name: "The Dark Army", work_types: ["field", "hacking"] },
+    the_syndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
     silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
     tetrads: { name: "Tetrads", work_types: ["field", "security"] },
 
     //other factions
     netburners: { name: "Netburners", work_types: ["hacking"] },
-    tianDiHui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
+    tian_di_hui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
 }
 
 
