@@ -5,11 +5,7 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/Gang.ts
 https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Constants.ts
 */
 
-import { 
-    info, success, warning, error, fail, //constants
-    common.port, common.servers, common.scripts, //enums
-    log, over_write_port, //functions
-} from "scripts/common.js"
+
 
 
 //common
