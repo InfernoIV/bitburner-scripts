@@ -182,7 +182,7 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
          //incorrect or undefined focus
         default:
             //log error
-            common.log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
+            common.log(ns, config.log_level, error, "Uncaught Gang focus: " + config.focus)
             //defaults to raise money / power?
             return data.gang_task.power
     }
@@ -227,7 +227,7 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
         return data.gang_task.money
         
     //if clashing: gain territory  
-    } else if (territory_clash == 1) {
+    } else if (territory_clash == data.territory_clash.start ) {
         //if we are still blocking resets
         if (ns.peek(common.port.reset) == "gang") {
             //remove this message
@@ -239,7 +239,7 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
         return data.gang_task.power
         
     //if all territory is owned: focus on getting money   
-    } else if (territory_clash == 2) {
+    } else if (territory_clash == data.territory_clash.complete) {
         //indicate status
         common.over_write_port(ns, common.port.gang, "Farming")
         //if we are still blocking resets
@@ -338,23 +338,23 @@ function manage_territory_clash(ns) {
     }
         
     //flag for clash
-    let territory_clash = 0
+    let territory_clash = data.territory_clash.stop
     //if all other gangs have no territory
     if (eliminated_gangs.length >= other_gangs.length || best_other_gang.faction == "") {
         //we've won, no further actions are needed
-        territory_clash = 2
+        territory_clash = data.territory_clash.complete
     //not all gangs are defeated
     } else {        
         //if we have more than the minimum chance
         if (ns.gang.getChanceToWinClash(best_other_gang.faction) > config.territory_clash_minimum_percentage) {
             //start clashing 
-            territory_clash = 1
+            territory_clash = data.territory_clash.start
             //log information
             common.log(ns, config.log_level, common.info, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
         }
     }
     //set warfare (TODO: does it matter if it is started whilst already performing warfare?)
-    if (territory_clash == 1) {
+    if (territory_clash == data.territory_clash.start) {
         //update gang stats
         ns.gang.setTerritoryWarfare(true)
     //no need to clash
@@ -378,15 +378,8 @@ function perform_task(ns, gang_own, gang_member, task_focus) {
 
     //if wanted should be lowered
     if (task_focus == data.gang_task.lower_wanted) {
-        //hacking focus
-        if (config.focus == data.focus_area.hacking) {
-            //set to hacking lowering wanted
-            task = "Ethical Hacking"
-        //combat focus
-        }else if(config.focus == data.focus_area.combat) {
-            //perform combat task for wanted level
-            task = "Vigilante Justice"
-        }
+        //set to lowering wanted, determined by focus
+        task = data.lower_wanted_action[config.focus]
     }
     /*
     //depending on the focus, set the task
@@ -418,13 +411,13 @@ function perform_task(ns, gang_own, gang_member, task_focus) {
         //dependant on bitnode focus (either hacking or combat)
         case data.gang_task.lowerWanted:
             //determined by gang focus
-            switch(gangFocus) {
+            switch(config.focus) {
                 case focus_area.hacking: 
 
                 case focus_area.combat: 
             }
             //if hacking focus
-            if (gangFocus == "hacking") {
+            if (config.focus == data.focus_area.hacking) {
                 //perform hacking task for wanted level
                 task = "Ethical Hacking"
                 //stop searching
@@ -487,11 +480,18 @@ function get_best_task(ns, gang_own, gang_member, type) { //type is either "repu
     if (best.value > 0) {
         //return the best task
         return best.name
+    
+    //no value set
     } else {
-        if (gangFocus == "combat") {
-            return "Train Combat"
-        } else if (gangFocus == "hacking") {
-            return "Train Hacking"
+        //if focus is combat
+        if (config.focus == data.focus_area.combat) {
+            //traing combat
+            return data.gang_task.train_combat
+        
+            //if focus is hacking
+        } else if (config.focus == data.focus_area.hacking) {
+            //traing hacking
+            return data.gang_task.train_hacking
         }
     }
 }
@@ -533,7 +533,7 @@ function get_tasks(ns) {
         }
     }
     //return task list   
-    return task_list[gangFocus]
+    return task_list[config.focus]
 }
 
 
@@ -631,9 +631,9 @@ function manage_ascension(ns, gang_member) {
 
     if (results != null) {
         //check focus
-        if (gangFocus == "hacking") {
+        if (config.focus == data.focus_area.hacking) {
             f = Math.min(results.hack)
-        } else if (gangFocus == "combat") {
+        } else if (config.focus == data.focus_area.combat) {
             f = Math.min(results.str, results.def, results.dex)//ignore agility since it is very slow levelling?, results.agi)
         }
     }
