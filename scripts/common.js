@@ -566,7 +566,9 @@ export function get_availability_functionality(ns, functionality) {
  */
 export function disable_logging(ns, log_topics) {
   //assuming array of log topics
-  //for each topic
+  //stop logging of the stop logging...
+  ns.disableLog("disableLog")
+  //for each topic of the argument
   for (const log_topic of log_topics) {
     //disable logging
     ns.disableLog(log_topic)
