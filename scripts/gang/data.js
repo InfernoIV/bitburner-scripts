@@ -7,10 +7,7 @@ export const members_max = 12
 //tasks types to be used by functions
 export const gang_task = { 
     unassigned: "unassigned",
-    lower_wanted: { 
-        focus_area.hacking: "Ethical Hacking",
-        focus_area.combat: "Vigilante Justice",
-    }, //"lowerWanted",
+    lower_wanted: "lower wanted", //{ focus_area.hacking: "Ethical Hacking", focus_area.combat: "Vigilante Justice", }, //"lowerWanted",
     train_hacking: "Train Hacking", //"trainHacking",
     train_combat: "Train Combat", //"trainCombat",
     train_charisma: "Train Charisma", //"trainCharisma",
