@@ -46,8 +46,8 @@ export const factions = {
 }
 
 //variable to use to check clash status
-export const territory_clash_status = {
-    stopped: 0,
-    started: 1,
-    completed: 2,
+export const territory_clash = {
+    stop: 0,
+    start: 1,
+    finished: 2,
 }
