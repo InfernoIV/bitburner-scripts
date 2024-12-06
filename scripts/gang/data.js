@@ -6,8 +6,11 @@ export const members_max = 12
 
 //tasks types to be used by functions
 export const gang_task = { 
-    unassigned: "unassigned",
+    //custom
     lower_wanted: "lower wanted", //{ focus_area.hacking: "Ethical Hacking", focus_area.combat: "Vigilante Justice", }, //"lowerWanted",
+    
+    //
+    unassigned: "unassigned",
     train_hacking: "Train Hacking", //"trainHacking",
     train_combat: "Train Combat", //"trainCombat",
     train_charisma: "Train Charisma", //"trainCharisma",
@@ -15,6 +18,12 @@ export const gang_task = {
     //TODO
     reputation: "respect",
     money: "money",
+}
+
+//specific tasks for lowering wanted
+export const lower_wanted_action = {
+    hacking: "Ethical Hacking",
+    combat: "Vigilante Justice",
 }
 
 //available focus area of the gang
