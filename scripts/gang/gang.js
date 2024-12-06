@@ -17,8 +17,7 @@ import * as data from "./data.js"
 
 
 //globals, to be moved inside the functions
-var bestPowerOfOtherGangs = 0
-var previous_wanted_level = 0
+
 
 
 //main function
@@ -28,17 +27,21 @@ export async function main(ns) {
         
     //try to recruit new members
     await recruit_members(ns)
+
+    //keep track of previous wanted level, to ensure the correct actions are set (not all/too many members to lower wanted)
+    let previous_wanted_level = 0
     
-    //main loop
+    //infitine loop
     while (true) {
+        //placed on this level, to ensure effects have occurred before assigning the next gang member
         //for every member
-        for (let gang_memberName of ns.gang.getMemberNames()) {
+        for (const gang_member_name of ns.gang.getMemberNames()) {
             //try to recruit new members
             await recruit_members(ns)
             //checks for clash and sets flag
             const territory_clash = manage_territory_clash(ns)
-            //manages member tasks
-            manage_members(ns, territory_clash, gang_memberName)
+            //manages member tasks, update wanted level
+            previous_wanted_level = manage_member(ns, territory_clash, gang_member_name, previous_wanted_level)
             //wait for next update, so the effect of the task is taken into account (e.g. lowering wanted level)
             await ns.gang.nextUpdate()
             //update UI
@@ -71,6 +74,8 @@ function init(ns) {
         //wait a second
         await ns.sleep(1000 * 10)
     }
+    //log information
+    common.log(ns, config.log_level, common.success, "Init complete")
 }
 
 
@@ -88,7 +93,7 @@ function createGang(ns) {
     //create a gang
     if (ns.gang.createGang(config.faction_gang)) {
         //log information
-        log(ns, config.log_level, success, "Created gang " + config.faction_gang)
+        common.log(ns, config.log_level, common.success, "Created gang " + config.faction_gang)
         //indicate success
         return true
     }
@@ -102,22 +107,25 @@ function createGang(ns) {
  * Function that manages the tasks of the members, according the clash
  */
 /** @param {NS} ns */
-async function manage_members(ns, territory_clash, gang_memberName) {
+async function manage_member(ns, territory_clash, gang_member_name, previous_wanted_level) {
     //get information of own gang (updated)
     const gang_own = ns.gang.getGangInformation()
     //if name exisist (only changes when killed)
-    if (ns.gang.getMemberNames().indexOf(gang_memberName) > -1) {
+    if (ns.gang.getMemberNames().indexOf(gang_member_name) > -1) {
         //get information of the member 
-        const gang_member = ns.gang.getMemberInformation(gang_memberName)
+        const gang_member = ns.gang.getMemberInformation(gang_member_name)
         //upgrade equipment
         manage_upgrades(ns, gang_member)
         //ascend to get better multipliers
         manageAscension(ns, gang_member)
+        //get the best action
+        const gang_member_action = determine_member_action(ns, gang_own.wantedLevel, previous_wanted_level, territory_clash, gang_member)
         //set member to perform task
-        perform_task(ns, gang_own, gang_member, determine_member_action(ns, gang_own.wantedLevel, territory_clash, gang_member))
-        //save wanted level
-        previous_wanted_level = gang_own.wantedLevel
+        perform_task(ns, gang_own, gang_member, gang_member_action)
+        
     }
+    //return wanted level
+    return gang_own.wantedLevel
 }
 
 
@@ -125,73 +133,86 @@ async function manage_members(ns, territory_clash, gang_memberName) {
 /** 
  * Function that determines the action for the specific gang member
  * @param {NS} ns */
-function determine_member_action(ns, wanted_level, territory_clash, gang_member) {
+function determine_member_action(ns, wanted_level, previous_wanted_level, territory_clash, gang_member, ) {
     //level of stat(s) to train
-    let statTrain = 0
+    let stat_to_train = 0
     //multiplier of stat(s) to traini
-    let statMult = 0
+    let stat_multiplier_to_train = 0
     //default action
-    let trainAction = data.gang_task.money
+    let train_action = data.gang_task.money
     //upgrades that are in possession
-    const upgradesHave = [].concat(gang_member.upgrades, gang_member.augmentations)
+    const upgrades_owned = [].concat(gang_member.upgrades, gang_member.augmentations)
     //get availaable upgrades
-    const upgradesAvailable = get_upgrades(ns)
+    const upgrades_available = get_upgrades(ns)
     //log information
-    common.log(ns, config.log_level, info, "upgradesHave: " + upgradesHave.length + ", upgradesAvailable: " + upgradesAvailable.length)
+    common.log(ns, config.log_level, common.info, "Upgrades_owned: " + upgrades_owned.length + ", upgrades_available: " + upgrades_available.length)
 
     //things to check for specific gang focus
-    //focus is combat
-    if (config.focus == data.focus_area.combat) {
-        //get the lowest level
-        statTrain = Math.min(gang_member.str, gang_member.agi, gang_member.def, gang_member.dex)
-        //get the lowest multiplier
-        statMult = Math.min(gang_member.str_asc_mult, gang_member.agi_asc_mult, gang_member.def_asc_mult, gang_member.dex_asc_mult)
-        //action set to train
-        trainAction = data.gang_task.trainCombat
+    switch (config.focus) {
+        //focus is combat
+        case data.focus_area.combat: 
+            //get the lowest level of the combat stats
+            stat_to_train = Math.min(gang_member.str, gang_member.agi, gang_member.def, gang_member.dex)
+            //get the lowest multiplier of the combat stats
+            stat_multiplier_to_train = Math.min(gang_member.str_asc_mult, gang_member.agi_asc_mult, gang_member.def_asc_mult, gang_member.dex_asc_mult)
+            //action set to train combat
+            train_action = data.gang_task.trainCombat
+            //stop
+            break
 
-    //focus is hacking
-    } else if (config.focus == data.focus_area.hacking) {
-        //get the hacking level
-        statTrain = gang_member.hack
-        //get the hacking multiplier
-        statMult = gang_member.hack_asc_mult
-        //set to training hacking
-        trainAction = data.gang_task.trainHacking
-
-    //incorrect or undefined focus
-    } else {
-        //log error
-        common.log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
-        //defaults to raise money
-        return data.gang_task.power
+        case data.focus_area.hacking: 
+            //get the hacking level
+            stat_to_train = gang_member.hack
+            //get the hacking multiplier
+            stat_multiplier_to_train = gang_member.hack_asc_mult
+            //set to training hacking
+            train_action = data.gang_task.trainHacking
+            //stop
+            break
+        
+         //incorrect or undefined focus
+        default:
+            //log error
+            common.log(ns, config.log_level, error, "Uncaught Gang focus: " + gangFocus)
+            //defaults to raise money / power?
+            return data.gang_task.power
     }
-
+    //if training level reached
+    const training_level_reached = stat_to_train > config.desired_training_Level
+    //if training multiplier reached
+    const training_multiplier_reached = stat_multiplier_to_train < config.desired_multiplier
+    //if enough members
+    const gang_members_maxed = ns.gang.getMemberNames().length >= data.members_max
+    //if wanted level rising
+    const wanted_level_rising = wanted_level > previous_wanted_level
+    //if all (desired) equipment unlocked
+    const desired_upgrades_unlocked = upgrades_owned.length >= config.desired_equipment
+    
     //if the desired level or mulitplier is too low
-    if ((statTrain < config.desired_training_Level) ||
-        (statMult < config.desired_multiplier)) {
+    if (!training_level_reached || !training_multiplier_reached) {
         //update UI
         common.over_write_port(ns, common.port.gang, "Training")
         //return the action
-        return trainAction
+        return train_action
         
-        //if not enough members unlocked
-    } else if (ns.gang.getMemberNames().length < data.members_max) {
+    //if not enough members unlocked
+    } else if (!gang_members_maxed) {
         //update UI
         common.over_write_port(ns, common.port.gang, "Growing gang")
         //if members can be unlocked: gain reputation
         return data.gang_task.reputation
         
     //if the wanted level is rising
-    } else if (wanted_level > previous_wanted_level) {
+    } else if (wanted_level_rising) {
         //lower wanted level
         return data.gang_task.lowerWanted
         
     //if not all upgrades unlocked
-    } else if (upgradesHave.length < config.desired_equipment) {
+    } else if (!desired_upgrades_unlocked) {
         //block resets
         common.over_write_port(ns, common.port.reset, "gang")
         //update UI
-        common.over_write_port(ns, common.port.gang, "Get equipment: " + upgradesHave.length + " / " + config.desired_equipment)
+        common.over_write_port(ns, common.port.gang, "Get equipment: " + upgrades_owned.length + " / " + config.desired_equipment)
         //raise money to buy upgrades
         return data.gang_task.money
         
@@ -221,6 +242,7 @@ function determine_member_action(ns, wanted_level, territory_clash, gang_member)
         
     //defaults to raise power
     } else {
+        //raise power
         return data.gang_task.power
     }
 }
@@ -241,22 +263,22 @@ async function recruit_members(ns) {
         //for every possible member
         for (let index = 0; index < data.members_max; index++) {
             //create name
-            const memberNameNew = "gang_member-" + index
+            const member_name_new = "gang_member-" + index
             //if the name does not exist
-            if (names.indexOf(memberNameNew) == -1) {
+            if (names.indexOf(member_name_new) == -1) {
                 //recruit a new member
-                if (ns.gang.recruitMember(memberNameNew)) {
+                if (ns.gang.recruitMember(member_name_new)) {
                     //log information
-                    common.log(ns, config.log_level, success, "Recruited member: '" + memberNameNew + "'")
+                    common.log(ns, config.log_level, common.success, "Recruited member: '" + member_name_new + "'")
                 } else {
                     //log failure
-                    common.log(ns, config.log_level, warning, "Failed to recruit member '" + memberNameNew + "'")
+                    common.log(ns, config.log_level, common.warning, "Failed to recruit member '" + member_name_new + "'")
                 }
                 return
             }
         }
         //log information
-        common.log(ns, config.log_level, error, "Unhandled: All " + data.members_max + " members recruited?!?")
+        common.log(ns, config.log_level, common.error, "Unhandled: All " + data.members_max + " members recruited?!?")
     }
     //cannot recruit member, do nothing
 }
@@ -275,46 +297,44 @@ function manage_territory_clash(ns) {
     //save information on other gangs (names)
     const other_gangs = ns.gang.getOtherGangInformation()
     //save list of other gangs which have no territory anymore (e.g. are eliminated)
-    let eliminatedGangs = []
+    let eliminated_gangs = []
     //variable to save the best gang in
-    let bestOtherGang = { faction: "", power: 0 }
+    let best_other_gang = { faction: "", power: 0 }
     //for each other gang
-    for (const gangName in other_gangs) {
+    for (const gang_name in other_gangs) {
         //if our own gang
-        if (gangName == gang_own.faction) { 
+        if (gang_name == gang_own.faction) { 
             //skip
             continue
         }
         //get the information
-        const gang_info = other_gangs[gangName]
+        const gang_info = other_gangs[gang_name]
         
         //if no territory (= eliminated)
         if (gang_info.territory == 0) {
             //add to the list
-            eliminatedGangs.push(gangName)
+            eliminated_gangs.push(gang_name)
         } else {
             //check if the power is higher
-            if (gang_info.power > bestOtherGang.power) {
+            if (gang_info.power > best_other_gang.power) {
                 //save the information
-                bestOtherGang.faction = gangName
+                best_other_gang.faction = gang_name
                 //save the power
-                bestOtherGang.power = gang_info.power
+                best_other_gang.power = gang_info.power
             }
         }
     }
-    
-    bestPowerOfOtherGangs = bestOtherGang.power
-    
+        
     //flag for clash
     let territory_clash = 0
     //if all other gangs have no territory
-    if (eliminatedGangs.length >= otherGangs.length || bestOtherGang.faction == "") {
+    if (eliminated_gangs.length >= other_gangs.length || best_other_gang.faction == "") {
         //we've won, no further actions are needed
         territory_clash = 2
     //not all gangs are defeated
     } else {        
         //if we have more than the minimum chance
-        if (ns.gang.getChanceToWinClash(bestOtherGang.faction) > config.territory_clash_minimum_percentage) {
+        if (ns.gang.getChanceToWinClash(best_other_gang.faction) > config.territory_clash_minimum_percentage) {
             //start clashing 
             territory_clash = 1
             //log information
@@ -372,6 +392,12 @@ function perform_task(ns, gang_own, gang_member, task_focus) {
             break
         //dependant on bitnode focus (either hacking or combat)
         case data.gang_task.lowerWanted:
+            //determined by gang focus
+            switch(gangFocus) {
+                case focus_area.hacking: 
+
+                case focus_area.combat: 
+            }
             //if hacking focus
             if (gangFocus == "hacking") {
                 //perform hacking task for wanted level
