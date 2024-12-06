@@ -44,3 +44,10 @@ export const factions = {
     nite_sec: common.factions.nite_sec.name,
     the_black_hand: common.factions.the_black_hand.name,
 }
+
+//variable to use to check clash status
+export const territory_clash_status = {
+    stopped: 0,
+    started: 1,
+    completed: 2,
+}
