@@ -3,13 +3,6 @@ This file shows the commons used in other scripts: script names, ports, hostname
 THIS FILE SHOULD NOT HAVE EXTRA RAM IMPACT ON OTHER FILES, IT SHOULD ONLY HAVE THE BASE COST FOR RAM!!!
 */
 
-/*
-import { 
-  enum_port, enum_servers, enum_scripts
-  log, info, success, warning, error, fail,
-} from "scripts/common.js"
-*/
-
 
 //file constants
 export const file_bit_node_multipliers = "bit_node_multipliers.json"
