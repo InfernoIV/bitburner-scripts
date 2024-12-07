@@ -96,7 +96,7 @@ export const scripts = {
  * Function that enables easy logging
  * Cost: 0
  */
-export function log(ns, loglevel, type, message) {
+export function log(ns, loglevel = 0, type = info, message = "") {
   //get time
     const date = new Date()
     let hour = "" + date.getHours()
@@ -140,19 +140,19 @@ export function number_formatter(number) {
     number = Math.round(number)
 
     const symbols = ["", "k", "m", "b", "t"]
-    let largestIndex = 0
+    let largest_index = 0
     for (let index = 0; index < symbols.length; index++) {
         if (Math.abs(number) >= Math.pow(1000, index)) {
-            largestIndex = index
+            largest_index = index
         } else {
             break
         }
     }
-    let numberReturn = number
-    if (largestIndex > 0) {
-        numberReturn = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
+    let number_return = number
+    if (largest_index > 0) {
+        number_return = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
     }
-    return numberReturn + symbols[largestIndex]
+    return number_return + symbols[largest_index]
 }
 
 
@@ -172,7 +172,7 @@ export const cities = {
 
 
 // hacking commands
-export const hackingCommands = {
+export const hacking_commands = {
     start: "Start",
     stop: "Stop",
 }
@@ -228,7 +228,7 @@ export function get_challenge_flags(ns) {
 export function get_next_bit_node(ns) {
     //TODO: getResetInfo is broken, return 12
     return 12
-
+    /*
     //get the current bit node information from file
     const reset_info = get_reset_info(ns)
     //get the map of owned source files (completed bitnodes) 
@@ -286,6 +286,7 @@ export function get_next_bit_node(ns) {
     }
     //failsafe: default target bit node 12, since it is endless
     return 12
+        */
 }
 
 
@@ -302,7 +303,8 @@ export function has_completed_bit_node_level(ns, bit_node, level = 1) {
     //get the map of owned source files (completed bitnodes) 
     const owned_source_files = reset_info.ownedSF
 
-    log(ns, 1, info, JSON.stringify(reset_info))
+    
+    //log(ns, 1, info, JSON.stringify(reset_info))
 
     //check if we already have completed the current node
     if (owned_source_files.has(reset_info.currentNode)) {
