@@ -38,7 +38,7 @@ export const port = {
 
 
 //no port data definition
-export const portNoData = "NULL PORT DATA"
+export const port_no_data = "NULL PORT DATA"
 
 
 
