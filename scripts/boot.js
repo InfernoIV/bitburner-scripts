@@ -1,16 +1,11 @@
-//imports
-import { 
-    log, info, success, warning, error, fail, file_bit_node_multipliers, file_reset_info, file_num_sleeves, //const
-    enum_servers, enum_scripts, //enums
-    get_challenge_flags, get_next_bit_node, has_completed_bit_node_level, //functions
-} from "scripts/common.js"
-
+//common
+import * as common from "./common.js"
 
 
 /** @param {NS} ns */
 export async function main(ns) {    
     //TODO: check if getRestInfo is still broken (ownedSF is empty)
-    log(ns, 1, info, "ns.getResetInfo(): " + JSON.stringify(ns.getResetInfo()))
+    common.log(ns, 1, common.info, "ns.getResetInfo(): " + JSON.stringify(ns.getResetInfo()))
     
     //prepare information to be used later by other functions
     prepare_information(ns)
@@ -41,20 +36,20 @@ function prepare_information(ns) {
     log_challenge_flags(ns, challenge_flags)
     
     //get reset info
-    const resetInfo = ns.getResetInfo()
+    const reset_info = ns.getResetInfo()
     //write data to file
-    ns.write(file_reset_info, JSON.stringify(resetInfo), "w")
+    ns.write(file_reset_info, JSON.stringify(reset_info), "w")
 
     //get bitnode
-    const bitNode = resetInfo.currentNode
+    const bit_node = resetInfo.currentNode
     //start at level 1
     let level = 1
     //up the level
-    if (resetInfo.ownedSF.has(bitNode)) {
+    if (resetInfo.ownedSF.has(bit_node)) {
         //add the levels of the SF
-        level += resetInfo.ownedSF.get(bitNode)
+        level += resetInfo.ownedSF.get(bit_node)
         //if not in 12
-        if (bitNode != 12) {
+        if (bit_node != 12) {
             //cap to 3
             level = Math.min(level, 3)
         }
@@ -64,12 +59,12 @@ function prepare_information(ns) {
     //check if we get bit node multipliers (needs bit node 
     if (has_completed_bit_node_level(ns, 5)) {
         //add the actual bitnode multipliers
-        bit_node_multipliers = ns.getBitNodeMultipliers(bitNode, level)
+        bit_node_multipliers = ns.getBitNodeMultipliers(bit_node, level)
     }
     //write data to file
     ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
-    log_bit_node_information(ns, bit_node_multipliers, resetInfo)
+    log_bit_node_information(ns, bit_node_multipliers, reset_info)
 
     //set to 0 by default
     let num_sleeves = 0
@@ -93,7 +88,7 @@ function log_challenge_flags(ns, challenge_flags) {
         //if challenge is active
         if(challenge_flags[challenge]) {
             //log challenge information
-            log(ns, 1, warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
+            common.log(ns, 1, common.warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
         }
     }
 }
@@ -105,32 +100,32 @@ function log_challenge_flags(ns, challenge_flags) {
 */
 function log_bit_node_information(ns, bit_node_multipliers, reset_info) {   
     //get the bitnode
-    let bitnode = reset_info.currentNode
+    let bit_node = reset_info.currentNode
 
     //log information on completed bitnodes
-    log(ns, 1, info, "Completed following bit nodes: " + JSON.stringify(reset_info.ownedSF))
+    common.log(ns, 1, common.info, "Completed following bit nodes: " + JSON.stringify(reset_info.ownedSF))
     //log next target bit node
-    log(ns, 1, info, "Next bit node: " + get_next_bit_node(ns))
+    common.log(ns, 1, common.info, "Next bit node: " + get_next_bit_node(ns))
     
     //set level
-    let sourceFile = 1
+    let source_file = 1
     //if we have source file
-    if (reset_info.ownedSF.has(bitnode)) {
+    if (reset_info.ownedSF.has(bit_node)) {
         //add the owned level to the source file
-        sourceFile += reset_info.ownedSF.get(bitnode)
+        source_file += reset_info.ownedSF.get(bit_node)
         //if bitnode is not 12 (which is unlimited)
-        if (bitnode != 12) {
+        if (bit_node != 12) {
             //limit if needed
-            sourceFile = Math.min(sourceFile, 3)
+            source_file = Math.min(source_file, 3)
         }
     }
     //get difficulty
     const difficulty = bit_node_multipliers["WorldDaemonDifficulty"]
     //get default hacking skill required for world deamon
-    const worldDeamonHackingSkill = 3000
+    const world_deamon_hacking_skill_required = 3000
     
     //log bitnode information
-    log(ns, 1, info, "BitNode: " + bitnode + "." + sourceFile + ", World daemon difficulty: " + difficulty + ", hacking level required: " + (difficulty * worldDeamonHackingSkill))
+    common.log(ns, 1, common.info, "BitNode: " + bit_node + "." + source_file + ", World daemon difficulty: " + difficulty + ", hacking level required: " + (difficulty * world_deamon_hacking_skill_required))
         
     //for each multiplier
     for (const key in bit_node_multipliers) {
@@ -169,17 +164,17 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
             //either no disabled value (else clause) or value is not disabled value (not used the continue)
             
             //assume negative multiplier
-            let log_type = warning
+            let log_type = common.warning
             //check if there is data on positive
             if(Object.hasOwn(lookup_data, "higher_is_better")) {
                 //check if it is positive
                 if(value > default_value && lookup_data["higher_is_better"]) {
                     //this is positive
-                    log_type = success
+                    log_type = common.success
                 }
             }
             //log information
-            log(ns, 1, log_type, key + ": " + value)
+            common.log(ns, 1, log_type, key + ": " + value)
         }
     }
 }
