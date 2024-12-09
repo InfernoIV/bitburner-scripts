@@ -132,7 +132,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
         //failsafe, if the multiplier doesn't exist in the list
         if(!Object.hasOwn(bit_node_lookup_data, key)) {
             //log error
-            log(ns, 1, error, "Muliplier '" + key + "' doesn't exist in the bit_node_lookup_data!")
+            common.log(ns, 1, error, "Muliplier '" + key + "' doesn't exist in the bit_node_lookup_data!")
             //go to next
             continue
         }
@@ -155,7 +155,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
                 //if disabled / limited
                 if (value == lookup_data["disabled_value"]) {
                     //log information
-                    log(ns, 1, error, key + ": " + value + " (" + lookup_data["disabled_text"] + ")")
+                    common.log(ns, 1, error, key + ": " + value + " (" + lookup_data["disabled_text"] + ")")
                     //go to next key in the loop
                     continue
                 }
