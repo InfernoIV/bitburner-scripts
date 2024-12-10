@@ -25,25 +25,26 @@ export async function main(ns) {
     //create target info object
     let target = new targetInfo(ns, config.delay_between_scripts)
     //always start in stop mode, to limit ram usage
-    let flagStop = false
+    let flag_stop = false
     //main loop
     while (true) {
         //if stopped
-        if (flagStop == true) {
+        if (flag_stop == true) {
             //if we should start again
             if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.start)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Resuming HackManager")
                 //reset flag
-                flagStop = false
+                flag_stop = false
             //nothing has changed
             } else {
                 //do nothing but wait a bit
                 await ns.sleep(100)
             }
 
-
+        //running normally
         } else {
+            //if command for stpoping
             if ((ns.peek(common.port.stopHack) == common.hackingCommands.stop)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Pausing HackManager")
@@ -51,18 +52,17 @@ export async function main(ns) {
                 let waitTime = ns.getWeakenTime(ns) + (2 * config.delay_between_scripts)
                 //wait to ensure everything is stpoped
                 await ns.sleep(waitTime)
-
                 //set flag
-                flagStop = true
+                flag_stop = true
             } else {
                 //set flag to check
-                let flagAwaitTarget = false
+                let flag_await_target = false
                 //check for a new target: if new target, re-calculate the batch sizes
                 while (!await target.determineTarget(ns)) {
                     //check if there is a need to log
-                    if (flagAwaitTarget == false) {
+                    if (flag_await_target == false) {
                         //set flag
-                        flagAwaitTarget = true
+                        flag_await_target = true
                         //log once
                         common.log(ns, config.log_level, common.warning, "Waiting for target")
                     }
@@ -353,7 +353,7 @@ class targetInfo {
         //while the security is not min
         while (ns.getServerSecurityLevel(this.hostname) > security_min) {
             //log info to UI
-            over_write_port(ns, enum_port.hack, "Weaken: " + this.hostname)
+            common.over_write_port(ns, common.port.hack, "Weaken: " + this.hostname)
             //updateUI(ns, this.hostname, "Weaken: " + Math.floor(security_min / ns.getServerSecurityLevel(this.hostname)) + "%")
             //weaken the server
             await this.executeBatch(ns, "weaken")
@@ -364,14 +364,14 @@ class targetInfo {
         //while money is not max
         while (ns.getServerMoneyAvailable(this.hostname) < money_max) {
             //log info to UI
-            over_write_port(ns, enum_port.hack, "Grow: " + this.hostname)
+            common.over_write_port(ns, common.port.hack, "Grow: " + this.hostname)
             //updateUI(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / money_max) + "%")
             //grow the money
             await this.executeBatch(ns, "grow")
         }
         //kill all running scripts
         this.killScripts(ns)
-        log(ns, 1, info, "Prep done for " + this.hostname + ", starting hack")
+        common.log(ns, config.log_level, common.info, "Prep done for " + this.hostname + ", starting hack")
     }
 
 
@@ -424,6 +424,7 @@ class targetInfo {
     
     /** @param {NS} ns */
     async executeHack(ns) {
+        //formate messages
         const money_percentage = "" + number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + number_formatter(ns.getServerMaxMoney(this.hostname))
         const security_percentage = "" + number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
@@ -455,8 +456,10 @@ class targetInfo {
                 ram_min = this.ram_min[cores][type]
                 //calculate the available ram
                 server_ram = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
+                //check if enough ram
+                const enough_ram = server_ram > ram_min
                 //if enough RAM
-                if (server_ram > ram_min) {
+                if (enough_ram) {
                     //log information
                     common.log(ns, config.log_level, common.info, "Found server: " + server + " (" + cores + " core(s), " + server_ram + " GB RAM) to run " + ram_min + " GB RAM")
                     //set the execute server
