@@ -542,8 +542,18 @@ export function disable_logging(ns, log_topics) {
   //stop logging of the stop logging...
   ns.disableLog("disableLog")
   //for each topic of the argument
-  for (const log_topic of log_topics) {
-    //disable logging
-    ns.disableLog(log_topic)
-  }
+    for (const log_topic of log_topics) {
+        //ensure improper config not crashing the script
+        try {
+            //if log topic set
+            if(log_topic != "") {
+                //disable logging
+                ns.disableLog(log_topic)
+            }
+        //error occurs
+        } catch (err) {
+            //log the error
+            log(ns, 1, common.error, "Disable logging failed for '" + log_topic + "'") 
+        }
+    }
 }
