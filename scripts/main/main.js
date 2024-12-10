@@ -32,18 +32,12 @@ import * as hacknet from "./hacknet/interface.js"
  *  Base cost (1,6)
  *  killall (0,5) (inherited from init)
  */
-export async function main(ns) {    
-    //get reset info
-    const reset_info = common.get_reset_info(ns) 
-    //get bitnode information from file
-    const bit_node_multipliers = common.get_bit_node_multipliers(ns)
-    
+export async function main(ns) {       
     //initialize
-    init(ns) //1,5 GB
+    const reset_info, bit_node_multipliers = init(ns) //1,5 GB
     
     //keep track of launched scripts
     let launched_scripts = []
-
     
     //main loop
     while (true) {
@@ -65,20 +59,21 @@ export async function main(ns) {
         manage_actions(ns, bit_node_multipliers)   //71 GB
         buy_augments(ns)  //10 GB
         
-        //sleeve
-        sleeve.manage_actions(ns, bit_node_multipliers) //
+        //sleeve: ? GB
+        sleeve.manage_actions(ns, bit_node_multipliers)
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
         //server.manage_servers(ns)   // GB
         manage_servers(ns)   // GB
 
-        //update ui: 0 GB
-        update_ui(ns, bit_node_multipliers) //0 GB
         //reset & destruction: 0 GB
         execute_bit_node_destruction(ns)   //0 GB (exernal script)
         install_augments(ns)    //0 GB (exernal script)
 
+        //update ui: 0 GB
+        update_ui(ns, bit_node_multipliers) //0 GB
+        
         //wait a bit
         await ns.sleep(config.time_between_loops)
     }
@@ -99,55 +94,15 @@ export async function main(ns) {
  */
 function init(ns) {
     //disable unwanted logs
-    common.disable_logs(ns, config.log_disabled_topics)
-    
-    //conditional imports, TODO: can be part of init or other function???
-    /*
-    //import hacknet
-    let import_hacknet_file = "./hacknet/server.js"
-    //check if we need to change
-    if(common.has_completed_bit_node_level(ns, 9)) {
-        //import hacknet
-        import_hacknet_file = "./hacknet/hacknet.js"
-    }
-    //import the functions
-    import * as server from import_hacknet_file //server.manage_servers
-
-    
-    //import sleeves
-    let import_sleeve_file = "./sleeve/sleeve_dummy.js"
-    //check if we need to change (either not unlocked or disabled)
-    if((common.has_completed_bit_node_level(ns, 10)) &&
-        //import sleeve
-        import_sleeve_file = "./sleeve/sleeve.js"
-    }
-    //import the functions
-    import * as sleeve from import_sleeve_file //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
-
-    
-    //import bladeburner
-    let import_bladeburner_file = "./bladeburner/bladeburner_dummy.js"
-    //check if we need to change (either not unlocked or disabled)
-    if((common.has_completed_bit_node_level(ns, 6)) &&
-       (common.has_completed_bit_node_level(ns, 7)) {
-        //import hacknet
-        import_bladeburner_file = "./bladeburner/bladeburner.js"
-    }
-    //import the functions
-    import * as bladeburner from import_bladeburner_file //todo
-    */
-    
-    
-    //sleeve stuff
-    sleeve.init(ns)
+    common.disable_logs(ns, config.log_disabled_topics) 
 
     //clear reset port
-    ns.clearPort(common.enum_port.reset)
+    ns.clearPort(common.ort.reset)
 
     //for each server
     for (const server of common.get_servers(ns)) {
         //check if it is home
-        const is_server_home = (server == common.enum_servers.home)
+        const is_server_home = (server == common.servers.home)
         //kill all scripts
         ns.killall(server, is_server_home)
     }
@@ -169,6 +124,18 @@ function init(ns) {
         //clear
         hook1.innerHTML = ''
     })
+
+    //sleeve stuff
+    sleeve.init(ns)
+    
+    //get information from files
+        //get reset info
+    const reset_info = common.get_reset_info(ns) 
+    //get bitnode information from file
+    const bit_node_multipliers = common.get_bit_node_multipliers(ns)
+
+    //give the information back
+    return reset_info, bit_node_multipliers
 }
 
 
@@ -234,8 +201,8 @@ function execute_bit_node_destruction(ns) {
         //kill all other scripts on home
         ns.killall()
         //launch script to destroy bitnode
-        ns.exec(enum_scripts.jump, enum_servers.home, 1,
-            enum_scripts.destroyBitNode, true) //which script to launch, kill other scripts
+        ns.exec(common.scripts.jump, common.servers.home, 1,
+            common.scripts.destroy_bitNode, true) //which script to launch, kill other scripts
     }
 }
 
@@ -260,7 +227,7 @@ function install_augments(ns) {
     //if enough augments bought for a reset
     if (augments_to_be_installed >= config.augments_minimum_for_reset) {
         //read the port if we need to wait
-        const reason_to_wait = ns.peek(enum_port.reset)
+        const reason_to_wait = ns.peek(common.port.reset)
         //check if there is no reason to wait
         if (reason_to_wait == portNoData) {
             //TODO: better way to go over the factions? Check each faction and start with the faction with the smallest difference between rep cost and rep have? 
@@ -272,8 +239,8 @@ function install_augments(ns) {
             //kill all other scripts on home
             ns.killall()
             //start reset script
-            ns.exec(enum_scripts.jump, enum_servers.home, 1,
-                enum_scripts.reset, true) //which script to launch, kill other scripts
+            ns.exec(common.scripts.jump, common.servers.home, 1,
+                common.scripts.reset, true) //which script to launch, kill other scripts
         }
     }
 }
@@ -288,7 +255,7 @@ function install_augments(ns) {
  */
 function buy_augments(ns) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
-    if (ns.peek(common.enum_port.reset) == "gang") {
+    if (ns.peek(common.port.reset) == "gang") {
         //do not buy augments
         return
     }
@@ -328,13 +295,13 @@ function manage_factions(ns) {
     const augments_installed = common.get_augmentations_installed(ns)
     //check for multual exlusive factions
     //TODO: are the city_group names (cities) the same as the faction names?
-    const city_group_1 = [enum_cities.sector12, enum_cities.aevum]
+    const city_group_1 = [common.cities.sector12, common.cities.aevum]
     const augments_missing_of_city_group_1 = (augments_installed.indexOf("CashRoot") == -1) || (augments_installed.indexOf("PCMatrix") == -1)
    
-    const city_group_2 = [enum_cities.chongqing, enum_cities.newTokyo, enum_cities.ishima]
+    const city_group_2 = [common.cities.chongqing, common.cities.newTokyo, common.cities.ishima]
     const augments_missing_of_city_group_2 = (augments_installed.indexOf("Neuregen") == -1) || (augments_installed.indexOf("NutriGen") == -1) || (augments_installed.indexOf("INFRARet") == -1)
     
-    const city_group_3 = [enum_cities.volhaven]
+    const city_group_3 = [common.cities.volhaven]
     const augments_missing_of_city_group_3 = (augments_installed.indexOf("DermaForce") == -1)
 
     //create a location
@@ -342,35 +309,35 @@ function manage_factions(ns) {
     //check if we need to travel
     if (augments_missing_of_city_group_1) {
         //if sector 12 is not joined
-        if (factions.indexOf(enum_factions.sector12.name) == -1) {
+        if (factions.indexOf(common.factions.sector12.name) == -1) {
             //travel to sector 12
-            city_to_travel_to = enum_cities.sector12
+            city_to_travel_to = common.cities.sector12
             //if aevum is not joined
-        } else if (factions.indexOf(enum_factions.aevum.name) == -1) {
+        } else if (factions.indexOf(common.factions.aevum.name) == -1) {
             //travel to aevum
-            city_to_travel_to = enum_cities.aevum
+            city_to_travel_to = common.cities.aevum
         }
 
     } else if (augments_missing_of_city_group_2) {
         //if chongqing is not joined
-        if (factions.indexOf(enum_factions.chongqing.name) == -1) {
+        if (factions.indexOf(common.factions.chongqing.name) == -1) {
             //travel to chongqing
-            city_to_travel_to = enum_cities.chongqing
+            city_to_travel_to = common.cities.chongqing
             //if New tokyo is not joined
-        } else if (factions.indexOf(enum_factions.newTokyo.name) == -1) {
+        } else if (factions.indexOf(common.factions.newTokyo.name) == -1) {
             //travel to aevum
-            city_to_travel_to = enum_cities.newTokyo
+            city_to_travel_to = common.cities.newTokyo
             //if Ishima is not joined    
-        } else if (factions.indexOf(enum_factions.ishima.name) == -1) {
+        } else if (factions.indexOf(common.factions.ishima.name) == -1) {
             //travel to aevum
-            city_to_travel_to = enum_cities.ishima
+            city_to_travel_to = common.cities.ishima
         }
 
     } else if (augments_missing_of_city_group_3) {
         //if Volhaven is not joined
-        if (factions.indexOf(enum_factions.volhaven.name) == -1) {
+        if (factions.indexOf(common.factions.volhaven.name) == -1) {
             //travel to Volhaven
-            city_to_travel_to = enum_cities.volhaven
+            city_to_travel_to = common.cities.volhaven
         }
     } else {
         //default to sector-12, no travel should be needed
@@ -388,25 +355,25 @@ function manage_factions(ns) {
     if (city_to_travel_to == "") {
 
         //if Tian Di Hui not joined
-        if ((factions.indexOf(enum_factions.tianDiHui.name) == -1) && (stats.hacking >= 50)) {
+        if ((factions.indexOf(common.factions.tianDiHui.name) == -1) && (stats.hacking >= 50)) {
             //travel to chongqing
-            city_to_travel_to = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
+            city_to_travel_to = common.cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
             //if Tetrads not joined
-        } else if ((factions.indexOf(enum_factions.tetrads.name) == -1) && (stats.combat >= 75) && (stats.karma <= -18)) {
+        } else if ((factions.indexOf(common.factions.tetrads.name) == -1) && (stats.combat >= 75) && (stats.karma <= -18)) {
             //travel to chongqing
-            city_to_travel_to = enum_cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
+            city_to_travel_to = common.cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
             //if The Syndicate not joined
-        } else if ((factions.indexOf(enum_factions.theSyndicate.name) == -1) && (stats.hacking >= 200) && (stats.combat >= 200) && (stats.karma <= -90)) {
+        } else if ((factions.indexOf(common.factions.theSyndicate.name) == -1) && (stats.hacking >= 200) && (stats.combat >= 200) && (stats.karma <= -90)) {
             //travel to sector 12
-            city_to_travel_to = enum_cities.sector12 //either Aevum, Sector-12 --> sector 12 is the default
+            city_to_travel_to = common.cities.sector12 //either Aevum, Sector-12 --> sector 12 is the default
         }
 
         //if The Dark Army not joined
-    } else if ((factions.indexOf(enum_factions.theDarkArmy.name) == -1) && (stats.hacking >= 300) && (stats.combat >= 300) && (stats.karma <= -45) && (stats.kills >= 5)) {
+    } else if ((factions.indexOf(common.factions.theDarkArmy.name) == -1) && (stats.hacking >= 300) && (stats.combat >= 300) && (stats.karma <= -45) && (stats.kills >= 5)) {
         //travel to chongqing
-        city_to_travel_to = enum_cities.chongqing //only Chongqing
+        city_to_travel_to = common.cities.chongqing //only Chongqing
     }
 
     //check if we need to travel
@@ -416,9 +383,9 @@ function manage_factions(ns) {
     }
 
     //for EVERY faction
-    for (const faction_index in enum_factions) {
+    for (const faction_index in common.factions) {
         //get faction name
-        const faction = enum_factions[faction_index].name
+        const faction = common.factions[faction_index].name
 
         //if the faction is allowed (need to join group x and faction is not in group y or group z)
         if (((augments_missing_of_city_group_1) && (city_group_2.indexOf(faction) == -1) && (city_group_3.indexOf(faction) == -1)) ||
@@ -506,7 +473,7 @@ function manage_hacking(ns) {
             (!ns.getServer(server).backdoorInstalled) && 
             (ns.getPlayer().skills.hacking >= ns.getServer(server).requiredHackingSkill)) {
                 //write hostname
-                ns.writePort(enum_port.backdoor, server)
+                ns.writePort(common.port.backdoor, server)
         }
     }
 }
@@ -531,7 +498,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //get money
-    const money_available = ns.getServer(enum_servers.home).moneyAvailable
+    const money_available = ns.getServer(common.servers.home).moneyAvailable
     //money that is needed for corporation
     const corporation_money_requirement = 150e9
     //check if makes sense to launch stock manager
@@ -544,7 +511,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     //check which scripts we need to launch
 
     //launch script
-    scripts_to_launch.push(enum_scripts.backdoor)
+    scripts_to_launch.push(common.scripts.backdoor)
     //hackmanager is always wanted?
     scripts_to_launch.push(common.scripts.hack)
 
@@ -578,7 +545,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             //if not already launched
             if (launched_scripts.indexOf(script) == -1) {
                 //signal hackManager to stop
-                common.over_write_port(ns, enum_port.stopHack, enum_hackingCommands.stop)
+                common.over_write_port(ns, common.port.stopHack, common.hackingCommands.stop)
                 //get all servers that can run scripts
                 const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
@@ -606,10 +573,10 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
                             script_folder += script_path_element                    
                         }           
                         //get the scripts from the folder
-                        const scripts_in_folder = ns.ls(enum_servers.home, script_folder)
+                        const scripts_in_folder = ns.ls(common.servers.home, script_folder)
 
                         //copy the scripts from the folder
-                        if (ns.scp(scripts_in_folder, enum_servers.home, server.hostname)) {
+                        if (ns.scp(scripts_in_folder, common.servers.home, server.hostname)) {
                             //execute the main script
                             if (ns.exec(script, server.hostname)) {
                                 //log information
@@ -623,7 +590,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             }
         }
         //indicate to hack manager that it can resume
-        common.over_write_port(ns, common.port.stopHack, enum_hackingCommands.start)
+        common.over_write_port(ns, common.port.stopHack, common.hackingCommands.start)
     }
     //return the list
     return launched_scripts
@@ -775,7 +742,7 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
     //set min chance = 100%
     const bladeburner_success_chance_minimum = 1
     //describe other actions
-    const enum_sleeveBladeburnerActions = {
+    const common.sleeveBladeburnerActions = {
         fieldAnalysis: "Field Analysis",
         infiltratesynthoids: "Infiltrate synthoids",
     }
@@ -785,17 +752,17 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
 
     //contracts
     //for each contract
-    for (const operation in enum_bladeburnerActions.contracts) {
+    for (const operation in common.bladeburnerActions.contracts) {
         //get contract information
-        const contract = enum_bladeburnerActions.contracts[operation]
+        const contract = common.bladeburnerActions.contracts[operation]
         //get action count
-        const action_count = ns.bladeburner.getActionCountRemaining(enum_bladeburnerActions.type.contracts, contract)
+        const action_count = ns.bladeburner.getActionCountRemaining(common.bladeburnerActions.type.contracts, contract)
         //get chance
-        const chance = ns.bladeburner.getActionEstimatedSuccessChance(enum_bladeburnerActions.type.contracts, contract, sleeveIndex)
+        const chance = ns.bladeburner.getActionEstimatedSuccessChance(common.bladeburnerActions.type.contracts, contract, sleeveIndex)
         //if this action can be performed and we have enough chance
         if ((action_count > 0) && (chance[0] >= bladeburner_success_chance_minimum)) {
             //return this information
-            return { type: enum_sleeveBladeburnerActions.takeonContracts, name: contract }
+            return { type: common.sleeveBladeburnerActions.takeonContracts, name: contract }
         }
         //add count to total actions available
         bladeburner_total_action_count += action_count
@@ -804,11 +771,11 @@ function getBladeburnerActionForSleeve(ns, sleeveIndex) {
     //if no operations or contracts available
     if (bladeburner_total_action_count == 0) {
         //set to create contracts
-        return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.inciteViolence }
+        return { type: common.bladeburnerActions.type.general, name: common.bladeburnerActions.general.inciteViolence }
     }
 
     //failsafe: just train
-    return { type: enum_bladeburnerActions.type.general, name: enum_bladeburnerActions.general.training }
+    return { type: common.bladeburnerActions.type.general, name: common.bladeburnerActions.general.training }
 }
 */
 
@@ -949,10 +916,10 @@ function get_activity(ns) {
         switch (player_activity.type) {
             case data.activities.study: activity.value = player_activity.classType; break
             case data.activities.company: activity.value = player_activity.companyName; break
-            //case enum_activities.createProgram: activity.value = player_activity.programName; break
+            //case common.activities.createProgram: activity.value = player_activity.programName; break
             case data.activities.crime: activity.value = player_activity.crimeType; break
             case data.activities.faction: activity.value = player_activity.factionName; break
-            //case enum_activities.grafting: activity.value = player_activity.augmentation; break
+            //case common.activities.grafting: activity.value = player_activity.augmentation; break
             default:
                 //log information
                 log(ns, 1, info, "get_activity - Uncaught condition: " + player_activity.type)
@@ -1088,9 +1055,9 @@ function update_ui(ns, bit_node_multipliers) {
     values.push("_______________________________")
 
     //external scripts
-    for (const port in enum_port) {
+    for (const port in common.port) {
         //check what is on the port
-        const value = ns.peek(enum_port[port])
+        const value = ns.peek(common.port[port])
         //if a value is set
         if (value != portNoData) {
             //show the value + activity.type.slice(1).
@@ -1134,9 +1101,9 @@ function bladeburner_determine_action(ns) {
     }
 
     //check the lowest chaos city
-    for (const cityEntry in enum_cities) {
+    for (const cityEntry in common.cities) {
         //get city
-        const city = enum_cities[cityEntry]
+        const city = common.cities[cityEntry]
         //get chaos of current city
         const cityChaos = ns.bladeburner.getCityChaos(city)
         //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
