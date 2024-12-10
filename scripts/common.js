@@ -67,7 +67,7 @@ export const scripts = {
     //utility
     jump: "scripts/utility/jump_script.js",
     jump2: "scripts/utility/jump.js",
-    destroyBitNode: "scripts/utility/destroy_bit_node.js",
+    destroy_bitNode: "scripts/utility/destroy_bit_node.js",
     reset: "scripts/utility/reset.js",
     //backdoor
     backdoor: "scripts/backdoor/backdoor.js",
@@ -79,13 +79,13 @@ export const scripts = {
     stock: "scripts/stock/stock.js",
     //hack
     hack: "scripts/hack/hack.js",
-    workerHack: "scripts/hack/worker_hack.js",
-    workerGrow: "scripts/hack/worker_grow.js",
-    workerWeaken: "scripts/hack/worker_weaken.js",
+    worker_hack: "scripts/hack/worker_hack.js",
+    worker_grow: "scripts/hack/worker_grow.js",
+    worker_weaken: "scripts/hack/worker_weaken.js",
     //stanek
-    stanekCreate: "scripts/stanek/stanek_create.js",
-    stanekCharge: "scripts/stanek/stanek_charge.js",
-    workerCharge: "scripts/stanek/stanek_worker_charge.js",
+    stanek_create: "scripts/stanek/stanek_create.js",
+    stanek_charge: "scripts/stanek/stanek_charge.js",
+    worker_charge: "scripts/stanek/stanek_worker_charge.js",
     //stanekBuy: "scripts/stanek/stanekBuy.js",
 }
 
