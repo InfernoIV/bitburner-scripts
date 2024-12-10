@@ -1,5 +1,5 @@
 //imports
-import { enum_port, } from "scripts/common.js"
+import * as common from "scripts/common.js"
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -13,5 +13,5 @@ export async function main(ns) {
         await ns.stanek.chargeFragment(x, y)
     }
     //use ports to indicate status
-    ns.writePort(enum_port.stanek, "Done")
+    ns.writePort(common.port.stanek, "Done")
 }
