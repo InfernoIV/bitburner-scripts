@@ -59,7 +59,7 @@ export async function main(ns) {
 
         //hacking & scripts: 18,7 GB
         manage_hacking(ns)   //4,3 GB
-        manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
+        launched_scripts = manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
 
         //player actions & bladeburner: 71 GB
         manage_actions(ns, bit_node_multipliers)   //71 GB
@@ -212,9 +212,9 @@ function execute_bit_node_destruction(ns) {
     let can_execute_destruction = false
 
     //if the red pill is installed
-    if (common.get_augmentations_installed(ns).indexOf(data.augments.theRedPill) > -1) {
+    if (common.get_augmentations_installed(ns).indexOf(data.augments.the_red_pill) > -1) {
         //then we can check the world daemon backdoor (otherwise the server doesn't exist)
-        if (ns.getServer(enum_servers.worldDaemon).backdoorInstalled) {
+        if (ns.getServer(common.servers.world_daemon).backdoorInstalled) {
             //backdoor is installed, proceed with destruction
             can_execute_destruction = true
         }
@@ -267,7 +267,7 @@ function install_augments(ns) {
             //for every joined faction
             for (const faction of ns.getPlayer().factions) {
                 //buy as much neuro as possible
-                while (ns.singularity.purchaseAugmentation(faction, data.augments.neuroFluxGovernor)) { /* Do nothing */ }
+                while (ns.singularity.purchaseAugmentation(faction, data.augments.neuro_flux_governor)) { /* Do nothing */ }
             }
             //kill all other scripts on home
             ns.killall()
@@ -299,7 +299,7 @@ function buy_augments(ns) {
         //for each augment of the faction
         for (const augment of ns.singularity.getAugmentationsFromFaction(faction)) {
             //if not owned or is neuroflux
-            if (augments_installed.indexOf(augment) == -1 || augment == data.augments.neuroFluxGovernor) {
+            if (augments_installed.indexOf(augment) == -1 || augment == data.augments.neuro_flux_governor) {
                 //try to buy
                 if(ns.singularity.purchaseAugmentation(faction, augment)) {
                     //log information
@@ -546,26 +546,26 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     //launch script
     scripts_to_launch.push(enum_scripts.backdoor)
     //hackmanager is always wanted?
-    scripts_to_launch.push(enum_scripts.hack)
+    scripts_to_launch.push(common.scripts.hack)
 
     //check if makes sense to launch gang manager
     if ((bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
         (player.karma < data.requirements.karma_for_gang)) { //and if karma threshold is reached
         //add to list
-        scripts_to_launch.push(enum_scripts.gang)
+        scripts_to_launch.push(common.scripts.gang)
     }
 
     //check if makes sense to launch corporation manager
     if ((bit_node_multipliers.CorporationSoftcap >= 0.15) && //and if the bitnode allows
         (money_available > corporation_money_requirement)) { //and if money threshold is reached
         //add to list
-        scripts_to_launch.push(enum_scripts.corporation)
+        scripts_to_launch.push(common.scripts.corporation)
     }
 
     //calculate money needed for stock manager
     if (money_available > (stock_4s_api_cost + stock_4s_market_data_cost)) { //26b
         //add to list
-        scripts_to_launch.push(enum_scripts.stock)
+        scripts_to_launch.push(common.scripts.stock)
     }
 
     //if there are scripts to launch
@@ -623,8 +623,10 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             }
         }
         //indicate to hack manager that it can resume
-        common.over_write_port(ns, enum_port.stopHack, enum_hackingCommands.start)
+        common.over_write_port(ns, common.port.stopHack, enum_hackingCommands.start)
     }
+    //return the list
+    return launched_scripts
 }
 
 
@@ -741,7 +743,7 @@ function manage_actions(ns, bit_node_multipliers) {
         }
 
         //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (common.get_augmentations_installed(ns).indexOf(data.augments.bladesSimulacrum) > -1)
+        const can_perform_dual_actions = (common.get_augmentations_installed(ns).indexOf(data.augments.blades_simulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
