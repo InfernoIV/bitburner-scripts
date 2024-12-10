@@ -27,7 +27,7 @@ export async function main(ns) {
     const moneyGrown = await ns.grow(target_hostname, { additionalMsec: delay })
 
     //get the end time
-    const timeEnd = Date.now()
+    const time_end = Date.now()
     //get the threads from arguments (if provided, otherwise 1)
     const threads = (ns.args[2] != undefined) ? ns.args[2] : 1
     //get the (own) hostname from arguments (if provided, otherwise "")
@@ -35,7 +35,7 @@ export async function main(ns) {
     //save log level
     const log_level = (ns.args[4] != undefined) ? ns.args[4] : 0
     //not formatted for use in comparison in excel
-    const message = hostname + " grew (" + threads + ") '" + target_hostname + "' for " + "\t" + moneyGrown + "\t" + timeStart + "\t" + timeEnd + "\t" + (timeEnd - timeStart) + "\t" + delay + "\t" + (timeEnd - timeStart - delay)
+    const message = hostname + " grew (" + threads + ") '" + target_hostname + "' for " + "\t" + moneyGrown + "\t" + timeStart + "\t" + time_end + "\t" + (time_end - timeStart) + "\t" + delay + "\t" + (time_end - timeStart - delay)
     //log according to log level
     if(log_level >= 1) {
         ns.tprint("SUCCESS " + message)
