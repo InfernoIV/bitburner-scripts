@@ -11,14 +11,18 @@ export async function main(ns) {
     init(ns)
     //log start
     common.log(ns, config.log_level, common.success, "Looking for servers to execute hacks")
+    //get servers
+    let number_of_execute_servers = common.get_server_specific(ns, true).length 
     //wait until servers become available
-    while (getExecuteServers(ns).length == 0) {
+    while (number_of_execute_servers == 0) {
         //wait a bit
         await ns.sleep(1 * 1000)
+        //update
+        number_of_execute_servers = common.get_server_specific(ns, true).length 
     }
     //log information
-    common.log(ns, config.log_level, common.success, "Found " + getExecuteServers(ns).length + " servers to execute hacks")
-    //create target info
+    common.log(ns, config.log_level, common.success, "Found " + number_of_execute_servers + " servers to execute hacks")
+    //create target info object
     let target = new targetInfo(ns, config.delay_between_scripts)
     //always start in stop mode, to limit ram usage
     let flagStop = false
@@ -80,12 +84,11 @@ function init(ns) {
     common.disable_logging(ns, config.log_disabled_topics)
     //clear UI data
     ns.clearPort(common.port.hack)
-    //ns.clearPort(portHackStatus)
-    //ns.clearPort(portHackTarget)
 }
 
 class targetInfo {
     //create the class
+    
     /** @param {NS} ns */
     constructor(ns) {
         //set hostname to empty
@@ -109,7 +112,7 @@ class targetInfo {
     /** @param {NS} ns */
     async determineTarget(ns) {
         //refresh servers
-        this.servers = getServers(ns) //getExecuteServers(ns)
+        this.servers = common.getServers(ns) //getExecuteServers(ns)
         //log(ns, 1, info, "servers: " + JSON.stringify(this.servers))
         //variable to save the target to
         let new_target = ""
@@ -133,7 +136,7 @@ class targetInfo {
                     //if this score is better than what we have
                     if (score > best_score) {
                         //save this server
-                        newTarget = server
+                        new_target = server
                         //save the score
                         best_score = score
                         //log(ns, 1, info, "newTarget: " + newTarget)
@@ -145,7 +148,7 @@ class targetInfo {
         //if new target:
         if (this.hostname != new_target) {
             //set current target to new target
-            this.hostname = new-target
+            this.hostname = new_target
             //calculate the batches (W, GW, HWGW)
             this.generateThreads(ns)
             //prep target: W, then GW 
@@ -170,7 +173,7 @@ class targetInfo {
         this.minRam = {}
 
         //maximum number of cores to calculate
-        const maxCores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
+        const max_cores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
         
         for (let index = 0; index < ns.hacknet.numNodes(); index++) {
             let hackNetCores = ns.hacknet.getNodeStats(index).cores
@@ -188,7 +191,7 @@ class targetInfo {
         //weakenAnalyze(threads, cores)
 
         //for each core amount
-        for (let cores = 1; cores <= maxCores; cores++) {
+        for (let cores = 1; cores <= max_cores; cores++) {
             this.weaken[cores] = []
             this.grow[cores] = []
             this.hack[cores] = []
@@ -214,78 +217,78 @@ class targetInfo {
         //weakenAnalyze(threads, cores)
 
         //"calculate" W
-        let threadsWeaken = { weaken: index }
+        let weaken_threads = { weaken: index }
         //add costs
-        const costWeaken = (threadsWeaken.weaken * this.cost.weaken)
+        const weaken_cost = (weaken_threads.weaken * this.cost.weaken)
         //save to map
-        this.weaken[cores].push({ cost: costWeaken, threads: threadsWeaken })
-        //this.weaken.push({ cost: costWeaken, threads: threadsWeaken })
+        this.weaken[cores].push({ cost: weaken_cost, threads: weaken_threads })
+        //this.weaken.push({ cost: weaken_cost, threads: weaken_threads })
 
 
         //calculate GW	
-        let threadsGrow = { grow: index }
+        let grow_threads = { grow: index }
         //calculate the security increase
-        const securityIncrease = ns.growthAnalyzeSecurity(threadsGrow.grow, this.hostname, cores)
+        const grow_security_increase = ns.growthAnalyzeSecurity(grow_threads.grow, this.hostname, cores)
         //set threads to 1
-        let threadsWeaken0 = 1
+        let weaken_threads_for_grow = 1
         //while the increase is not nullified
-        while (ns.weakenAnalyze(threadsWeaken0, cores) < securityIncrease) {
+        while (ns.weakenAnalyze(weaken_threads_for_grow, cores) < grow_security_increase) {
             //add threads
-            threadsWeaken0++
+            weaken_threads_for_grow++
         }
-        threadsGrow.weaken = threadsWeaken0
+        grow_threads.weaken = weaken_threads_for_grow
         //always set to 1 if smaller
-        if (threadsGrow.weaken < 1) {
-            threadsGrow.weaken = 1
+        if (grow_threads.weaken < 1) {
+            grow_threads.weaken = 1
         }
         //add costs
-        let costGrow = (threadsGrow.grow * this.cost.grow) +
-            (threadsGrow.weaken * this.cost.weaken)
+        let grow_cost = (grow_threads.grow * this.cost.grow) +
+            (grow_threads.weaken * this.cost.weaken)
         //save to map
-        this.grow[cores].push({ cost: costGrow, threads: threadsGrow })
-        //this.grow.push({ cost: costGrow, threads: threadsGrow })
+        this.grow[cores].push({ cost: grow_cost, threads: grow_threads })
+        //this.grow.push({ cost: grow_cost, threads: grow_threads })
 
 
         //calculate HWGW
-        let threadsHack = { hack: index }
+        let hack_threads = { hack: index }
         //calculate growth
-        let moneyMax = ns.getServerMaxMoney(this.hostname)
-        let moneyHacked = ns.hackAnalyze(this.hostname) * threadsHack.hack * moneyMax
+        let money_max = ns.getServerMaxMoney(this.hostname)
+        let money_hacked = ns.hackAnalyze(this.hostname) * hack_threads.hack * money_max
         //if hacking equal to or more than 100%
-        if ((ns.hackAnalyze(this.hostname) * threadsHack.hack) >= 1) {
+        if ((ns.hackAnalyze(this.hostname) * hack_threads.hack) >= 1) {
             //signal to stop
             return false
         }
 
-        threadsHack.grow = Math.max(Math.ceil(ns.growthAnalyze(this.hostname, moneyMax / (moneyMax - moneyHacked), cores)), 1)
-        //BAD: Math.ceil(ns.growthAnalyze(this.hostname, (moneyMax / (moneyMax - moneyHacked))))
+        hack_threads.grow = Math.max(Math.ceil(ns.growthAnalyze(this.hostname, money_max / (money_max - money_hacked), cores)), 1)
+        //BAD: Math.ceil(ns.growthAnalyze(this.hostname, (money_max / (money_max - money_hacked))))
         //GOOD: Math.ceil(ns.growthAnalyze(server, maxMoney / (maxMoney - maxMoney * tGreed)))
 
 
         //calculate the security increase of hack
-        threadsHack.weaken1 = Math.max(Math.ceil(threadsHack.hack * 0.002 / 0.05), 1)
-        //let securityIncreaseHack = ns.hackAnalyzeSecurity(threadsHack.hack, this.hostname)
+        hack_threads.weaken1 = Math.max(Math.ceil(hack_threads.hack * 0.002 / 0.05), 1)
+        //let securityIncreaseHack = ns.hackAnalyzeSecurity(hack_threads.hack, this.hostname)
 
         //calculate the security increase of grow
-        threadsHack.weaken2 = Math.max(Math.ceil(threadsHack.grow * 0.004 / 0.05), 1)
+        hack_threads.weaken2 = Math.max(Math.ceil(hack_threads.grow * 0.004 / 0.05), 1)
 
 
-        //let securityIncreaseGrow = ns.growthAnalyzeSecurity(threadsHack.grow, this.hostname)
+        //let securityIncreaseGrow = ns.growthAnalyzeSecurity(hack_threads.grow, this.hostname)
         //add costs
-        let costHack = (threadsHack.hack * this.cost.hack) +
-            (threadsHack.weaken1 * this.cost.weaken) +
-            (threadsHack.grow * this.cost.grow) +
-            (threadsHack.weaken2 * this.cost.weaken)
+        let hack_cost = (hack_threads.hack * this.cost.hack) +
+            (hack_threads.weaken1 * this.cost.weaken) +
+            (hack_threads.grow * this.cost.grow) +
+            (hack_threads.weaken2 * this.cost.weaken)
 
 
         //save to list
-        this.hack[cores].push({ cost: costHack, threads: threadsHack })
-        //this.hack.push({ cost: costHack, threads: threadsHack })
+        this.hack[cores].push({ cost: hack_cost, threads: hack_threads })
+        //this.hack.push({ cost: hack_cost, threads: hack_threads })
 
         //if first time, save the minimum ram needed: this is the minimum set
         if (index == 1) {
-            this.minRam[cores] = { weaken: costWeaken, grow: costGrow, hack: costHack }
-            //this.minRam = { weaken: costWeaken, grow: costGrow, hack: costHack }
+            this.minRam[cores] = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
+            //this.minRam = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
         }
         return true
     }
@@ -300,8 +303,11 @@ class targetInfo {
 
             //for every index
             for (let index = 0; index < list.length; index++) {
+                //if enough ram
                 if (list[index].cost > ram) {
+                    //if not enough ram
                     if (index == 0) {
+                        //not possible
                         return null
                     }
                     //exceeded ram, go back 1
@@ -310,10 +316,11 @@ class targetInfo {
             }
             //exceeded list, return last entry
             return list[list.length - 1].threads
+        //error occured
         } catch (error) {
-            log(ns, config.log_level, warning, "getThreads: " + error)
-            log(ns, config.log_level, warning, "cores: " + cores + ", ram: " + ram + ", type: " + type)
-            log(ns, config.log_level, error, "this: " + JSON.stringify(this))
+            common.log(ns, config.log_level, common.warning, "getThreads: " + error)
+            common.log(ns, config.log_level, common.warning, "cores: " + cores + ", ram: " + ram + ", type: " + type)
+            common.log(ns, config.log_level, common.error, "this: " + JSON.stringify(this))
             return undefined ///{ grow: 0, weaken: 0, hack: 0, weaken1: 0, weaken2: 0 }
         }
     }
@@ -324,26 +331,30 @@ class targetInfo {
     async prepTarget(ns) {
 
         //get info
-        let securityMin = ns.getServerMinSecurityLevel(this.hostname)
-        let moneyMax = ns.getServerMaxMoney(this.hostname)
-
+        const security_min = ns.getServerMinSecurityLevel(this.hostname)
+        const money_max = ns.getServerMaxMoney(this.hostname)
+        //check data
+        const security_below_threshold = Math.round(ns.getServerSecurityLevel(this.hostname)) < Math.round(security_min)
+        const money_at_max = ns.getServerMoneyAvailable(this.hostname) >= money_max
         //check if need to log
-        if ((Math.round(ns.getServerSecurityLevel(this.hostname)) > Math.round(securityMin)) ||
-            (ns.getServerMoneyAvailable(this.hostname) < moneyMax)) {
-            log(ns, config.log_level, info, "Started prep " + this.hostname + ": " +
-                ns.getServerSecurityLevel(this.hostname) + " > " + securityMin + " (" + (ns.getServerSecurityLevel(this.hostname) > securityMin) + "), " +
-                ns.getServerMoneyAvailable(this.hostname) + " < " + moneyMax + " (" + (ns.getServerMoneyAvailable(this.hostname) < moneyMax) + ")")
+        if (!security_below_threshold || !money_at_max) {
+            //log information
+            common.log(ns, config.log_level, common.info, "Started prep " + this.hostname + ": " +
+                ns.getServerSecurityLevel(this.hostname) + " > " + security_min + " (" + (ns.getServerSecurityLevel(this.hostname) > security_min) + "), " +
+                ns.getServerMoneyAvailable(this.hostname) + " < " + money_max + " (" + (ns.getServerMoneyAvailable(this.hostname) < money_max) + ")")
             //kill all running scripts
             this.killScripts(ns)
+        //everything ok
         } else {
+            //no need for action
             return
         }
 
         //while the security is not min
-        while (ns.getServerSecurityLevel(this.hostname) > securityMin) {
+        while (ns.getServerSecurityLevel(this.hostname) > security_min) {
             //log info to UI
             over_write_port(ns, enum_port.hack, "Weaken: " + this.hostname)
-            //updateUI(ns, this.hostname, "Weaken: " + Math.floor(securityMin / ns.getServerSecurityLevel(this.hostname)) + "%")
+            //updateUI(ns, this.hostname, "Weaken: " + Math.floor(security_min / ns.getServerSecurityLevel(this.hostname)) + "%")
             //weaken the server
             await this.executeBatch(ns, "weaken")
         }
@@ -351,10 +362,10 @@ class targetInfo {
         this.killScripts(ns)
 
         //while money is not max
-        while (ns.getServerMoneyAvailable(this.hostname) < moneyMax) {
+        while (ns.getServerMoneyAvailable(this.hostname) < money_max) {
             //log info to UI
             over_write_port(ns, enum_port.hack, "Grow: " + this.hostname)
-            //updateUI(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / moneyMax) + "%")
+            //updateUI(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / money_max) + "%")
             //grow the money
             await this.executeBatch(ns, "grow")
         }
@@ -582,71 +593,4 @@ function updateUI(ns, header, value) {
     common.over_write_port(ns, common.port.hack, header + ", " + value)
     //common.over_write_port(ns, common.port.hack, value)
     //TODO: properly fix
-}
-
-
-
-/** @param {NS} ns */
-function getServers(ns) {
-    //create a list to save hostnames to
-    let scanList = []
-    //start scanning from home
-    scanServer(ns, enum_servers.home, scanList)
-    //add purchased servers to the list
-    return scanList.concat(ns.getPurchasedServers())
-}
-
-
-
-/** @param {NS} ns */
-function scanServer(ns, hostname, scanList) {
-    //add this hostname to the list				
-    scanList.push(hostname)
-    //scan at this hostname				
-    let neighbours = ns.scan(hostname)
-    //for every neighbour				
-    for (let neighbour of neighbours) {
-        //if not yet performed a scan on this hostname			
-        if (scanList.indexOf(neighbour) == -1) {
-            //scan from this neighbour		
-            scanServer(ns, neighbour, scanList)
-        }
-    }
-}
-
-
-
-/** @param {NS} ns */
-function getExecuteServers(ns) {
-    let executeServers = []
-    const allServers = getServers(ns)
-    //TODO: WHY DO THEY FAIL?
-    const blackList = ["zb-institute", "univ-energy", "titan-labs"]
-    for (const server of allServers) {
-        //if not on the blacklist
-        //if (blackList.indexOf(server) != -1) {
-        //if root access and RAM
-        if ((ns.hasRootAccess(server)) &&
-            (ns.getServerMaxRam(server) > 0)) {
-            //if not yet in the executeServers list
-            if (executeServers.indexOf(server) == -1) {
-                //copy files to servers 
-                ns.scp(enum_scripts.workerWeaken, server)
-                ns.scp(enum_scripts.workerGrow, server)
-                ns.scp(enum_scripts.workerHack, server)
-                /*
-                ns.scp("scripts/external/weaken.js", server)
-                ns.scp("scripts/external/grow.js", server)
-                ns.scp("scripts/external/hack.js", server)
-                */
-                //ns.scp("scripts/helpers.js", server)
-
-                //push to list
-                executeServers.push(server)
-            }
-        }
-        //}
-    }
-    //log(ns,1,info,"executeServers: " + executeServers)
-    return executeServers
 }
