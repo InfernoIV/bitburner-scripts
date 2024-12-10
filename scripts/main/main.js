@@ -53,7 +53,7 @@ export async function main(ns) {
         launched_scripts = manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
 
         //player actions & bladeburner: 71 GB
-        manage_actions(ns, bit_node_multipliers)   //71 GB
+        manage_action_player(ns, bit_node_multipliers)   //71 GB
         buy_augments(ns)  //10 GB
         
         //sleeve: ? GB
@@ -611,7 +611,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
  *          bladeburner_get_activity (1)
  *          bladeburner_determine_action (28)
  */
-function manage_actions(ns, bit_node_multipliers) {
+function manage_action_player(ns, bit_node_multipliers) {
     //if the player is focussed (should only happen after resuming play (starting the game)
     if(ns.singularity.isFocused()) {
         //stop action
@@ -661,7 +661,7 @@ function manage_actions(ns, bit_node_multipliers) {
         //if bladeburner joined: work for bladeburner
         if (bladeburner_joined) {
             //check for bladeburner work
-            bladeburner.determine_action(ns)
+            bladeburner.manage_action(ns)
         }
 
         //if bladeburner is not joined or augment for dual work is installed
