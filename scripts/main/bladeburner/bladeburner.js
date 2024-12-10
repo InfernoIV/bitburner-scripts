@@ -11,19 +11,8 @@ import * as data from "./data.js"
  * Function to do a check for bladeburner access 
  */
 export function get_access(ns) {
-    //get challenge config
-    const challenge_flags = common.get_challenge_flags(ns)
-    //if unlocked (API and division) and not performing the challenge
-    if(!common.has_completed_bit_node_level(ns, 6) || 
-       !common.has_completed_bit_node_level(ns, 7) || 
-       (challenge_flags.disable_bladeburner == true)) {
-        //no access
-        return false
-        
-    //unlocked and not disabled: check access
-    } else {
-        return ns.bladeburner.joinBladeburnerDivision()
-    }
+    //try to or return the result of joining
+    return ns.bladeburner.joinBladeburnerDivision()
 }
 
 
