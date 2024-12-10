@@ -15,12 +15,12 @@ export async function main(ns) {
     //if we can charge fragments (faction COTMG is joined)
     if (ns.getPlayer().factions.indexOf(data.faction) > -1) {
         //kill all scripts
-        ns.killall(enum_servers.home, true)  
+        ns.killall(common.servers.home, true)  
       
         //save biggest RAM
-        const max_ram = ns.getServerMaxRam(enum_servers.home) - ns.getScriptRam(enum_scripts.stanekCharge, enum_servers.home)
+        const max_ram = ns.getServerMaxRam(common.servers.home) - ns.getScriptRam(common.scripts.stanekCharge, common.servers.home)
         //calculate RAM cost
-        const script_ram = ns.getScriptRam(enum_scripts.workerCharge, enum_servers.home)
+        const script_ram = ns.getScriptRam(common.scripts.workerCharge, common.servers.home)
         //check how many threads we can run
         const threads = Math.floor(max_ram / script_ram)
 
