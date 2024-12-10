@@ -1,3 +1,34 @@
+//disabled log topics
+export const log_disabled_topics = [
+  //normal
+  "sleep",
+  "scan",
+  "ftpcrack",
+  "brutessh",
+  "sqlinject",
+  "httpworm",
+  "relaysmtp",
+  "nuke",
+  "scp",
+  "exec",
+  "killall",
+  //singularity
+  "singularity.purchaseProgram",
+  "singularity.purchaseAugmentation",
+  "singularity.joinFaction",
+  "singularity.applyToCompany",
+  "singularity.purchaseTor",
+  "singularity.commitCrime",
+  "singularity.travelToCity",
+  //hacknet
+  "singularity.upgradeHomeRam",
+  "singularity.upgradeHomeCores",
+  //bladeburner
+  "bladeburner.joinBladeburnerDivision",
+  "bladeburner.startAction",
+  "bladeburner.upgradeSkill",
+]
+
 //minimum stat for hacking (todo: struct format?)
 export const stat_minimum_hacking = 25//50 //?
 
