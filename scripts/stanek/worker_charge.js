@@ -1,6 +1,8 @@
 //imports
 import * as common from "scripts/common.js"
 
+
+
 /** @param {NS} ns */
 export async function main(ns) {
     //if we have coordinates
