@@ -1,48 +1,45 @@
 /** @param {NS} ns 
  * 
  * arguments:
- * 0 - hostname (string)
+ * 0 - hostname (string) (mandatory)
  * 1 - Number of threads (1+)
  * 2 - delay in msec (0+)
- * 3 - affectsStock (true/false) 
- * 4 - singleInstance (true/false)
+ * 3 - hostname (hostname of the executing machine, for logging) 
+ * 4 - log level (to determine where to print)
 */
 export async function main(ns) {
-
-    let timeStart = Date.now()
-    let targetHostname = " "
-    if (ns.args[0] != undefined) {
-        targetHostname = ns.args[0]
-    } else {
+     //get the start time
+    const time_start = Date.now()
+    //check if we have enough arguments
+    if(ns.args.length < 1) {
+        //no hostname available, script cannot work
+        //log information
         ns.tprint("ERROR " + "No hostname!")
-        return
+        //stop script
+        ns.exit()
     }
+    //get the host name from arguments
+    const target_hostname = ns.args[0]
+    //get the delay from arguments (if provided, otherwise 0)
+    const delay = (ns.args[1] != undefined) ? ns.args[1] : 0
 
-    let delay = 0
-    if (ns.args[1] != undefined) {
-        delay = ns.args[1]
-    }
+    //weaken the server and save the amount
+    const security_weakened = await ns.weaken(target_hostname, { additionalMsec: delay })
 
-    let threads = 0
-    if (ns.args[2] != undefined) {
-        threads = ns.args[2]
-    }
-
-    let hostname = ns.args[3]
-
-    let logLevel = 0
-    if (ns.args[4] != undefined) {
-        logLevel = ns.args[4]
-    }
-
-    let securityWeaken = await ns.weaken(targetHostname, { additionalMsec: delay })
-    let timeEnd = Date.now()
-    let message = hostname + " weakened (" + threads + ") '" + targetHostname + "' for " + '\t' + securityWeaken + "\t" + timeStart + "\t" + timeEnd + "\t" + (timeEnd - timeStart) + "\t" + delay + "\t" + (timeEnd - timeStart - delay)
-    if(logLevel >= 1) {
+    //get the end time
+    const time_end = Date.now()
+    //get the threads from arguments (if provided, otherwise 1)
+    const threads = (ns.args[2] != undefined) ? ns.args[2] : 1
+    //get the (own) hostname from arguments (if provided, otherwise "")
+    const hostname = (ns.args[3] != undefined) ? ns.args[3] : ""
+    //save log level
+    const log_level = (ns.args[4] != undefined) ? ns.args[4] : 0
+    //not formatted for use in comparison in excel
+    let message = hostname + " weakened (" + threads + ") '" + target_hostname + "' for " + '\t' + security_weakened + "\t" + time_start + "\t" + time_end + "\t" + (time_end - time_start) + "\t" + delay + "\t" + (time_end - time_start - delay)
+    //log according to log level
+    if(log_level >= 1) {
         ns.tprint("SUCCESS " + message)
-        ns.tprint("INFO ")
     } else {
         ns.print("SUCCESS " + message)
-        ns.print("INFO ")
     }
 }
