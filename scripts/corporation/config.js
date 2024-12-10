@@ -1,5 +1,7 @@
 //loglevel
 export const log_level = 0 //logLevel
+//disable logs
+export const disabled_logs = [""]
 
 //research to be left over after researching something
 export const research_left_over_percentage = 1.1 //10% //researchLeftOverPercentage
