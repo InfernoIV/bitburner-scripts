@@ -2,6 +2,7 @@
 import * as common from "./common.js"
 
 
+
 /** @param {NS} ns */
 export async function main(ns) {    
     //TODO: check if getRestInfo is still broken (ownedSF is empty)
@@ -10,16 +11,16 @@ export async function main(ns) {
     //prepare information to be used later by other functions
     prepare_information(ns)
     
-    //if unlocked and not disabled
-    if (has_completed_bit_node_level(ns, 13)) {
+    //if stanek unlocked
+    if (common.functionality_available(common.functionality.stanek)) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
-        ns.run(enum_scripts.jump, 1,
-            enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
+        ns.run(common.scripts.jump, 1,
+            common.scripts.stanek_create, true) //which script to launch, kill other scripts
     } else {
         //launch directly to main
         //run jumpscript to boot main
-        ns.run(enum_scripts.jump, 1, 
-        enum_scripts.main, true)
+        ns.run(common.scripts.jump, 1, 
+        common.scripts.main, true)
     } 
 }
 
@@ -63,7 +64,7 @@ function prepare_information(ns) {
     //set to 0 by default
     let num_sleeves = 0
     //check if we have unlocked sleeve
-    if(has_completed_bit_node_level(10, 1)) {
+    if(common.functionality_available(common.functionality.sleeve)) {
         //get the actual number
         num_sleeves = ns.sleeve.getNumSleeves()
     }
@@ -110,7 +111,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
         //failsafe, if the multiplier doesn't exist in the list
         if(!Object.hasOwn(bit_node_lookup_data, key)) {
             //log error
-            common.log(ns, 1, error, "Muliplier '" + key + "' doesn't exist in the bit_node_lookup_data!")
+            common.log(ns, 1, common.error, "Muliplier '" + key + "' doesn't exist in the bit_node_lookup_data!")
             //go to next
             continue
         }
@@ -123,6 +124,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
         let default_value = 1
         //if there is another default value
         if(Object.hasOwn(lookup_data, "default_value")) {
+            //update the default value
             default_value = lookup_data["default_value"]
         }
         
