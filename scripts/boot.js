@@ -11,8 +11,7 @@ export async function main(ns) {
     prepare_information(ns)
     
     //if unlocked and not disabled
-    if ((has_completed_bit_node_level(ns, 13)) && 
-        (get_challenge_flags(ns).disable_stanek != true)) {
+    if (has_completed_bit_node_level(ns, 13)) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
         ns.run(enum_scripts.jump, 1,
             enum_scripts.stanekCreate, true) //which script to launch, kill other scripts
@@ -27,14 +26,9 @@ export async function main(ns) {
 
 
 /**
- * Function that retrieves information (challenge flags, reset info, bitnode multipliers) and saves it to file
+ * Function that retrieves information (reset info, bitnode multipliers) and saves it to file
  */
-function prepare_information(ns) {
-    //get the challenge flags
-    const challenge_flags = get_challenge_flags(ns)
-    //log active challenge settings
-    log_challenge_flags(ns, challenge_flags)
-    
+function prepare_information(ns) {  
     //get reset info
     const reset_info = ns.getResetInfo()
     //write data to file
@@ -75,22 +69,6 @@ function prepare_information(ns) {
     }
     //write data to file
     ns.write(file_num_sleeves, JSON.stringify(num_sleeves), "w")
-}
-
-
-
-/**
- * 
- */
-function log_challenge_flags(ns, challenge_flags) {
-    //for each challenge
-    for (const challenge in challenge_flags) {
-        //if challenge is active
-        if(challenge_flags[challenge]) {
-            //log challenge information
-            common.log(ns, 1, common.warning, "Challenge parameter: '" + challenge + "' is active (and thus limited / disabled)")
-        }
-    }
 }
 
 
