@@ -67,7 +67,8 @@ function that sets 1 time things on boot
 */
 function init(ns) {
     //disable logs
-    //ns.disableLog("disableLog")
+    common.disable_logging(ns, config.disabled_logs)
+    
     //set counter to amount of products owned
     //productCounter = 0// + ns.corporation.getDivision().products.length
 
