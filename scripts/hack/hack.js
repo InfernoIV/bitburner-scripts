@@ -1,59 +1,57 @@
-//imports
-import { info, success, warning, error, fail, //constants 
-    enum_port, enum_servers, enum_scripts, enum_hackingCommands, //enums
-    log, number_formatter, over_write_port, //functions
-} from "scripts/common.js"
-
 //config.
 import * as config from "./config.js"
-
-//global variables
-var counter
-const counterLimit = 10
+//common
+import * as common from "./common.js"
 
 
 
 /** @param {NS} ns */
 export async function main(ns) {
-    //counter = 0
     //init
     init(ns)
-    
-    log(ns, config.log_level, success, "Looking for servers to execute hacks")
+    //log start
+    common.log(ns, config.log_level, common.success, "Looking for servers to execute hacks")
     //wait until servers become available
     while (getExecuteServers(ns).length == 0) {
+        //wait a bit
         await ns.sleep(1 * 1000)
     }
-    log(ns, config.log_level, success, "Found " + getExecuteServers(ns).length + " servers to execute hacks")
+    //log information
+    common.log(ns, config.log_level, common.success, "Found " + getExecuteServers(ns).length + " servers to execute hacks")
     //create target info
     let target = new targetInfo(ns, config.delay_between_scripts)
     //always start in stop mode, to limit ram usage
     let flagStop = false
     //main loop
     while (true) {
-
+        //if stopped
         if (flagStop == true) {
+            //if we should start again
             if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.start)) {
                 //log information
-                log(ns, config.log_level, info, "Resuming HackManager")
+                common.log(ns, config.log_level, common.info, "Resuming HackManager")
                 //reset flag
                 flagStop = false
+            //nothing has changed
             } else {
-                //do nothing
+                //do nothing but wait a bit
                 await ns.sleep(100)
             }
 
 
         } else {
-            if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.stop)) {
+            if ((ns.peek(common.port.stopHack) == common.hackingCommands.stop)) {
                 //log information
-                log(ns, config.log_level, info, "Pausing HackManager")
-                let waitTime = ns.getWeakenTime(ns) + (2*config.delay_between_scripts)
+                common.log(ns, config.log_level, common.info, "Pausing HackManager")
+                //set wait time
+                let waitTime = ns.getWeakenTime(ns) + (2 * config.delay_between_scripts)
+                //wait to ensure everything is stpoped
                 await ns.sleep(waitTime)
 
                 //set flag
                 flagStop = true
             } else {
+                //set flag to check
                 let flagAwaitTarget = false
                 //check for a new target: if new target, re-calculate the batch sizes
                 while (!await target.determineTarget(ns)) {
@@ -62,7 +60,7 @@ export async function main(ns) {
                         //set flag
                         flagAwaitTarget = true
                         //log once
-                        log(ns, 1, warning, "Waiting for target")
+                        common.log(ns, config.log_level, common.warning, "Waiting for target")
                     }
                     await ns.sleep(100)
                 }
@@ -78,22 +76,10 @@ export async function main(ns) {
 
 /** @param {NS} ns */
 function init(ns) {
-    ns.disableLog("disableLog")
-    ns.disableLog("getServerMaxRam")
-    ns.disableLog("getServerUsedRam")
-    ns.disableLog("sleep")
-    ns.disableLog("getServerMoneyAvailable")
-    ns.disableLog("exec")
-    ns.disableLog("getServerSecurityLevel")
-    ns.disableLog("getServerRequiredHackingLevel")
-    ns.disableLog("getServerMinSecurityLevel")
-    ns.disableLog("getServerMaxMoney")
-    ns.disableLog("getHackingLevel")
-    ns.disableLog("scan")
-    ns.disableLog("getServerBaseSecurityLevel")
-    ns.disableLog("scp")
+    //disable logging
+    common.disable_logging(ns, config.log_disabled_topics)
     //clear UI data
-    ns.clearPort(enum_port.hack)
+    ns.clearPort(common.port.hack)
     //ns.clearPort(portHackStatus)
     //ns.clearPort(portHackTarget)
 }
@@ -108,9 +94,9 @@ class targetInfo {
         this.waitTime = 0
         this.wait = 0
         //define scripts
-        this.scriptWeaken = enum_scripts.workerWeaken //"scripts/external/weaken.js"
-        this.scriptGrow = enum_scripts.workerGrow //"scripts/external/grow.js"
-        this.scriptHack = enum_scripts.workerHack //"scripts/external/hack.js"
+        this.scriptWeaken = common.scripts.workerWeaken 
+        this.scriptGrow = common.scripts.workerGrow 
+        this.scriptHack = common.scripts.workerHack
         //set costs
         this.cost = {
             weaken: ns.getScriptRam(this.scriptWeaken),
@@ -126,26 +112,30 @@ class targetInfo {
         this.servers = getServers(ns) //getExecuteServers(ns)
         //log(ns, 1, info, "servers: " + JSON.stringify(this.servers))
         //variable to save the target to
-        let newTarget = ""
+        let new_target = ""
         //variable to temporarly store new target
-        let bestScore = -1
+        let best_score = -1
         //log(ns,1,info,"this.servers: " + JSON.stringify(this.servers))
         //for every server
         for (let server of this.servers) {
             //set score to 0			
             let score = 0
-            let maxMoney = ns.getServerMaxMoney(server)
+            //get the max money possible
+            let max_money = ns.getServerMaxMoney(server)
             //if the server can be hacked and has money
-            if (ns.hasRootAccess(server) && maxMoney > 0) {
+            if (ns.hasRootAccess(server) && max_money > 0) {
                 //log(ns,1,info,"server: " + server)
                 //log(ns,1,info,(ns.getHackingLevel() / 2) + " > " + ns.getServerRequiredHackingLevel(server))
                 //if required hacking level is smaller than half the player hacking level			
                 if ((ns.getHackingLevel() / 2) > ns.getServerRequiredHackingLevel(server)) {
                     //calculate score according to max money and min security (?)		
-                    score = maxMoney / ns.getServerMinSecurityLevel(server)
-                    if (score > bestScore) {
+                    score = max_money / ns.getServerMinSecurityLevel(server)
+                    //if this score is better than what we have
+                    if (score > best_score) {
+                        //save this server
                         newTarget = server
-                        bestScore = score
+                        //save the score
+                        best_score = score
                         //log(ns, 1, info, "newTarget: " + newTarget)
                     }
                 }
@@ -153,17 +143,19 @@ class targetInfo {
         }
 
         //if new target:
-        if (this.hostname != newTarget) {
+        if (this.hostname != new_target) {
             //set current target to new target
-            this.hostname = newTarget
+            this.hostname = new-target
             //calculate the batches (W, GW, HWGW)
             this.generateThreads(ns)
             //prep target: W, then GW 
             await this.prepTarget(ns) //should only happen once, if properly balanced
         }
-        if (newTarget == "") {
+        if (new_target == "") {
+            //no target found
             return false
         }
+        //
         return true
     }
 
@@ -177,7 +169,8 @@ class targetInfo {
 
         this.minRam = {}
 
-        let maxCores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
+        //maximum number of cores to calculate
+        const maxCores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
         
         for (let index = 0; index < ns.hacknet.numNodes(); index++) {
             let hackNetCores = ns.hacknet.getNodeStats(index).cores
@@ -223,7 +216,7 @@ class targetInfo {
         //"calculate" W
         let threadsWeaken = { weaken: index }
         //add costs
-        let costWeaken = (threadsWeaken.weaken * this.cost.weaken)
+        const costWeaken = (threadsWeaken.weaken * this.cost.weaken)
         //save to map
         this.weaken[cores].push({ cost: costWeaken, threads: threadsWeaken })
         //this.weaken.push({ cost: costWeaken, threads: threadsWeaken })
@@ -232,7 +225,7 @@ class targetInfo {
         //calculate GW	
         let threadsGrow = { grow: index }
         //calculate the security increase
-        let securityIncrease = ns.growthAnalyzeSecurity(threadsGrow.grow, this.hostname, cores)
+        const securityIncrease = ns.growthAnalyzeSecurity(threadsGrow.grow, this.hostname, cores)
         //set threads to 1
         let threadsWeaken0 = 1
         //while the increase is not nullified
@@ -420,10 +413,10 @@ class targetInfo {
     
     /** @param {NS} ns */
     async executeHack(ns) {
-        let moneyPercentage = "" + number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + number_formatter(ns.getServerMaxMoney(this.hostname))
-        let securityPercentage = "" + number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
+        const money_percentage = "" + number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + number_formatter(ns.getServerMaxMoney(this.hostname))
+        const security_percentage = "" + number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
-        over_write_port(ns, enum_port.hack, "Hack: " + this.hostname)
+        common.over_write_port(ns, common.port.hack, "Hack: " + this.hostname)
         //updateUI(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
         //execute the batch
         await this.executeBatch(ns, "hack")
@@ -432,13 +425,13 @@ class targetInfo {
 
     
     async executeBatch(ns, type) {
-
         //variable to save server name to
         let serverExec = ""
         //save the ram of the execute server
         let serverRam = 0
         //for every available server
         for (let server of getExecuteServers(ns)) {
+            //get the cores
             let cores = ns.getServer(server).cpuCores
 
             try {
@@ -452,16 +445,17 @@ class targetInfo {
                 ////eval("this.minRam[" + cores + "]." + type)
                 //calculate the available ram
                 serverRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
+                //if enough RAM
                 if (serverRam > minRam) {
-                    log(ns, config.log_level, info, "Found server: " + server + " (" + cores + " core(s), " + serverRam + " GB RAM) to run " + minRam + " GB RAM")
+                    common.log(ns, config.log_level, common.info, "Found server: " + server + " (" + cores + " core(s), " + serverRam + " GB RAM) to run " + minRam + " GB RAM")
                     //set the execute server
                     serverExec = server
                     //stop looking
                     break
                 }
             } catch (error) {
-                log(ns, 1, warning, "Error: " + error)
-                log(ns, 1, info, "cores: " + cores + ", type: " + type + ", this.minRam: " + JSON.stringify(this.minRam))
+                common.log(ns, config.log_level, common.warning, "Error: " + error)
+                common.log(ns, config.log_level, common.info, "cores: " + cores + ", type: " + type + ", this.minRam: " + JSON.stringify(this.minRam))
                 ns.exit()
             }
 
@@ -503,12 +497,11 @@ class targetInfo {
                     break
                 }
                 if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, config.log_level)) {
-                    log(ns, 1, warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))
-                    counter++
-                    //log(ns,1,info,"zb-institute: " + ))
-
+                    //log informatoin
+                    common.log(ns, config.log_level, common.warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))                   
                 }
                 break
+
             case "grow":
                 //check if delay is incorrect
                 if (delays.grow < 0 || delays.weaken < 0) {
@@ -524,6 +517,7 @@ class targetInfo {
                     counter++
                 }
                 break
+                
             case "hack":
                 //check if delay is incorrect
                 if (delays.hack < 0 || delays.weaken1 < 0 || delays.grow < 0 || delays.weaken2 < 0) {
@@ -555,12 +549,12 @@ class targetInfo {
 
 
                 } catch (error) {
-                    log(ns, 1, error, "'" + serverExec + "' cannot exec " + JSON.stringify(threads) + " (" + serverRam + ")")
+                    common.log(ns, config.log_level, common.error, "'" + serverExec + "' cannot exec " + JSON.stringify(threads) + " (" + serverRam + ")")
                     ns.exit()
                 }
                 break
             default:
-                log(ns, 1, error, "executeBatch - Unhandled type: " + type)
+                common.log(ns,config.log_level, common.error, "executeBatch - Unhandled type: " + type)
                 //stop the script
                 ns.exit()
         }
@@ -585,8 +579,9 @@ class targetInfo {
 /** @param {NS} ns */
 function updateUI(ns, header, value) {
     //write data to port
-    over_write_port(ns, portHackTarget, header)
-    over_write_port(ns, portHackStatus, value)
+    common.over_write_port(ns, common.port.hack, header + ", " + value)
+    //common.over_write_port(ns, common.port.hack, value)
+    //TODO: properly fix
 }
 
 
