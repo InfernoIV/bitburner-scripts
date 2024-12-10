@@ -152,51 +152,16 @@ export async function main(ns) {
 function init(ns) {
 
     //disable unwanted logs
-    ns.disableLog("disableLog")
-    ns.disableLog("sleep")
-    ns.disableLog("scan")
-    ns.disableLog("ftpcrack")
-    ns.disableLog("brutessh")
-    ns.disableLog("sqlinject")
-    ns.disableLog("httpworm")
-    ns.disableLog("relaysmtp")
-    ns.disableLog("nuke")
-    ns.disableLog("scp")
-    ns.disableLog("exec")
-    ns.disableLog("killall")
-    
-    //singularity
-    ns.disableLog("singularity.purchaseProgram")
-    ns.disableLog("singularity.purchaseAugmentation")
-    ns.disableLog("singularity.joinFaction")
-    ns.disableLog("singularity.applyToCompany")
-    ns.disableLog("singularity.purchaseTor")
-    ns.disableLog("singularity.commitCrime")
-    ns.disableLog("singularity.travelToCity")
-
-    //hacknet
-    ns.disableLog("singularity.upgradeHomeRam")
-    ns.disableLog("singularity.upgradeHomeCores")
+    common.disable_logs(ns, config.log_disabled_topics)
     
     //sleeve stuff
     sleeve.init(ns)
-
-    //bladeburner stuff
-    ns.disableLog("bladeburner.joinBladeburnerDivision")
-    ns.disableLog("bladeburner.startAction")
-    ns.disableLog("bladeburner.upgradeSkill")
-    
-    //open console
-    /*
-    ns.tail()
-    ns.resizeTail(1000, 500)
-    */
 
     //clear reset port
     ns.clearPort(common.enum_port.reset)
 
     //for each server
-    for (let server of get_servers(ns)) {
+    for (const server of common.get_servers(ns)) {
         //check if it is home
         const is_server_home = (server == common.enum_servers.home)
         //kill all scripts
@@ -204,7 +169,7 @@ function init(ns) {
     }
 
     //signal hackManager to stop
-    common.over_write_port(ns, common.enum_port.stopHack, common.enum_hackingCommands.stop)
+    common.over_write_port(ns, common.port.stopHack, common.hackingCommands.stop)
 
     //get the UI
     const doc = eval('document')
@@ -215,9 +180,10 @@ function init(ns) {
 
     //clear data on exit
     ns.atExit(() => {
+        //clear
         hook0.innerHTML = ''
+        //clear
         hook1.innerHTML = ''
-        ns.closeTail()
     })
 }
 
@@ -1168,75 +1134,6 @@ function bladeburner_get_activity(ns) {
     }
     //return the value
     return activity
-}
-
-
-
-
-/**
- * Function that only returns servers (objects) 
- * That have RAM or money, and that have admin access (can run scripts)
- * Parameter determines if it returns ram (true) or money (false) server objects
- * Cost: 2
- *  getServer (2)
- */
-function get_server_specific(ns, server_has_ram = false) {
-    //create a list (of objects) to return
-    let server_list = []
-    //get all servers
-    const servers_all = get_servers(ns)
-    //for each server
-    for (let index = 0; index < servers_all.length; index++) {
-        //get server information
-        let server = ns.getServer(servers_all[index])
-        //if we have admin rights
-        if (server.hasAdminRights) {
-            //if we need to check ram and there is ram, or if we need to check money and there is money
-            if (((server_has_ram) && (server.maxRam > 0)) || ((!server_has_ram) && (server.moneyMax > 0))) {
-                //add the server object to the list
-                server_list.push(server)
-            }
-        }
-    }
-    //return server list
-    return server_list
-}
-
-
-
-/**
- * Function that will retrieve all server hostnames
- * Cost: none
- */
-function get_servers(ns) {
-    //create list to save hostnames into
-    let server_list = []
-    //start scanning from home
-    scan_server(ns, enum_servers.home, server_list)
-    //return the server list
-    return server_list
-}
-
-
-
-/**
- * Function that will retrieve all servers, sub function of get_servers
- * Cost: 
- *  scan (0,2)
- */
-function scan_server(ns, hostname, server_list) {
-    //get the neighbours of the server
-    const neighbours = ns.scan(hostname)
-    //for each neighbour
-    for (const neighbour of neighbours) {
-        //if not in the list
-        if (server_list.indexOf(neighbour) == -1) {
-            //add to list
-            server_list.push(neighbour)
-            //start scanning
-            scan_server(ns, neighbour, server_list)
-        }
-    }
 }
 
 
