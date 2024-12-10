@@ -29,6 +29,9 @@ export const log_disabled_topics = [
   "bladeburner.upgradeSkill",
 ]
 
+//work area for company work
+export const company_work_type = "Software"
+
 //minimum stat for hacking (todo: struct format?)
 export const stat_minimum_hacking = 25//50 //?
 
