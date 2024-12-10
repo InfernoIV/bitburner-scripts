@@ -34,11 +34,7 @@ export async function main(ns) {
  */
 function init(ns) {
     //disable logging
-    ns.disableLog("disableLog")
-    ns.disableLog("scan")
-    ns.disableLog("singularity.installBackdoor")
-    ns.disableLog("sleep")
-    
+    common.disable_logging(ns, config.disabled_logs)    
     //connect to home to ensure proper starting state 
     ns.singularity.connect(common.servers.home)
 }
