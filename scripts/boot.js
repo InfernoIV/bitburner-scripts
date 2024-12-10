@@ -52,7 +52,7 @@ function prepare_information(ns) {
     //get the multipliers of this bitnode
     let bit_node_multipliers = dummy_bit_node_multipliers
     //check if we get bit node multipliers (needs bit node 
-    if (has_completed_bit_node_level(ns, 5)) {
+    if (common.get_availability_functionality(ns, common.functionality.intelligence)) {
         //add the actual bitnode multipliers
         bit_node_multipliers = ns.getBitNodeMultipliers(bit_node, level)
     }
@@ -64,7 +64,7 @@ function prepare_information(ns) {
     //set to 0 by default
     let num_sleeves = 0
     //check if we have unlocked sleeve
-    if(common.functionality_available(common.functionality.sleeve)) {
+    if(common.get_availability_functionality(common.functionality.sleeve)) {
         //get the actual number
         num_sleeves = ns.sleeve.getNumSleeves()
     }
