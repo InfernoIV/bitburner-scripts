@@ -143,7 +143,7 @@ function init(ns) {
 /**
  * Function that gets the number of augments to be installed, using the UI
  */
-function get_augments_to_be_installed() {
+function get_number_of_augments_waiting_for_install() {
     //value to return
     let augments_ready_for_install = 0
     //get all svg
@@ -215,7 +215,7 @@ function execute_bit_node_destruction(ns) {
  */
 function install_augments(ns) {
     //get number of bought augments
-    const augments_to_be_installed = get_augments_to_be_installed()
+    const augments_to_be_installed = get_number_of_augments_waiting_for_install()
 
     //check if player is busy
     if (bladeburner.is_perform_blackop(ns)) {
@@ -456,7 +456,7 @@ function manage_hacking(ns) {
     }
 
     //get all servers
-    for (let server of get_servers(ns)) {
+    for (const server of get_servers(ns)) {
         //if no admin rights (should resolve owned servers automatically)
         if (!ns.getServer(server).hasAdminRights) {
             //just try all tools (without checking if we have them...) and nuke
@@ -477,10 +477,6 @@ function manage_hacking(ns) {
         }
     }
 }
-
-
-
-
 
 
 
@@ -573,14 +569,16 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
                             script_folder += script_path_element                    
                         }           
                         //get the scripts from the folder
-                        const scripts_in_folder = ns.ls(common.servers.home, script_folder)
-
+                        let scripts_in_folder = ns.ls(common.servers.home, script_folder)
+                        //add common.js
+                        scripts_in_folder.push("scripts/common.js")
+                        
                         //copy the scripts from the folder
                         if (ns.scp(scripts_in_folder, common.servers.home, server.hostname)) {
                             //execute the main script
                             if (ns.exec(script, server.hostname)) {
                                 //log information
-                                log(ns, 1, success, "Launched '" + script + "'")
+                                common.log(ns, 1, common.success, "Launched '" + script + "'")
                                 //add script to list of launched scripts
                                 launched_scripts.push(script)
                             }
@@ -949,7 +947,7 @@ function update_ui(ns, bit_node_multipliers) {
     //add augments bought
     headers.push("Augments bought")
     //add global
-    values.push(common.get_augmentations_installed(ns).length + "+" + get_augments_to_be_installed() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
+    values.push(common.get_augmentations_installed(ns).length + "+" + get_number_of_augments_waiting_for_install() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
     //sleeve, should not do anything if not unlocked
     //add sleeve values
