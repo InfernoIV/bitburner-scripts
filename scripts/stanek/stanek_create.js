@@ -72,12 +72,27 @@ export async function main(ns) {
         }
     }*/
     
-    //if we can place fragments (faction COTMG is joined)
+    
+    
+    //run jumpscript to boot main
+    ns.run(enum_scripts.jump, 1, 
+           enum_scripts.stanek_charge)
+}
+
+
+
+/**
+ * 
+ */
+function place_fragments(ns) {
+  //if we can place fragments (faction COTMG is joined)
     if (ns.getPlayer().factions.indexOf(faction) > -1) {
-        ns.tprint("ActiveFragments: " + ns.stanek.activeFragments().length)
+      //log information  
+        common.log(ns, config.log_level, common.info, "ActiveFragments: " + ns.stanek.activeFragments().length)
         //if not yet created a layout
         if (ns.stanek.activeFragments().length == 0 ) {
-            ns.tprint("Current node: " + ns.getResetInfo().currentNode)
+            //log information
+            common.log(ns, config.log_level, common.info, "Current node: " + ns.getResetInfo().currentNode)
             //hardcoded for 5x6 using excel and https://github.com/bitburner-official/bitburner-src/blob/dev/src/CotMG/Fragment.ts
             //TODO: what is the rootX and rootY position? Top left position, even if it is 'false'?
 
@@ -85,7 +100,19 @@ export async function main(ns) {
             let fragmentList = []
             //placeFragment(rootX: number, rootY: number, rotation: number, fragmentId: number): boolean
             //fill depending on bitnode focus
-            switch (ns.getResetInfo().currentNode) {
+
+            //default for now
+            fragmentList.push([3, 3, 0, 12]) //Defense
+            fragmentList.push([3, 1, 0, 105]) //Booster 1 (Tilted W)
+            fragmentList.push([3, 0, 0, 30]) //Bladeburner
+            fragmentList.push([1, 2, 0, 100]) //Booster 2 (Shifted T)
+    
+            fragmentList.push([0, 0, 1, 16]) //Agility
+            fragmentList.push([1, 0, 0, 10]) //Strength
+            fragmentList.push([0, 2, 1, 14]) //Dexterity
+            
+          /*
+          switch (ns.getResetInfo().currentNode) {
                 //2x3
                 case 8:     //Stocks
                     break
@@ -135,26 +162,26 @@ export async function main(ns) {
                 case 9:     //Hacknet
                     break
             }
-
+            */
+          
             //for each fragment
             for (let fragmentInfo of fragmentList) {
+                //get all information
                 const x = fragmentInfo[0]
                 const y = fragmentInfo[1]
                 const rotation = fragmentInfo[2]
                 const id = fragmentInfo[3]
-                //place fragment
+                
+                //if placement failed
                 if(!ns.stanek.placeFragment(x, y, rotation, id)) {
-                    ns.tprint("ERROR " + fragmentInfo)
-                    ns.run(enum_scripts.jump, 1, enum_scripts.main)
-                    return
+                  //report the error    
+                  common.log(ns, config.log_level, common.error, fragmentInfo)                  
                 }
             }
         }
     }
-    
-    //run jumpscript to boot main
-    ns.run(enum_scripts.jump, 1, enum_scripts.stanekCharge)
 }
+
 
 
 /**
