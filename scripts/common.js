@@ -49,9 +49,9 @@ export const servers = {
     home: "home",   //no effect
     worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
-    zb_institute: "zb-institute",
-    universal_energy: "univ-energy",
-    titan_labs: "titan-labs",
+    //zb_institute: "zb-institute",
+    //universal_energy: "univ-energy",
+    //titan_labs: "titan-labs",
 }
 
 
@@ -98,16 +98,20 @@ export const scripts = {
 export function log(ns, loglevel = 0, type = info, message = "") {
   //get time
     const date = new Date()
+    //get the hours
     let hour = "" + date.getHours()
+    //get the minutes
     let min = "" + date.getMinutes()
     //add leading 0's
     if (hour.length == 1) {
+        //add a leading 0
         hour = "0" + hour
     }
+    //if only 1 character
     if (min.length == 1) {
+        //add a leading 0
         min = "0" + min
     }
-    
     //update message
     message = hour + ":" + min + " " + message
     //depending on loglevel
@@ -137,8 +141,9 @@ export function number_formatter(number) {
     }
     //round the number
     number = Math.round(number)
-
+    //symbols to add
     const symbols = ["", "k", "m", "b", "t"]
+    //create a variable to save the largest index into
     let largest_index = 0
     for (let index = 0; index < symbols.length; index++) {
         if (Math.abs(number) >= Math.pow(1000, index)) {
@@ -193,6 +198,7 @@ export function over_write_port(ns, port, data) {
 
 /**
  * Function that retrieves bitnode information from file
+ * Cost: 0
  */
 export function get_bit_node_multipliers(ns) {
     //read data from file
@@ -203,6 +209,7 @@ export function get_bit_node_multipliers(ns) {
 
 /**
  * Function that retrieves bitnode information from file
+ * Cost: 0
  */
 export function get_reset_info(ns) {
     //read data from file
@@ -213,6 +220,7 @@ export function get_reset_info(ns) {
 
 /**
  * Function that returns the next target bit node
+ * Cost: ???
  */
 export function get_next_bit_node(ns) {
     //TODO: getResetInfo is broken, return 12
@@ -419,116 +427,93 @@ export const functionality = {
   * returns boolean indicating access to functionality
 **/
 export function get_availability_functionality(ns, functionality) {
-  //stub
-  return false
-  /*
+  
   //get current bit node and level
   const reset_info = get_reset_info(ns)
-  const source_files = 0
-  const bit_node = -1
-  const bit_node_level = -1
+  //get the map of source files
+  const source_files = reset_info.ownedSF
+    //get the current bit node
+  const bit_node = reset_info.currentNode
   //get bit node multipliers
-  const bit_node_multipliers = 0
+  const bit_node_multipliers = get_bit_node_multipliers(ns)
   
+  //depending on the functionality
   switch (functionality) {
-      
+      //uncaught condition
+      default:
+        //unknown = no access
+        return false
+          
   case functionality.gang: //bit node 2: namespace gang
-    if((bit_node == 2) || //if in bit node
-      (source_files.has(2)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if(((bit_node == 2) || (source_files.has(2))) && //if in bit node or has source file
+      (bit_node_multipliers.GangSoftcap > 0) &&  //and not disabled by bit node multipliers
+      (!reset_info.bitNodeOptions.disableGang)) { //and not disabled by bitnode options
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.corporation: //bit node 3: namespace corporation
-    if((bit_node == 3) || //if in bit node
-      (source_files.has(3)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if(((bit_node == 3) || (source_files.has(3))) && //if in bit node or has source file 
+        (bit_node_multipliers.CorporationSoftcap >= 0.15) && //not disabled by bit node multipliers
+        (!reset_info.bitNodeOptions.disableCorporation)) { //and not disabled by bitnode options
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.intelligence: //bit node 5: function bitnodeMultipliers, namespace formula's
-    if((bit_node == 5) || //if in bit node
-      (source_files.has(5)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 5) || (source_files.has(5))) { //if in bit node or has source file
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.bladeburner: //bit node 6 & 7: namespace bladeburner
-    if((bit_node == 6) || //if in bit node
-      (source_files.has(6)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 6) || (bit_node == 7) || source_files.has(6) || source_files.has(7) && //if in bit node or has source file
+      //(bit_node_multipliers.x > y) && //not disabled by bit node multipliers
+      (!reset_info.bitNodeOptions.disableBladeburner)) { //not disabled by bitnode options
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.stocks: //bit node 8: namespace Tix (short and limit orders)
-    if((bit_node == 8) || //if in bit node
-      (source_files.has(8)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 8) || (source_files.has(8))) { //&& //if in bit node or has source file
+      //(bit_node_multipliers.x > y) && //not disabled by bit node multipliers
+        //(!reset_info.bitNodeOptions.disable4SData)) { //not disabled by bitnode options
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.hacknet: //bit node 9: namespace hacknet
-    if((bit_node == 9) || //if in bit node
-      (source_files.has(9)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if(((bit_node == 9) || (source_files.has(9)))) {// && //if in bit node or has source file
+      //(bit_node_multipliers.x > y) && //not disabled by bit node multipliers
+      //(!reset_info.bitNodeOptions.disableHacknetServer)) { //not disabled by bitnode options
+      //(!reset_info.bitNodeOptions.restrictHomePCUpgrade)) { //not disabled by bitnode options
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.sleeve: //bit node 10: namespace sleeve, grafting
-    if((bit_node == 10) || //if in bit node
-      (source_files.has(10)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 10) || (source_files.has(10))) { // && //if in bit node or has source file
+      //(bit_node_multipliers.x > y) //not disabled by bit node multipliers
+      //(!reset_info.bitNodeOptions.disableSleeveExpAndAugmentation)) { 
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
 
   case functionality.stanek: //bit node 13: namespace stanek
-    if((bit_node == 13) || //if in bit node
-      (source_files.has(13)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 13) || (source_files.has(13))) { // && //if in bit node or has source file
+      //(bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
   
   case functionality.ipvgo: //bit node 14: namespace ipvgo
-    if((bit_node == 14) || //if in bit node
-      (source_files.has(14)) && //or has source file
-      (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
+    if((bit_node == 14) || (source_files.has(14))) { // && //if in bit node or has source file
+      //(bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
     }  
-    //indicate failure
-    return false
-
-  //uncaught condition
-  default:
-    //unknown = no access
-    return false
-  }
-  */
-  //failsafe
+  }  
+  //otherwise we don't have access
   return false
 }
 
