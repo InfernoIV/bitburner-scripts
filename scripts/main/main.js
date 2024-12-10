@@ -97,7 +97,7 @@ function init(ns) {
     common.disable_logs(ns, config.log_disabled_topics) 
 
     //clear reset port
-    ns.clearPort(common.ort.reset)
+    ns.clearPort(common.port.reset)
 
     //for each server
     for (const server of common.get_servers(ns)) {
