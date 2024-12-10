@@ -7,7 +7,6 @@ THIS FILE SHOULD NOT HAVE EXTRA RAM IMPACT ON OTHER FILES, IT SHOULD ONLY HAVE T
 //file constants
 export const file_bit_node_multipliers = "bit_node_multipliers.json"
 export const file_reset_info = "reset_info.json"
-export const file_challenge_flags = "challenge.json"
 export const file_bit_node_progression = "bit_node_progression.json"
 export const file_num_sleeves = "sleeves.json"
 
@@ -208,16 +207,6 @@ export function get_bit_node_multipliers(ns) {
 export function get_reset_info(ns) {
     //read data from file
     return JSON.parse(ns.read(file_reset_info))
-}
-
-
-
-/**
- * Function that retrieves bitnode information from file
- */
-export function get_challenge_flags(ns) {
-    //read data from file
-    return JSON.parse(ns.read(file_challenge_flags))
 }
 
 
@@ -426,15 +415,13 @@ export const functionality = {
   * Function that checks if functionality is available
   * either by being in the bitnode that enables it
   * or by having it unlocked by destroying the corresponding bit node
-  * also checked if not disabled by challenge config or bit node multipliers
+  * also checked if not disabled by bit node multipliers
   * returns boolean indicating access to functionality
 **/
 export function get_availability_functionality(ns, functionality) {
   //stub
   return false
   /*
-  //get challenge flags -> to transfer to bit node options???
-  const challenge_flags = get_challenge_flags(ns)
   //get current bit node and level
   const reset_info = get_reset_info(ns)
   const source_files = 0
@@ -448,7 +435,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.gang: //bit node 2: namespace gang
     if((bit_node == 2) || //if in bit node
       (source_files.has(2)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -459,7 +445,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.corporation: //bit node 3: namespace corporation
     if((bit_node == 3) || //if in bit node
       (source_files.has(3)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -470,7 +455,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.intelligence: //bit node 5: function bitnodeMultipliers, namespace formula's
     if((bit_node == 5) || //if in bit node
       (source_files.has(5)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -481,7 +465,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.bladeburner: //bit node 6 & 7: namespace bladeburner
     if((bit_node == 6) || //if in bit node
       (source_files.has(6)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -492,7 +475,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.stocks: //bit node 8: namespace Tix (short and limit orders)
     if((bit_node == 8) || //if in bit node
       (source_files.has(8)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -503,7 +485,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.hacknet: //bit node 9: namespace hacknet
     if((bit_node == 9) || //if in bit node
       (source_files.has(9)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -514,7 +495,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.sleeve: //bit node 10: namespace sleeve, grafting
     if((bit_node == 10) || //if in bit node
       (source_files.has(10)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -525,7 +505,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.stanek: //bit node 13: namespace stanek
     if((bit_node == 13) || //if in bit node
       (source_files.has(13)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -536,7 +515,6 @@ export function get_availability_functionality(ns, functionality) {
   case functionality.ipvgo: //bit node 14: namespace ipvgo
     if((bit_node == 14) || //if in bit node
       (source_files.has(14)) && //or has source file
-      (challenge_flags == false) && //not disabled by challenge
       (bit_node_multipliers.x > y)) { //not disabled by bit node multipliers
       //we should have access
       return true
@@ -557,7 +535,7 @@ export function get_availability_functionality(ns, functionality) {
 
 
 /**
- * 
+ * Function that disables all logging for the array of strings that is provided
  */
 export function disable_logging(ns, log_topics) {
   //assuming array of log topics
