@@ -10,6 +10,7 @@ import * as config from "config.js"
 /**
  * Function to do a check for bladeburner access 
  * used to check for bladeburner access, to determine actions
+ * @param {NS} ns
  */
 export function get_access(ns) {
     //try to or return the result of joining
@@ -22,91 +23,23 @@ export function get_access(ns) {
  * Function that manages the bladeburner stuff
  * Upgrades bladeburner skills
  * travels to city with lowest chaos and where population is not 0
- * 
- * @param {NS} ns
- * Cost: 28 GB
- *  upgradeSkill (4)
- *  getCityChaos (4)
- *  switchCity(4)
- *  getStamina (4)
- *  getRank (4)
- *  getaction_countRemaining (4)
- *  getActionEstimatedSuccessChance (4)
+ * assigns actions
  */
-export function determine_action(ns) {
+export function manage_action(ns) {
     //upgrade skills
     bladeburner_raise_skills(ns)
     //check if we need to travel elsewhere
     bladeburner_travel_to_best_city(ns)
-    //get stamina
-    const bladeburner_stamina = ns.bladeburner.getStamina()
-    //if current stamina is higher than half max stamina (no penalties)
-    if (bladeburner_stamina[0] > (bladeburner_stamina[1] / 2)) {
-        //blackops
-        //get current rank
-        const bladeburner_rank = ns.bladeburner.getRank()
-        //for each black operation
-        for (const activity in data.bladeburner_actions.blackOps) {
-            //get black_op information
-            const black_op = data.bladeburner_actions.blackOps[activity]
-            //check if this is the black op that is to be done
-            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, black_op.name) > 0) {
-                //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, black_op.name)
-                //check if we have enough rank and enough chance
-                if ((bladeburner_rank > black_op.reqRank) &&
-                    (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
-                    //return this information
-                    return { type: data.bladeburner_actions.type.blackOps, name: black_op.name }
-                }
-                //stop looking!
-                break
-            }
-        }
-        //operations
-        //for each operation
-        for (const activity in data.bladeburner_actions.operations) {
-            //get operation information
-            const operation = data.bladeburner_actions.operations[activity]
-            //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
-            //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.operations, operation)
-            //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
-                //return this information
-                return { type: data.bladeburner_actions.type.operations, name: operation }
-            }
-        }
-        //contracts
-        //for each contract
-        for (const activity in data.bladeburner_actions.contracts) {
-            //get contract information
-            const contract = data.bladeburner_actions.contracts[activity]
-            //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
-            //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.contracts, contract)
-            //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
-                //return this information
-                return { type: data.bladeburner_actions.type.contracts, name: contract }
-            }
-        }
+    //get the advised action
+    const best_action = determine_action(ns)
+    //get the current activity
+    const current_action = get_activity(ns)
+    //check if the current action is already being performed
+    if((current_action.type != best_action.type) ||
+       (current_action.value != best_action.value)) {
+        //start this action
+        ns.bladeburner.startAction(best_action.type, best_action.value)
     }
-    //general
-    //if over threshold
-    if (bladeburner_chaos_lowest > data.bladeburner_chaos_threshold) {
-        //lower chaos
-        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
-    }
-    //if no operations or contracts available
-    if (bladeburner_get_lowest_action_count(ns) == 0) {
-        //generate operations and contracts
-        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
-    }
-    //default: raise success chances
-    return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.fieldAnalysis }
 }
 
 
@@ -298,4 +231,88 @@ function get_activity(ns) {
     }
     //return an empty value
     return { type: "", value: "" }
+}
+
+
+
+/**
+ * Cost: 28 GB
+ *  upgradeSkill (4)
+ *  getCityChaos (4)
+ *  switchCity(4)
+ *  getStamina (4)
+ *  getRank (4)
+ *  getaction_countRemaining (4)
+ *  getActionEstimatedSuccessChance (4)
+ */
+function determine_action(ns) {
+    //get stamina
+    const bladeburner_stamina = ns.bladeburner.getStamina()
+    //if current stamina is higher than half max stamina (no penalties)
+    if (bladeburner_stamina[0] > (bladeburner_stamina[1] / 2)) {
+        //blackops
+        //get current rank
+        const bladeburner_rank = ns.bladeburner.getRank()
+        //for each black operation
+        for (const activity in data.bladeburner_actions.blackOps) {
+            //get black_op information
+            const black_op = data.bladeburner_actions.blackOps[activity]
+            //check if this is the black op that is to be done
+            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, black_op.name) > 0) {
+                //get chance
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, black_op.name)
+                //check if we have enough rank and enough chance
+                if ((bladeburner_rank > black_op.reqRank) &&
+                    (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
+                    //return this information
+                    return { type: data.bladeburner_actions.type.blackOps, name: black_op.name }
+                }
+                //stop looking!
+                break
+            }
+        }
+        //operations
+        //for each operation
+        for (const activity in data.bladeburner_actions.operations) {
+            //get operation information
+            const operation = data.bladeburner_actions.operations[activity]
+            //get action count
+            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
+            //get chance
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.operations, operation)
+            //if this action can be performed and we have enough chance
+            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
+                //return this information
+                return { type: data.bladeburner_actions.type.operations, name: operation }
+            }
+        }
+        //contracts
+        //for each contract
+        for (const activity in data.bladeburner_actions.contracts) {
+            //get contract information
+            const contract = data.bladeburner_actions.contracts[activity]
+            //get action count
+            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
+            //get chance
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.contracts, contract)
+            //if this action can be performed and we have enough chance
+            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
+                //return this information
+                return { type: data.bladeburner_actions.type.contracts, name: contract }
+            }
+        }
+    }
+    //general
+    //if over threshold
+    if (bladeburner_chaos_lowest > data.bladeburner_chaos_threshold) {
+        //lower chaos
+        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
+    }
+    //if no operations or contracts available
+    if (bladeburner_get_lowest_action_count(ns) == 0) {
+        //generate operations and contracts
+        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
+    }
+    //default: raise success chances
+    return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.fieldAnalysis }
 }
