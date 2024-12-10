@@ -124,7 +124,7 @@ class targetInfo {
             //set score to 0			
             let score = 0
             //get the max money possible
-            let max_money = ns.getServerMaxMoney(server)
+            const max_money = ns.getServerMaxMoney(server)
             //if the server can be hacked and has money
             if (ns.hasRootAccess(server) && max_money > 0) {
                 //log(ns,1,info,"server: " + server)
@@ -170,7 +170,7 @@ class targetInfo {
         this.grow = []
         this.hack = []
 
-        this.minRam = {}
+        this.ram_min = {}
 
         //maximum number of cores to calculate
         const max_cores = 128/*ns.getServer(enum_servers.home).cpuCores //128 
@@ -287,8 +287,8 @@ class targetInfo {
 
         //if first time, save the minimum ram needed: this is the minimum set
         if (index == 1) {
-            this.minRam[cores] = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
-            //this.minRam = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
+            this.ram_min[cores] = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
+            //this.ram_min = { weaken: weaken_cost, grow: grow_cost, hack: hack_cost }
         }
         return true
     }
@@ -437,43 +437,47 @@ class targetInfo {
     
     async executeBatch(ns, type) {
         //variable to save server name to
-        let serverExec = ""
+        let server_to_execute_hack_on = ""
         //save the ram of the execute server
-        let serverRam = 0
+        let server_ram = 0
         //for every available server
-        for (let server of getExecuteServers(ns)) {
+        for (const server of common.get_server_specific(ns,true)) { //getExecuteServers(ns)) {
             //get the cores
             let cores = ns.getServer(server).cpuCores
-
+            //safeguard
             try {
-                //log(ns,1,info,"cores: " + cores + ", minRam:" + JSON.stringify(this.minRam))
                 //get the minimum ram needed
-                let minRam = 0
-                while (!Object.hasOwn(this.minRam, cores)) {
+                let ram_min = 0
+                //check the cores
+                while (!Object.hasOwn(this.ram_min, cores)) {
                     cores -= 1
                 }
-                minRam = this.minRam[cores][type]
-                ////eval("this.minRam[" + cores + "]." + type)
+                ram_min = this.ram_min[cores][type]
                 //calculate the available ram
-                serverRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
+                server_ram = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
                 //if enough RAM
-                if (serverRam > minRam) {
-                    common.log(ns, config.log_level, common.info, "Found server: " + server + " (" + cores + " core(s), " + serverRam + " GB RAM) to run " + minRam + " GB RAM")
+                if (server_ram > ram_min) {
+                    //log information
+                    common.log(ns, config.log_level, common.info, "Found server: " + server + " (" + cores + " core(s), " + server_ram + " GB RAM) to run " + ram_min + " GB RAM")
                     //set the execute server
-                    serverExec = server
+                    server_to_execute_hack_on = server
                     //stop looking
                     break
                 }
+            //error occured
             } catch (error) {
+                //log informations
                 common.log(ns, config.log_level, common.warning, "Error: " + error)
-                common.log(ns, config.log_level, common.info, "cores: " + cores + ", type: " + type + ", this.minRam: " + JSON.stringify(this.minRam))
+                //log environment
+                common.log(ns, config.log_level, common.info, "cores: " + cores + ", type: " + type + ", this.ram_min: " + JSON.stringify(this.ram_min))
+                //stop script
                 ns.exit()
             }
 
         }
 
         //if no server found or not enough room
-        if (/*(serverRam < minRam) ||*/ (serverExec == "")) {
+        if (/*(server_ram < ram_min) ||*/ (server_to_execute_hack_on == "")) {
             //wait a bit
             await (ns.sleep(this.wait))
             //go back to start
@@ -482,9 +486,9 @@ class targetInfo {
 
         //determine script settings
         let delays = this.getDelays(ns, type) //dynamic to hack level, generated every time
-        let threads = this.getThreads(ns, ns.getServer(serverExec).cpuCores, serverRam, type) //static to server, generated when a server is selected
+        let threads = this.getThreads(ns, ns.getServer(server_to_execute_hack_on).cpuCores, server_ram, type) //static to server, generated when a server is selected
 
-        //log(ns, 0, info, serverExec + " has " + ns.getServer(serverExec).cpuCores + " cores")
+        //log(ns, 0, info, server_to_execute_hack_on + " has " + ns.getServer(server_to_execute_hack_on).cpuCores + " cores")
         //log(ns, 1, info, "delays: " + JSON.stringify(delays))
         //log(ns, 1, info, "threads: " + JSON.stringify(threads))
         //ns.exit()
@@ -494,7 +498,8 @@ class targetInfo {
         }
 
         if (threads === undefined) {
-            log(ns, 1, warning, "Server: " + serverExec + ": " + ns.getServer(serverExec).cpuCores + ", ram: " + serverRam + ", type: " + type)
+            common.log(ns, 1, common.warning, "Server: " + server_to_execute_hack_on + ": " + ns.getServer(server_to_execute_hack_on).cpuCores + ", ram: " + server_ram + ", type: " + type)
+            //exit script
             ns.exit()
         }
 
@@ -502,14 +507,15 @@ class targetInfo {
         //execute scripts
         //args: hostname, delay, loglevel
         switch (type) {
+                
             case "weaken":
                 //check if delay is incorrect
                 if (delays.weaken < 0) {
                     break
                 }
-                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, config.log_level)) {
+                if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, server_to_execute_hack_on, config.log_level)) {
                     //log informatoin
-                    common.log(ns, config.log_level, common.warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))                   
+                    common.log(ns, config.log_level, common.warning, server_to_execute_hack_on + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))                   
                 }
                 break
 
@@ -519,12 +525,12 @@ class targetInfo {
                     break
                 }
 
-                if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /*    */ this.hostname, delays.grow, threads.grow, serverExec, config.log_level)) {
-                    log(ns, 1, warning, serverExec + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                if (!ns.exec(this.scriptGrow, server_to_execute_hack_on, threads.grow, /*    */ this.hostname, delays.grow, threads.grow, server_to_execute_hack_on, config.log_level)) {
+                    common.log(ns, 1, common.warning, server_to_execute_hack_on + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                     counter++
                 }
-                if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, serverExec, config.log_level)) {
-                    log(ns, 1, warning, serverExec + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, server_to_execute_hack_on, config.log_level)) {
+                    common.log(ns, 1, common.warning, server_to_execute_hack_on + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                     counter++
                 }
                 break
@@ -536,20 +542,20 @@ class targetInfo {
                 }
 
                 try {
-                    if (!ns.exec(this.scriptHack, serverExec, threads.hack, /* */this.hostname, delays.hack, threads.hack, serverExec, config.log_level)) {
-                        log(ns, 1, warning, serverExec + " failed to start " + "hack (" + threads.hack + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                    if (!ns.exec(this.scriptHack, server_to_execute_hack_on, threads.hack, /* */this.hostname, delays.hack, threads.hack, server_to_execute_hack_on, config.log_level)) {
+                        log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "hack (" + threads.hack + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken1, this.hostname, delays.weaken1, threads.weaken1, serverExec, config.log_level)) {
-                        log(ns, 1, warning, serverExec + " failed to start " + "weaken1 (" + threads.weaken1 + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                    if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken1, this.hostname, delays.weaken1, threads.weaken1, server_to_execute_hack_on, config.log_level)) {
+                        log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "weaken1 (" + threads.weaken1 + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptGrow, serverExec, threads.grow, /* */this.hostname, delays.grow, threads.grow, serverExec, config.log_level)) {
-                        log(ns, 1, warning, serverExec + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                    if (!ns.exec(this.scriptGrow, server_to_execute_hack_on, threads.grow, /* */this.hostname, delays.grow, threads.grow, server_to_execute_hack_on, config.log_level)) {
+                        log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                         counter++
                     }
-                    if (!ns.exec(this.scriptWeaken, serverExec, threads.weaken2, this.hostname, delays.weaken2, threads.weaken2, serverExec, config.log_level)) {
-                        log(ns, 1, warning, serverExec + " failed to start " + "weaken2 (" + threads.weaken2 + ") -> " + JSON.stringify(ns.getServer(serverExec)))
+                    if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken2, this.hostname, delays.weaken2, threads.weaken2, server_to_execute_hack_on, config.log_level)) {
+                        log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "weaken2 (" + threads.weaken2 + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
                         counter++
                     }
 
@@ -560,7 +566,7 @@ class targetInfo {
 
 
                 } catch (error) {
-                    common.log(ns, config.log_level, common.error, "'" + serverExec + "' cannot exec " + JSON.stringify(threads) + " (" + serverRam + ")")
+                    common.log(ns, config.log_level, common.error, "'" + server_to_execute_hack_on + "' cannot exec " + JSON.stringify(threads) + " (" + server_ram + ")")
                     ns.exit()
                 }
                 break
