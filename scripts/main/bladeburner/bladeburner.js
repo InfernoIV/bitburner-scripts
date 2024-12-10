@@ -66,17 +66,17 @@ function determine_action(ns) {
         const bladeburner_rank = ns.bladeburner.getRank()
         //for each black operation
         for (const activity in data.bladeburner_actions.blackOps) {
-            //get blackOp information
-            const blackOp = data.bladeburner_actions.blackOps[activity]
+            //get black_op information
+            const black_op = data.bladeburner_actions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) > 0) {
+            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, black_op.name) > 0) {
                 //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, blackOp.name)
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
-                if ((bladeburner_rank > blackOp.reqRank) &&
+                if ((bladeburner_rank > black_op.reqRank) &&
                     (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
                     //return this information
-                    return { type: data.bladeburner_actions.type.blackOps, name: blackOp.name }
+                    return { type: data.bladeburner_actions.type.blackOps, name: black_op.name }
                 }
                 //stop looking!
                 break
@@ -213,7 +213,7 @@ export function get_lowest_action_count(ns) {
  * Function that returns if the player is performing a blackop
  * used to block resets
 **/
-export function is_perform_blackop(ns) {
+export function is_performing_black_op(ns) {
     //if no access
     if(!get_access(ns)) {
         //not possible
@@ -254,25 +254,55 @@ export function update_ui(ns) {
         values.push(number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + number_formatter(400e3))
 
         //blackOps completed
-        let blackOpsCompleted = 0
-        for (let blackOpEntry in data.bladeburner_actions.blackOps) {
-            //get blackop name
-            const blackOp = data.bladeburner_actions.blackOps[blackOpEntry]
-            //if completed
-            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
-                //add to the counter
-                blackOpsCompleted++
-            } else {
-                //not completed: stop
-                break
-            }
-        }
+        const black_ops_completed = get_number_of_completed_black_ops(ns)
+        //add the text
         headers.push("Bladeburner BlackOps")
-        values.push(blackOpsCompleted + "/"+ ((data.bladeburner_actions.blackOps)-1) ) //was 21 (this should be dynamic
+        //add the data
+        values.push(black_ops_completed + "/"+ data.bladeburner_actions.blackOps.length) //was 21 (this should be dynamic
     }
     //return the headers and values
     return headers, values
 }
+
+
+
+/**
+ * 
+ */
+export function has_completed_all_black_ops(ns) {
+    //get the number of completed black ops
+    const number_of_black_ops_completed = get_number_of_completed_black_ops(ns)
+    //compare to all black ops
+    const has_completed_all_black_ops = number_of_black_ops_completed >= data.bladeburner_actions.blackOps.length
+    //return the value
+    return has_completed_all_black_ops
+}
+
+
+
+/**
+ * Function that provides the number of completed black ops
+ */
+function get_number_of_completed_black_ops(ns) {
+    //value to return
+    let black_ops_completed = 0
+    //for each blackop
+    for (const black_op_entry in data.bladeburner_actions.blackOps) {
+        //get blackop name
+        const black_op = data.bladeburner_actions.blackOps[black_op_entry]
+        //if completed
+        if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, black_op.name) == 0) {
+            //add to the counter
+            black_ops_completed++
+        } else {
+            //not completed: stop
+            break
+        }
+    }
+    //return the amount (the index that has action count)
+    return black_ops_completed
+}
+
 
 
 /**
@@ -330,17 +360,17 @@ function bladeburner_determine_action(ns) {
         const bladeburner_rank = ns.bladeburner.getRank()
         //for each black operation
         for (const activity in data.bladeburner_actions.blackOps) {
-            //get blackOp information
-            const blackOp = data.bladeburner_actions.blackOps[activity]
+            //get black_op information
+            const black_op = data.bladeburner_actions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) > 0) {
+            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, black_op.name) > 0) {
                 //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, blackOp.name)
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
-                if ((bladeburner_rank > blackOp.reqRank) &&
+                if ((bladeburner_rank > black_op.reqRank) &&
                     (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
                     //return this information
-                    return { type: data.bladeburner_actions.type.blackOps, name: blackOp.name }
+                    return { type: data.bladeburner_actions.type.blackOps, name: black_op.name }
                 }
                 //stop looking!
                 break
