@@ -135,7 +135,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
                 //if disabled / limited
                 if (value == lookup_data["disabled_value"]) {
                     //log information
-                    common.log(ns, 1, error, key + ": " + value + " (" + lookup_data["disabled_text"] + ")")
+                    common.log(ns, 1, common.error, key + ": " + value + " (" + lookup_data["disabled_text"] + ")")
                     //go to next key in the loop
                     continue
                 }
