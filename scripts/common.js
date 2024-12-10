@@ -47,7 +47,7 @@ export const port_no_data = "NULL PORT DATA"
  */
 export const servers = {
     home: "home",   //no effect
-    worldDaemon: "w0r1d_d43m0n",    //bitnode destruction
+    world_daemon: "w0r1d_d43m0n",    //bitnode destruction
     //fulcrumSecretTechnologies: "fulcrumassets",     //fulcrum faction
     //zb_institute: "zb-institute",
     //universal_energy: "univ-energy",
