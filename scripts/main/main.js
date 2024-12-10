@@ -1,10 +1,3 @@
-//imports
-import {
-    info, success, warning, error, fail, portNoData, //constants 
-    enum_scripts, enum_servers, enum_factions, enum_cities, enum_port, enum_hackingCommands, //enums
-    log, number_formatter, get_reset_info, get_bit_node_multipliers, get_challenge_flags, has_completed_bit_node_level, //functions
-} from "scripts/common.js"
-
 //common functions
 import * as common from "../common.js"
 //config
@@ -14,13 +7,14 @@ import * as data from "./data.js"
 
 
 
+//functionality imports
 //sleeve
-import * as sleeve from "./sleeve/sleeve.js" //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
+import * as sleeve from "./sleeve/interface.js" 
 //bladeburner
-import * as bladeburner from "./bladeburner/bladeburner.js" //todo
+import * as bladeburner from "./bladeburner/interface.js"
 //hacknet
-//import * as server from "./hacknet/hacknet.js"
-import { manage_servers, } from "./hacknet/hacknet.js"
+import * as hacknet from "./hacknet/interface.js"
+    
 
 
 /**
@@ -43,78 +37,32 @@ export async function main(ns) {
     const reset_info = common.get_reset_info(ns) 
     //get bitnode information from file
     const bit_node_multipliers = common.get_bit_node_multipliers(ns)
-    //get challenge config
-    const challenge_flags = common.get_challenge_flags(ns)
-
-    //keep track of launched scripts
-    let launched_scripts = []
-
-    //conditional imports, TODO: can be part of init or other function???
-    /*
-    //import hacknet
-    let import_hacknet_file = "./hacknet/server.js"
-    //check if we need to change
-    if(common.has_completed_bit_node_level(ns, 9)) {
-        //import hacknet
-        import_hacknet_file = "./hacknet/hacknet.js"
-    }
-    //import the functions
-    import * as server from import_hacknet_file //server.manage_servers
-
-    
-    //import sleeves
-    let import_sleeve_file = "./sleeve/sleeve_dummy.js"
-    //check if we need to change (either not unlocked or disabled)
-    if((common.has_completed_bit_node_level(ns, 10)) &&
-      challenge_flags.disable_sleeves != true) {
-        //import sleeve
-        import_sleeve_file = "./sleeve/sleeve.js"
-    }
-    //import the functions
-    import * as sleeve from import_sleeve_file //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
-
-    
-    //import bladeburner
-    let import_bladeburner_file = "./bladeburner/bladeburner_dummy.js"
-    //check if we need to change (either not unlocked or disabled)
-    if((common.has_completed_bit_node_level(ns, 6)) &&
-       (common.has_completed_bit_node_level(ns, 7)) &&
-       (challenge_flags.disable_bladeburner != true)) {
-        //import hacknet
-        import_bladeburner_file = "./bladeburner/bladeburner.js"
-    }
-    //import the functions
-    import * as bladeburner from import_bladeburner_file //todo
-    */
-
-
-
-
-
     
     //initialize
     init(ns) //1,5 GB
-    //restart work (to ensure it is set to non-focussed in case of restarting the game)
-    restart_player_actions(ns)
     
-    //wait a bit for first iteration
-    await ns.sleep(config.time_between_loops)
+    //keep track of launched scripts
+    let launched_scripts = []
+
     
     //main loop
     while (true) {
         //main script: 3,1 GB  
         //init: 1,5 GB
 
+        //restart work (to ensure it is set to non-focussed in case of restarting the game)
+        restart_player_actions(ns)
+        
         //factions & companies: 13 GB
         manage_factions(ns)  //10 GB
         manage_companies(ns) //3 GB
 
         //hacking & scripts: 18,7 GB
         manage_hacking(ns)   //4,3 GB
-        manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags)  //4,4 GB
+        manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
 
         //player actions & bladeburner: 71 GB
-        manage_actions(ns, bit_node_multipliers, challenge_flags)   //71 GB
+        manage_actions(ns, bit_node_multipliers)   //71 GB
         buy_augments(ns)  //10 GB
         
         //sleeve
@@ -122,13 +70,13 @@ export async function main(ns) {
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
-        //server.manage_servers(ns, challenge_flags)   // GB
-        manage_servers(ns, challenge_flags)   // GB
+        //server.manage_servers(ns)   // GB
+        manage_servers(ns)   // GB
 
         //update ui: 0 GB
-        update_ui(ns, bit_node_multipliers, challenge_flags) //0 GB
+        update_ui(ns, bit_node_multipliers) //0 GB
         //reset & destruction: 0 GB
-        execute_bit_node_destruction(ns, challenge_flags)   //0 GB (exernal script)
+        execute_bit_node_destruction(ns)   //0 GB (exernal script)
         install_augments(ns)    //0 GB (exernal script)
 
         //wait a bit
@@ -150,9 +98,45 @@ export async function main(ns) {
  *  read (0)
  */
 function init(ns) {
-
     //disable unwanted logs
     common.disable_logs(ns, config.log_disabled_topics)
+    
+    //conditional imports, TODO: can be part of init or other function???
+    /*
+    //import hacknet
+    let import_hacknet_file = "./hacknet/server.js"
+    //check if we need to change
+    if(common.has_completed_bit_node_level(ns, 9)) {
+        //import hacknet
+        import_hacknet_file = "./hacknet/hacknet.js"
+    }
+    //import the functions
+    import * as server from import_hacknet_file //server.manage_servers
+
+    
+    //import sleeves
+    let import_sleeve_file = "./sleeve/sleeve_dummy.js"
+    //check if we need to change (either not unlocked or disabled)
+    if((common.has_completed_bit_node_level(ns, 10)) &&
+        //import sleeve
+        import_sleeve_file = "./sleeve/sleeve.js"
+    }
+    //import the functions
+    import * as sleeve from import_sleeve_file //sleeve.manage_actions, sleeve.buy_augments, sleeve.init, sleeve.update_ui
+
+    
+    //import bladeburner
+    let import_bladeburner_file = "./bladeburner/bladeburner_dummy.js"
+    //check if we need to change (either not unlocked or disabled)
+    if((common.has_completed_bit_node_level(ns, 6)) &&
+       (common.has_completed_bit_node_level(ns, 7)) {
+        //import hacknet
+        import_bladeburner_file = "./bladeburner/bladeburner.js"
+    }
+    //import the functions
+    import * as bladeburner from import_bladeburner_file //todo
+    */
+    
     
     //sleeve stuff
     sleeve.init(ns)
@@ -223,7 +207,7 @@ function get_augments_to_be_installed() {
  * Cost: none
  * TODO: launch script for bitnode destruction
  */
-function execute_bit_node_destruction(ns, challenge_flags) {
+function execute_bit_node_destruction(ns) {
     //set a flag for desctruction
     let can_execute_destruction = false
 
@@ -237,7 +221,7 @@ function execute_bit_node_destruction(ns, challenge_flags) {
     }
 
     //bladeburner is possible
-    if (get_bladeburner_access(ns, challenge_flags)) {
+    if (get_bladeburner_access(ns)) {
         //if operation Daedalus has been completed, do we need to check rank as well?
         if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, data.bladeburner_actions.blackOps.operationDaedalus.name) == 0) {
             //proceed with destruction
@@ -543,7 +527,7 @@ function manage_hacking(ns) {
  *  getServer (2)
  *  ls (0.2)
  */
-function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_flags) {
+function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //get money
@@ -565,23 +549,20 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers, challenge_fl
     scripts_to_launch.push(enum_scripts.hack)
 
     //check if makes sense to launch gang manager
-    if ((!challenge_flags.disable_gang) && //if not performing a challenge
-        (bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
+    if ((bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
         (player.karma < data.requirements.karma_for_gang)) { //and if karma threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.gang)
     }
 
     //check if makes sense to launch corporation manager
-    if ((!challenge_flags.disable_corporation) && //if not perfoming a challenge
-        (bit_node_multipliers.CorporationSoftcap >= 0.15) && //and if the bitnode allows
+    if ((bit_node_multipliers.CorporationSoftcap >= 0.15) && //and if the bitnode allows
         (money_available > corporation_money_requirement)) { //and if money threshold is reached
         //add to list
         scripts_to_launch.push(enum_scripts.corporation)
     }
 
     //calculate money needed for stock manager
-    //TODO: how to handle challenge_flags.disable_s4_market_data ?
     if (money_available > (stock_4s_api_cost + stock_4s_market_data_cost)) { //26b
         //add to list
         scripts_to_launch.push(enum_scripts.stock)
@@ -709,7 +690,7 @@ function restart_player_actions(ns) {
  *          bladeburner_get_activity (1)
  *          bladeburner_determine_action (28)
  */
-function manage_actions(ns, bit_node_multipliers, challenge_flags) {
+function manage_actions(ns, bit_node_multipliers) {
     //get player
     const player = ns.getPlayer()
     //get player activity
@@ -717,7 +698,7 @@ function manage_actions(ns, bit_node_multipliers, challenge_flags) {
     //set the default focus for actions (always false)
     const action_focus = false
     //check if we joined bladeburner (default is false
-    const bladeburner_joined = get_bladeburner_access(ns, challenge_flags) 
+    const bladeburner_joined = get_bladeburner_access(ns) 
 
     //if not enough hacking skill
     if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
@@ -754,7 +735,7 @@ function manage_actions(ns, bit_node_multipliers, challenge_flags) {
             if (bladeburner_action_current.value != bladeburner_action_wanted.name) {
                 //start bladeburner action
                 if (!ns.bladeburner.startAction(bladeburner_action_wanted.type, bladeburner_action_wanted.name)) {
-                    log(ns, 1, warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
+                    common.log(ns, 1, common.warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
                 }
             }
         }
@@ -770,14 +751,14 @@ function manage_actions(ns, bit_node_multipliers, challenge_flags) {
             if (player_activity.value != crime_best) {
                 //commit crime for money/stats?
                 if (ns.singularity.commitCrime(crime_best, action_focus)) {
-                    log(ns, 1, warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+                    //log information
+                    common.log(ns, 1, common.warning, "manage_actions failed 3. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
                 }
             }
         }
     }
 }
     
-
 
 
 /**
@@ -1143,7 +1124,7 @@ function bladeburner_get_activity(ns) {
  * @param {NS} ns
  * Cost: 0 GB
  */
-function update_ui(ns, bit_node_multipliers, challenge_flags) {
+function update_ui(ns, bit_node_multipliers) {
     //get the UI
     const doc = eval('document')
     //left side
@@ -1222,7 +1203,7 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
     }
 
     //bladeburner    
-    if (get_bladeburner_access(ns, challenge_flags)) {
+    if (get_bladeburner_access(ns)) {
         //stamina
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
@@ -1271,28 +1252,3 @@ function update_ui(ns, bit_node_multipliers, challenge_flags) {
     hook0.innerText = headers.join("\n")
     hook1.innerText = values.join("\n")
 }
-
-
-
-
-
-
-
-/**
- * Function to do a check for bladeburner access 
- */
-function get_bladeburner_access(ns, challenge_flags) {
-    //if unlocked (API and division) and not performing the challenge
-    if(!has_completed_bit_node_level(ns, 6) || 
-       !has_completed_bit_node_level(ns, 7) || 
-       (challenge_flags.disable_bladeburner == true)) {
-        //no access
-        return false
-        
-    //unlocked and not disabled: check access
-    } else {
-        return ns.bladeburner.joinBladeburnerDivision()
-    }
-}
-
-
