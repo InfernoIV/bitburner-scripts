@@ -79,13 +79,13 @@ export const scripts = {
     stock: "scripts/stock/stock.js",
     //hack
     hack: "scripts/hack/hack.js",
-    workerHack: "scripts/hack/workerHack.js",
-    workerGrow: "scripts/hack/workerGrow.js",
-    workerWeaken: "scripts/hack/workerWeaken.js",
+    workerHack: "scripts/hack/worker_hack.js",
+    workerGrow: "scripts/hack/worker_grow.js",
+    workerWeaken: "scripts/hack/worker_weaken.js",
     //stanek
-    stanekCreate: "scripts/stanek/stanekCreate.js",
-    stanekCharge: "scripts/stanek/stanekCharge.js",
-    workerCharge: "scripts/stanek/workerCharge.js",
+    stanekCreate: "scripts/stanek/stanek_create.js",
+    stanekCharge: "scripts/stanek/stanek_charge.js",
+    workerCharge: "scripts/stanek/stanek_worker_charge.js",
     //stanekBuy: "scripts/stanek/stanekBuy.js",
 }
 
