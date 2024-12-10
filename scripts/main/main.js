@@ -667,10 +667,15 @@ function manage_actions(ns, bit_node_multipliers) {
     //set the default focus for actions (always false)
     const action_focus = false
     //check if we joined bladeburner (default is false
-    const bladeburner_joined = get_bladeburner_access(ns) 
-
+    const bladeburner_joined = bladeburner.get_access(ns)
+    
+    //variables to check
+    const enough_hacking_skill = ns.getPlayer().skills.hacking >= config.stat_minimum_hacking
+    const enough_karma = player.karma < data.requirements.karma_for_gang
+    const can_perform_dual_actions = common.get_augmentations_installed(ns).indexOf(data.augments.blades_simulacrum) > -1
+    
     //if not enough hacking skill
-    if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
+    if (!enough_hacking_skill) {
         //get best crime for hacking
         const crime_best = ns.enums.CrimeType.robStore//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.hacking)
         //if not performing the correct crime
@@ -680,8 +685,9 @@ function manage_actions(ns, bit_node_multipliers) {
                 log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
-        //if we have not reached target karma
-    } else if (player.karma > data.requirements.karma_for_gang) {
+        
+    //if we have not reached target karma
+    } else if (!enough_karma) {
         //get best crime for karma
         const crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, data.crime_focus.karma)
         //if not performing the correct crime
@@ -691,26 +697,14 @@ function manage_actions(ns, bit_node_multipliers) {
                 log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
-
+        
+    //hacking and karma are ok, start normally
     } else {
         //if bladeburner joined: work for bladeburner
         if (bladeburner_joined) {
-            //check what ae are doing for bladeburner
-            const bladeburner_action_current = bladeburner_get_activity(ns)
-            //do bladeburner stuff
-            const bladeburner_action_wanted = bladeburner_determine_action(ns, player)
-            //log(ns, 1, info, "bladeburner_determine_action: " + JSON.stringify(bladeburner_action_wanted))
-            //if not the same (type and value is not the same)
-            if (bladeburner_action_current.value != bladeburner_action_wanted.name) {
-                //start bladeburner action
-                if (!ns.bladeburner.startAction(bladeburner_action_wanted.type, bladeburner_action_wanted.name)) {
-                    common.log(ns, 1, common.warning, "manage_actions failed bladeburner.startAction(" + bladeburner_action_wanted.type + ", " + bladeburner_action_wanted.name + ")")
-                }
-            }
+            //check for bladeburner work
+            bladeburner.determine_action(ns)
         }
-
-        //check if we can do both bladeburner and normal work
-        const can_perform_dual_actions = (common.get_augmentations_installed(ns).indexOf(data.augments.blades_simulacrum) > -1)
 
         //if bladeburner is not joined or augment for dual work is installed
         if ((!bladeburner_joined) || (can_perform_dual_actions)) {
@@ -729,55 +723,6 @@ function manage_actions(ns, bit_node_multipliers) {
 }
     
 
-
-/**
- * Function that checks the best work type for bladeburner for sleeve
- * Only perform 100% chance work, else we get shock
- * cannot lower chaos, requires to get city, which increases ram usage
- * @param {NS} ns
- * Cost: 0 GB
- */
-    /*
-function getBladeburnerActionForSleeve(ns, sleeveIndex) {
-    //set min chance = 100%
-    const bladeburner_success_chance_minimum = 1
-    //describe other actions
-    const common.sleeveBladeburnerActions = {
-        fieldAnalysis: "Field Analysis",
-        infiltratesynthoids: "Infiltrate synthoids",
-    }
-
-    //keep track of action count
-    let bladeburner_total_action_count = 0
-
-    //contracts
-    //for each contract
-    for (const operation in common.bladeburnerActions.contracts) {
-        //get contract information
-        const contract = common.bladeburnerActions.contracts[operation]
-        //get action count
-        const action_count = ns.bladeburner.getActionCountRemaining(common.bladeburnerActions.type.contracts, contract)
-        //get chance
-        const chance = ns.bladeburner.getActionEstimatedSuccessChance(common.bladeburnerActions.type.contracts, contract, sleeveIndex)
-        //if this action can be performed and we have enough chance
-        if ((action_count > 0) && (chance[0] >= bladeburner_success_chance_minimum)) {
-            //return this information
-            return { type: common.sleeveBladeburnerActions.takeonContracts, name: contract }
-        }
-        //add count to total actions available
-        bladeburner_total_action_count += action_count
-    }
-
-    //if no operations or contracts available
-    if (bladeburner_total_action_count == 0) {
-        //set to create contracts
-        return { type: common.bladeburnerActions.type.general, name: common.bladeburnerActions.general.inciteViolence }
-    }
-
-    //failsafe: just train
-    return { type: common.bladeburnerActions.type.general, name: common.bladeburnerActions.general.training }
-}
-*/
 
 
 
