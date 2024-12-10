@@ -43,9 +43,6 @@ export async function main(ns) {
     while (true) {
         //main script: 3,1 GB  
         //init: 1,5 GB
-
-        //restart work (to ensure it is set to non-focussed in case of restarting the game)
-        restart_player_actions(ns)
         
         //factions & companies: 13 GB
         manage_factions(ns)  //10 GB
@@ -596,51 +593,10 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
 
 
 
-/**
- * Function that restarts player activity
- * Used to ensure player focus is false, to enable resets after resuming play (restarting of game)
- * Quick and dirty copy of the determine player actions
- */
-function restart_player_actions(ns) {
-    //check if we need to switch
-    if(ns.singularity.isFocused()) {
-        //get player
-        const player = ns.getPlayer()
-        //get player activity
-        const player_activity = get_activity(ns)
-        //set the default focus for actions (always false)
-        const action_focus = false
-        
-        //save player desired action
-        let player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.grandTheftAuto }
-        
-        //if not enough hacking skill
-        if (ns.getPlayer().skills.hacking < config.stat_minimum_hacking) {
-            //raise hacking
-            player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.robStore }
-            //if we have not reached target karma
-        } else if (player.karma > data.requirements.karma_for_gang) {
-            //get best crime for karma
-            player_action_desired = { type: data.activities.crime, value: ns.enums.CrimeType.mug }
-            
-        }
-        
-        //check if we need to change
-        if ((player_activity.type != player_action_desired.type) ||
-           (player_activity.value != player_action_desired.value)) {
-            //check if it works
-            if (!ns.singularity.commitCrime(player_action_desired.value, action_focus)) {
-                log(ns, 1, warning, "restart_player_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
-            }
-        }        
-    }
-}
-
-
-
 /*
  * Function that determines the best action to take, according to a set priority
  * It also handles duplicate actions of sleeves (faction, company)
+ * makes sure the player is not performing focussed work
  * Player: either crime and/or bladeburner
  * Cost: 6 + 37 + 28 = 71 GB
  *  
@@ -658,6 +614,12 @@ function restart_player_actions(ns) {
  *          bladeburner_determine_action (28)
  */
 function manage_actions(ns, bit_node_multipliers) {
+    //if the player is focussed (should only happen after resuming play (starting the game)
+    if(ns.singularity.isFocused()) {
+        //stop action
+        ns.singularity.stopAction()
+    }
+    
     //get player
     const player = ns.getPlayer()
     //get player activity
