@@ -557,3 +557,132 @@ export function disable_logging(ns, log_topics) {
         }
     }
 }
+
+
+
+/** @param {NS} ns */
+function getServers(ns) {
+    //create a list to save hostnames to
+    let scanList = []
+    //start scanning from home
+    scanServer(ns, enum_servers.home, scanList)
+    //add purchased servers to the list
+    return scanList.concat(ns.getPurchasedServers())
+}
+
+
+
+/** @param {NS} ns */
+function scanServer(ns, hostname, scanList) {
+    //add this hostname to the list				
+    scanList.push(hostname)
+    //scan at this hostname				
+    let neighbours = ns.scan(hostname)
+    //for every neighbour				
+    for (let neighbour of neighbours) {
+        //if not yet performed a scan on this hostname			
+        if (scanList.indexOf(neighbour) == -1) {
+            //scan from this neighbour		
+            scanServer(ns, neighbour, scanList)
+        }
+    }
+}
+
+
+
+/** @param {NS} ns */
+/*
+function getExecuteServers(ns) {
+    let executeServers = []
+    const allServers = getServers(ns)
+    //TODO: WHY DO THEY FAIL?
+    const blackList = ["zb-institute", "univ-energy", "titan-labs"]
+    for (const server of allServers) {
+        //if not on the blacklist
+        //if (blackList.indexOf(server) != -1) {
+        //if root access and RAM
+        if ((ns.hasRootAccess(server)) &&
+            (ns.getServerMaxRam(server) > 0)) {
+            //if not yet in the executeServers list
+            if (executeServers.indexOf(server) == -1) {
+                //copy files to servers 
+                ns.scp(enum_scripts.workerWeaken, server)
+                ns.scp(enum_scripts.workerGrow, server)
+                ns.scp(enum_scripts.workerHack, server)
+                //push to list
+                executeServers.push(server)
+            }
+        }
+        //}
+    }
+    //log(ns,1,info,"executeServers: " + executeServers)
+    return executeServers
+}*/
+
+
+/**
+ * Function that only returns servers (objects) 
+ * That have RAM or money, and that have admin access (can run scripts)
+ * Parameter determines if it returns ram (true) or money (false) server objects
+ * Cost: 2
+ *  getServer (2)
+ */
+function get_server_specific(ns, server_has_ram = false) {
+    //create a list (of objects) to return
+    let server_list = []
+    //get all servers
+    const servers_all = get_servers(ns)
+    //for each server
+    for (let index = 0; index < servers_all.length; index++) {
+        //get server information
+        let server = ns.getServer(servers_all[index])
+        //if we have admin rights
+        if (server.hasAdminRights) {
+            //if we need to check ram and there is ram, or if we need to check money and there is money
+            if (((server_has_ram) && (server.maxRam > 0)) || ((!server_has_ram) && (server.moneyMax > 0))) {
+                //add the server object to the list
+                server_list.push(server)
+            }
+        }
+    }
+    //return server list
+    return server_list
+}
+
+
+
+/**
+ * Function that will retrieve all server hostnames
+ * Cost: none
+ */
+function get_servers(ns) {
+    //create list to save hostnames into
+    let server_list = []
+    //start scanning from home
+    scan_server(ns, enum_servers.home, server_list)
+    //return the server list
+    return server_list
+}
+
+
+
+/**
+ * Function that will retrieve all servers, sub function of get_servers
+ * Cost: 
+ *  scan (0,2)
+ */
+function scan_server(ns, hostname, server_list) {
+    //get the neighbours of the server
+    const neighbours = ns.scan(hostname)
+    //for each neighbour
+    for (const neighbour of neighbours) {
+        //if not in the list
+        if (server_list.indexOf(neighbour) == -1) {
+            //add to list
+            server_list.push(neighbour)
+            //start scanning
+            scan_server(ns, neighbour, server_list)
+        }
+    }
+}
+
