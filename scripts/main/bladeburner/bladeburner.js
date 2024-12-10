@@ -230,3 +230,46 @@ export function is_perform_blackop(ns) {
     //not busy
     return false
 }
+
+
+
+/**
+ * Function that returns the headers and values used to update the ui
+ */
+export function update_ui(ns) {
+    //create new headers list
+    const headers = []
+    //create new values list
+    const values = []
+
+    //if blade burner is active
+    if (get_bladeburner_access(ns)) {
+        //stamina
+        headers.push("Bladeburner stamina")
+        const stamina = ns.bladeburner.getStamina()
+        const stamina_percentage = Math.round(stamina[0] / stamina[1] * 100)
+        values.push(number_formatter(stamina[0]) + "/" + number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
+        //rank
+        headers.push("Bladeburner rank")
+        values.push(number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + number_formatter(400e3))
+
+        //blackOps completed
+        let blackOpsCompleted = 0
+        for (let blackOpEntry in data.bladeburner_actions.blackOps) {
+            //get blackop name
+            const blackOp = data.bladeburner_actions.blackOps[blackOpEntry]
+            //if completed
+            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
+                //add to the counter
+                blackOpsCompleted++
+            } else {
+                //not completed: stop
+                break
+            }
+        }
+        headers.push("Bladeburner BlackOps")
+        values.push(blackOpsCompleted + "/"+ ((data.bladeburner_actions.blackOps)-1) ) //was 21 (this should be dynamic
+    }
+    //return the headers and values
+    return headers, values
+}
