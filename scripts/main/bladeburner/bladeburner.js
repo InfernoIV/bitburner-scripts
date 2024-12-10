@@ -11,7 +11,7 @@ import * as config from "config.js"
  * Function to do a check for bladeburner access 
  * used to check for bladeburner access, to determine actions
  */
-function get_access(ns) {
+export function get_access(ns) {
     //try to or return the result of joining
     return ns.bladeburner.joinBladeburnerDivision()
 }
