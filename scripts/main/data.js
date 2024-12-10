@@ -10,10 +10,10 @@ export const requirements = {
  * Enum stating special augments
  */
 export const augments = {
-    theRedPill: "The Red Pill", //enables bitnode destruction by hacking
-    neuroFluxGovernor: "NeuroFlux Governor",
-    bladesSimulacrum: "The Blade's Simulacrum", //"This augmentation allows you to perform Bladeburner actions and other actions (such as working, committing crimes, etc.) at the same time.",
-    neuroreceptorManager: "Neuroreceptor Management Implant", //"This augmentation removes the penalty for not focusing on actions such as working in a job or working for a faction.",
+    the_red_pill: "The Red Pill", //enables bitnode destruction by hacking
+    neuro_flux_governor: "NeuroFlux Governor",
+    blades_simulacrum: "The Blade's Simulacrum", //"This augmentation allows you to perform Bladeburner actions and other actions (such as working, committing crimes, etc.) at the same time.",
+    neuroreceptor_manager: "Neuroreceptor Management Implant", //"This augmentation removes the penalty for not focusing on actions such as working in a job or working for a faction.",
 }
 
 
