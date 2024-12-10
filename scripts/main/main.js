@@ -61,12 +61,12 @@ export async function main(ns) {
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
-        //server.manage_servers(ns)   // GB
+        //hacknet.manage_network(ns) // GB
         manage_servers(ns)   // GB
 
         //reset & destruction: 0 GB
-        execute_bit_node_destruction(ns)   //0 GB (exernal script)
-        install_augments(ns)    //0 GB (exernal script)
+        manage_bit_node_destruction(ns)   //0 GB (exernal script)
+        manage_augment_installation(ns)   //0 GB (exernal script)
 
         //update ui: 0 GB
         update_ui(ns, bit_node_multipliers) //0 GB
@@ -122,11 +122,11 @@ function init(ns) {
         hook1.innerHTML = ''
     })
 
-    //sleeve stuff
+    //sleeve
     sleeve.init(ns)
     
     //get information from files
-        //get reset info
+    //get reset info
     const reset_info = common.get_reset_info(ns) 
     //get bitnode information from file
     const bit_node_multipliers = common.get_bit_node_multipliers(ns)
@@ -140,9 +140,9 @@ function init(ns) {
 /**
  * Function that gets the number of augments to be installed, using the UI
  */
-function get_number_of_augments_waiting_for_install() {
+function get_number_of_augments_ready_for_installationation() {
     //value to return
-    let augments_ready_for_install = 0
+    let augments_ready_for_installation = 0
     //get all svg
     const elements = eval("document").getElementsByTagName("svg")
     //for each SVG
@@ -154,14 +154,14 @@ function get_number_of_augments_waiting_for_install() {
             //check if it is set
             if (value.length > 0) {
                 //use this value
-                augments_ready_for_install = value
+                augments_ready_for_installation = value
             }
             //stop looking 
             break
         }
     }
     //return the value
-    return augments_ready_for_install
+    return augments_ready_for_installation
 }
 
 
@@ -171,7 +171,7 @@ function get_number_of_augments_waiting_for_install() {
  * Cost: none
  * TODO: launch script for bitnode destruction
  */
-function execute_bit_node_destruction(ns) {
+function manage_bit_node_destruction(ns) {
     //set a flag for desctruction
     let can_execute_destruction = false
 
@@ -184,10 +184,8 @@ function execute_bit_node_destruction(ns) {
         }
     }
 
-    //bladeburner is possible
-    if (get_bladeburner_access(ns)) {
-        //if operation Daedalus has been completed, do we need to check rank as well?
-        if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, data.bladeburner_actions.blackOps.operationDaedalus.name) == 0) {
+    //bladeburner condition met
+    if (bladeburner.has_completed_all_black_ops(ns)) {
             //proceed with destruction
             can_execute_destruction = true
         }
@@ -210,12 +208,12 @@ function execute_bit_node_destruction(ns) {
  * Cost: none
  * TODO: attach script for external reset
  */
-function install_augments(ns) {
+function manage_augment_installation(ns) {
     //get number of bought augments
-    const augments_to_be_installed = get_number_of_augments_waiting_for_install()
+    const augments_to_be_installed = get_number_of_augments_ready_for_installationation()
 
     //check if player is busy
-    if (bladeburner.is_perform_blackop(ns)) {
+    if (bladeburner.is_performing_black_op(ns)) {
         //do not proceed
         return
     }
@@ -909,7 +907,7 @@ function update_ui(ns, bit_node_multipliers) {
     //add augments bought
     headers.push("Augments bought")
     //add global
-    values.push(common.get_augmentations_installed(ns).length + "+" + get_number_of_augments_waiting_for_install() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
+    values.push(common.get_augmentations_installed(ns).length + "+" + get_number_of_augments_ready_for_installationation() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
     //sleeve, should not do anything if not unlocked
     //add sleeve values
