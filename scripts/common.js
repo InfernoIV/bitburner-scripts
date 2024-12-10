@@ -210,6 +210,7 @@ export function get_bit_node_multipliers(ns) {
 /**
  * Function that retrieves bitnode information from file
  * Cost: 0
+ * @param {NS} ns
  */
 export function get_reset_info(ns) {
     //read data from file
@@ -425,6 +426,7 @@ export const functionality = {
   * or by having it unlocked by destroying the corresponding bit node
   * also checked if not disabled by bit node multipliers
   * returns boolean indicating access to functionality
+* @param {NS} ns
 **/
 export function get_availability_functionality(ns, functionality) {
   
@@ -550,7 +552,7 @@ function getServers(ns) {
     //create a list to save hostnames to
     let scanList = []
     //start scanning from home
-    scanServer(ns, enum_servers.home, scanList)
+    scanServer(ns, servers.home, scanList)
     //add purchased servers to the list
     return scanList.concat(ns.getPurchasedServers())
 }
