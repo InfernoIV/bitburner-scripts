@@ -12,7 +12,7 @@ export async function main(ns) {
     prepare_information(ns)
     
     //if stanek unlocked
-    if (common.functionality_available(common.functionality.stanek)) {
+    if (common.get_availability_functionality(ns, common.functionality.stanek)) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
         ns.run(common.scripts.jump, 1,
             common.scripts.stanek_create, true) //which script to launch, kill other scripts
@@ -28,21 +28,22 @@ export async function main(ns) {
 
 /**
  * Function that retrieves information (reset info, bitnode multipliers) and saves it to file
+ *  @param {NS} ns
  */
 function prepare_information(ns) {  
     //get reset info
     const reset_info = ns.getResetInfo()
     //write data to file
-    ns.write(file_reset_info, JSON.stringify(reset_info), "w")
+    ns.write(common.file_reset_info, JSON.stringify(reset_info), "w")
 
     //get bitnode
-    const bit_node = resetInfo.currentNode
+    const bit_node = reset_info.currentNode
     //start at level 1
     let level = 1
     //up the level
-    if (resetInfo.ownedSF.has(bit_node)) {
+    if (reset_info.ownedSF.has(bit_node)) {
         //add the levels of the SF
-        level += resetInfo.ownedSF.get(bit_node)
+        level += reset_info.ownedSF.get(bit_node)
         //if not in 12
         if (bit_node != 12) {
             //cap to 3
@@ -57,19 +58,19 @@ function prepare_information(ns) {
         bit_node_multipliers = ns.getBitNodeMultipliers(bit_node, level)
     }
     //write data to file
-    ns.write(file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
+    ns.write(common.file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
     log_bit_node_information(ns, bit_node_multipliers, reset_info)
 
     //set to 0 by default
     let num_sleeves = 0
     //check if we have unlocked sleeve
-    if(common.get_availability_functionality(common.functionality.sleeve)) {
+    if(common.get_availability_functionality(ns, common.functionality.sleeve)) {
         //get the actual number
         num_sleeves = ns.sleeve.getNumSleeves()
     }
     //write data to file
-    ns.write(file_num_sleeves, JSON.stringify(num_sleeves), "w")
+    ns.write(common.file_num_sleeves, JSON.stringify(num_sleeves), "w")
 }
 
 
@@ -84,7 +85,7 @@ function log_bit_node_information(ns, bit_node_multipliers, reset_info) {
     //log information on completed bitnodes
     common.log(ns, 1, common.info, "Completed following bit nodes: " + JSON.stringify(reset_info.ownedSF))
     //log next target bit node
-    common.log(ns, 1, common.info, "Next bit node: " + get_next_bit_node(ns))
+    common.log(ns, 1, common.info, "Next bit node: " + common.get_next_bit_node(ns))
     
     //set level
     let source_file = 1
