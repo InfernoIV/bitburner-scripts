@@ -963,35 +963,10 @@ function update_ui(ns, bit_node_multipliers) {
         values.push(sleeve_values[index])
     }
 
-    //bladeburner    
-    if (get_bladeburner_access(ns)) {
-        //stamina
-        headers.push("Bladeburner stamina")
-        const stamina = ns.bladeburner.getStamina()
-        const stamina_percentage = Math.round(stamina[0] / stamina[1] * 100)
-        values.push(number_formatter(stamina[0]) + "/" + number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
-        //rank
-        headers.push("Bladeburner rank")
-        values.push(number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + number_formatter(400e3))
-
-        //blackOps completed
-        let blackOpsCompleted = 0
-        for (let blackOpEntry in data.bladeburner_actions.blackOps) {
-            //get blackop name
-            const blackOp = data.bladeburner_actions.blackOps[blackOpEntry]
-            //if completed
-            if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, blackOp.name) == 0) {
-                //add to the counter
-                blackOpsCompleted++
-            } else {
-                //not completed: stop
-                break
-            }
-        }
-        headers.push("Bladeburner BlackOps")
-        values.push(blackOpsCompleted + "/"+ (data.bladeburner_actions.blackOps-1) ) //was 21 (this should be dynamic
-    }
-
+    //bladeburner
+    const bladeburner_headers, bladeburner_values = bladeburner.update_ui(ns)
+    headers.push(bladeburner_headers)
+    values.push(bladeburner_values)
 
     //space for readable text
     headers.push("_______________________________")
