@@ -444,7 +444,7 @@ function manage_companies(ns) {
     for (let company in data.company_factions) {
         //just try to join the company, default to "software"
         //also works for getting promotion
-        ns.singularity.applyToCompany(company, "Software")
+        ns.singularity.applyToCompany(company, config.company_work_type)
     }
 }
 
