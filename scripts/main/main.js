@@ -22,19 +22,20 @@ import * as data from "./data.js"
  *  Base cost (1,6)
  *  killall (0,5) (inherited from init)
  */
-export async function main(ns) {       
-    //initialize
-    const [reset_info, bit_node_multipliers] = init(ns) //1,5 GB
-    
-    //keep track of launched scripts
-    let launched_scripts = []
-    
+export async function main(ns) {           
     //namespace sleeve
     const sleeve = common.functionality_available(common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
     //namespace bladeburner
     const bladeburner = common.functionality_available(common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
     //namespace hacknet
     const hacknet = common.functionality_available(common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
+
+    //sleeve
+    sleeve.init(ns)
+    //initialize
+    const [reset_info, bit_node_multipliers] = init(ns) //1,5 GB
+    //keep track of launched scripts
+    let launched_scripts = []
 
     //main loop
     while (true) {
@@ -119,8 +120,6 @@ function init(ns) {
         hook1.innerHTML = ''
     })
 
-    //sleeve
-    sleeve.init(ns)
     
     //get information from files
     //get reset info
