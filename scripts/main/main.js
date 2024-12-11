@@ -4,17 +4,7 @@ import * as common from "../common.js"
 import * as config from "./config.js"
 //data
 import * as data from "./data.js"
-
-
-
-//functionality imports
-//sleeve
-import * as sleeve from "./sleeve/interface.js" 
-//bladeburner
-import * as bladeburner from "./bladeburner/interface.js"
-//hacknet
-import * as hacknet from "./hacknet/interface.js"
-    
+  
 
 
 /**
@@ -39,6 +29,13 @@ export async function main(ns) {
     //keep track of launched scripts
     let launched_scripts = []
     
+    //namespace sleeve
+    const sleeve = common.functionality_available(common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
+    //namespace bladeburner
+    const bladeburner = common.functionality_available(common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
+    //namespace hacknet
+    const hacknet = common.functionality_available(common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
+
     //main loop
     while (true) {
         //main script: 3,1 GB  
@@ -91,7 +88,7 @@ export async function main(ns) {
  */
 function init(ns) {
     //disable unwanted logs
-    common.disable_logs(ns, config.log_disabled_topics) 
+    common.disable_logging(ns, config.log_disabled_topics) 
 
     //clear reset port
     ns.clearPort(common.port.reset)
