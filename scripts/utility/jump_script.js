@@ -18,7 +18,7 @@ export async function main(ns) {
         }
         //if kill all other scripts
         if (kill_all) {
-            ns.killAll(common.servers.home, true)
+            ns.killall(common.servers.home, true)
         }
 
         if (ns.args.length > 2) {
