@@ -540,7 +540,7 @@ export function disable_logging(ns, log_topics) {
         //error occurs
         } catch (err) {
             //log the error
-            log(ns, 1, common.error, "Disable logging failed for '" + log_topic + "'") 
+            log(ns, 1, error, "Disable logging failed for '" + log_topic + "'") 
         }
     }
 }
