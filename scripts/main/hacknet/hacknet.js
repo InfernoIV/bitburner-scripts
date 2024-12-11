@@ -1,7 +1,7 @@
 //data
 import * as data from "./data.js"
 //common
-import * as common from "../common.js"
+import * as common from "scripts/common.js"
 
 
 /*
