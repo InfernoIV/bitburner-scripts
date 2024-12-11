@@ -102,7 +102,7 @@ function init(ns) {
     }
 
     //signal hackManager to stop
-    common.over_write_port(ns, common.port.stopHack, common.hackingCommands.stop)
+    common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
 
     //get the UI
     const doc = eval('document')
@@ -532,7 +532,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             //if not already launched
             if (launched_scripts.indexOf(script) == -1) {
                 //signal hackManager to stop
-                common.over_write_port(ns, common.port.stopHack, common.hackingCommands.stop)
+                common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
                 //get all servers that can run scripts
                 const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
@@ -579,7 +579,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             }
         }
         //indicate to hack manager that it can resume
-        common.over_write_port(ns, common.port.stopHack, common.hackingCommands.start)
+        common.over_write_port(ns, common.port.stopHack, common.hacking_commands.start)
     }
     //return the list
     return launched_scripts
