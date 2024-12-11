@@ -34,7 +34,7 @@ import * as hacknet from "./hacknet/interface.js"
  */
 export async function main(ns) {       
     //initialize
-    const reset_info, bit_node_multipliers = init(ns) //1,5 GB
+    const [reset_info, bit_node_multipliers] = init(ns) //1,5 GB
     
     //keep track of launched scripts
     let launched_scripts = []
@@ -188,7 +188,6 @@ function manage_bit_node_destruction(ns) {
     if (bladeburner.has_completed_all_black_ops(ns)) {
             //proceed with destruction
             can_execute_destruction = true
-        }
     }
 
     //if destruction is possible
@@ -924,7 +923,7 @@ function update_ui(ns, bit_node_multipliers) {
     }
 
     //bladeburner
-    const bladeburner_headers, bladeburner_values = bladeburner.update_ui(ns)
+    const [bladeburner_headers, bladeburner_values] = bladeburner.update_ui(ns)
     headers.push(bladeburner_headers)
     values.push(bladeburner_values)
 
