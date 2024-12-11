@@ -1,5 +1,5 @@
 //common
-import * as common from "./common.js"
+import * as common from "scripts/common.js"
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -18,7 +18,7 @@ export async function main(ns) {
         }
         //if kill all other scripts
         if (kill_all) {
-            ns.kill_all(common.servers.home, true)
+            ns.killAll(common.servers.home, true)
         }
 
         if (ns.args.length > 2) {
