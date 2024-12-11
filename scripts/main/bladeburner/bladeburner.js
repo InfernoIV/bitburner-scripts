@@ -1,9 +1,9 @@
 //common
-import * as common from "./common.js"
+import * as common from "scripts/common.js"
 //data
-import * as data from "data.js"
+import * as data from "./data.js"
 //config
-import * as config from "config.js"
+import * as config from "./config.js"
 
 
 
