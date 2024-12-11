@@ -7,6 +7,15 @@ import * as data from "./data.js"
   
 
 
+//sleeve
+import * as sleeve from "/scripts/main/sleeve/sleeve.js"
+//bladeburner
+import * as bladeburner from "/scripts/main/bladeburner/bladeburner.js"
+//hacknet
+import * as hacknet from "/scripts/main/hacknet/hacknet.js"
+
+
+
 /**
  * Function that handles everything
  * Mandatory: 
@@ -23,17 +32,22 @@ import * as data from "./data.js"
  *  killall (0,5) (inherited from init)
  */
 export async function main(ns) {           
+    /*
     //namespace sleeve
-    const sleeve = common.get_availability_functionality(ns, common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
+    const sleeve = await import("/scripts/main/sleeve/sleeve.js")
+    //common.get_availability_functionality(ns, common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
     //namespace bladeburner
-    const bladeburner = common.get_availability_functionality(ns, common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
+    const bladeburner = await import("/scripts/main/bladeburner/bladeburner.js")
+    //common.get_availability_functionality(ns, common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
     //namespace hacknet
-    const hacknet = common.get_availability_functionality(ns, common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
+    const hacknet = await import("/scripts/main/hacknet/hacknet.js")
+    //common.get_availability_functionality(ns, common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
+*/
 
-    //sleeve
-    sleeve.init(ns)
     //initialize
     const [reset_info, bit_node_multipliers] = init(ns) //1,5 GB
+    //sleeve
+    sleeve.init(ns)
     //keep track of launched scripts
     let launched_scripts = []
 
