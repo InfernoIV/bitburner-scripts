@@ -24,11 +24,11 @@ import * as data from "./data.js"
  */
 export async function main(ns) {           
     //namespace sleeve
-    const sleeve = common.functionality_available(common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
+    const sleeve = common.get_availability_functionality(common.functionality.sleeve) ? await import("./sleeve/sleeve.js") : await import("./sleeve/sleeve_dummy.js")
     //namespace bladeburner
-    const bladeburner = common.functionality_available(common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
+    const bladeburner = common.get_availability_functionality(common.functionality.bladeburner) ? await import("./bladeburner/bladeburner.js") : await import("./bladeburner/bladeburner_dummy.js")
     //namespace hacknet
-    const hacknet = common.functionality_available(common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
+    const hacknet = common.get_availability_functionality(common.functionality.hacknet) ? await import("./hacknet/hacknet.js") : await import("./hacknet/server.js")
 
     //sleeve
     sleeve.init(ns)
