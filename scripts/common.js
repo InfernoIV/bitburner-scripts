@@ -642,11 +642,11 @@ function get_server_specific(ns, server_has_ram = false) {
  * Function that will retrieve all server hostnames
  * Cost: none
  */
-function get_servers(ns) {
+export function get_servers(ns) {
     //create list to save hostnames into
     let server_list = []
     //start scanning from home
-    scan_server(ns, enum_servers.home, server_list)
+    scan_server(ns, servers.home, server_list)
     //return the server list
     return server_list
 }
