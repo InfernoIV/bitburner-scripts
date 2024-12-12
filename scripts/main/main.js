@@ -73,8 +73,7 @@ export async function main(ns) {
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
-        //hacknet.manage_network(ns) // GB
-        manage_servers(ns)   // GB
+        hacknet.manage_network(ns) // GB
 
         //reset & destruction: 0 GB
         manage_bit_node_destruction(ns)   //0 GB (exernal script)
