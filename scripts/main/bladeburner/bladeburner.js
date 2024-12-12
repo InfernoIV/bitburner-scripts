@@ -27,18 +27,19 @@ export function get_access(ns) {
  */
 export function manage_action(ns) {
     //upgrade skills
-    bladeburner_raise_skills(ns)
+    raise_skills(ns)
     //check if we need to travel elsewhere
-    bladeburner_travel_to_best_city(ns)
+    travel_to_best_city(ns)
     //get the advised action
     const best_action = determine_action(ns)
     //get the current activity
     const current_action = get_activity(ns)
+
     //check if the current action is already being performed
     if((current_action.type != best_action.type) ||
-       (current_action.value != best_action.value)) {
+       (current_action.name != best_action.name)) {
         //start this action
-        ns.bladeburner.startAction(best_action.type, best_action.value)
+        ns.bladeburner.startAction(best_action.type, best_action.name)
     }
 }
 
@@ -70,7 +71,7 @@ export function has_completed_all_black_ops(ns) {
     //get the number of completed black ops
     const number_of_black_ops_completed = get_number_of_completed_black_ops(ns)
     //compare to all black ops
-    const has_completed_all_black_ops = number_of_black_ops_completed >= data.bladeburner_actions.blackOps.length
+    const has_completed_all_black_ops = number_of_black_ops_completed >= data.actions.blackOps.length
     //return the value
     return has_completed_all_black_ops
 }
@@ -87,7 +88,7 @@ export function update_ui(ns) {
     const values = []
 
     //if blade burner is active
-    if (get_bladeburner_access(ns)) {
+    if (get_access(ns)) {
         //stamina
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
@@ -102,7 +103,7 @@ export function update_ui(ns) {
         //add the text
         headers.push("Bladeburner BlackOps")
         //add the data
-        values.push(black_ops_completed + "/"+ data.bladeburner_actions.blackOps.length) //was 21 (this should be dynamic
+        values.push(black_ops_completed + "/"+ data.actions.blackOps.length) //was 21 (this should be dynamic
     }
     //return the headers and values
     return headers, values
@@ -115,24 +116,24 @@ export function update_ui(ns) {
  * Chaos should be lowest possible
  * Population should be more than 0 (otherwise we cannot do anything)
 **/
-function get_best_city(ns) {
+function travel_to_best_city(ns) {
     //go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
-    let bladeburner_chaos_lowest = 999999
+    let chaos_lowest = 999999
     //check the lowest chaos city
-    for (const cityEntry in enum_cities) {
+    for (const cityEntry in common.cities) {
         //get city
-        const city = enum_cities[cityEntry]
+        const city = common.cities[cityEntry]
         //get chaos of current city
         const cityChaos = ns.bladeburner.getCityChaos(city)
         //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
         //and actions will default to Field analysis, which will do nothing...
         //if lower than previous and there is synthoids in the city
-        if (cityChaos < bladeburner_chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
+        if (cityChaos < chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
             //switch city
             ns.bladeburner.switchCity(city)
             //update lowest chaos
-            bladeburner_chaos_lowest = cityChaos
+            chaos_lowest = cityChaos
         }
     }
 }
@@ -145,9 +146,9 @@ function get_best_city(ns) {
 **/
 function raise_skills(ns) {
     //for each bladeburner skill
-    for (const skill in data.bladeburner_skills) {
+    for (const skill in data.skills) {
         //upgrade skill without checking details (money, level cap)
-        ns.bladeburner.upgradeSkill(data.bladeburner_skills[skill])
+        ns.bladeburner.upgradeSkill(data.skills[skill])
     }
 }
 
@@ -161,11 +162,11 @@ function get_lowest_action_count(ns) {
     //set variable to return, set to high so it can be lowered
     let lowest_action_count = 999
     //for each operation
-    for (const activity in data.bladeburner_actions.operations) {
+    for (const activity in data.actions.operations) {
         //get operation information
-        const operation = data.bladeburner_actions.operations[activity]
+        const operation = data.actions.operations[activity]
         //get action count
-        const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
+        const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.operations, operation)
         //check if lower
         if (action_count < lowest_action_count) {
             //set action count
@@ -173,11 +174,11 @@ function get_lowest_action_count(ns) {
         }
     }
     //for each contract
-    for (const activity in data.bladeburner_actions.contracts) {
+    for (const activity in data.actions.contracts) {
         //get contract information
-        const contract = data.bladeburner_actions.contracts[activity]
+        const contract = data.actions.contracts[activity]
         //get action count
-        const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
+        const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
         //check if lower
         if (action_count < lowest_action_count) {
             //set action count
@@ -197,11 +198,11 @@ function get_number_of_completed_black_ops(ns) {
     //value to return
     let black_ops_completed = 0
     //for each blackop
-    for (const black_op_entry in data.bladeburner_actions.blackOps) {
+    for (const black_op_entry in data.actions.blackOps) {
         //get blackop name
-        const black_op = data.bladeburner_actions.blackOps[black_op_entry]
+        const black_op = data.actions.blackOps[black_op_entry]
         //if completed
-        if (ns.bladeburner.getActionCountRemaining(data.bladeburner_actions.type.blackOps, black_op.name) == 0) {
+        if (ns.bladeburner.getActionCountRemaining(data.actions.type.blackOps, black_op.name) == 0) {
             //add to the counter
             black_ops_completed++
         } else {
@@ -242,30 +243,30 @@ function get_activity(ns) {
  *  switchCity(4)
  *  getStamina (4)
  *  getRank (4)
- *  getaction_countRemaining (4)
+ *  getActionCountRemaining (4)
  *  getActionEstimatedSuccessChance (4)
  */
 function determine_action(ns) {
     //get stamina
-    const bladeburner_stamina = ns.bladeburner.getStamina()
+    const stamina = ns.bladeburner.getStamina()
     //if current stamina is higher than half max stamina (no penalties)
-    if (bladeburner_stamina[0] > (bladeburner_stamina[1] / 2)) {
+    if (stamina[0] > (stamina[1] / 2)) {
         //blackops
         //get current rank
-        const bladeburner_rank = ns.bladeburner.getRank()
+        const rank = ns.bladeburner.getRank()
         //for each black operation
-        for (const activity in data.bladeburner_actions.blackOps) {
+        for (const activity in data.actions.blackOps) {
             //get black_op information
-            const black_op = data.bladeburner_actions.blackOps[activity]
+            const black_op = data.actions.blackOps[activity]
             //check if this is the black op that is to be done
-            if (ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.blackOps, black_op.name) > 0) {
+            if (ns.bladeburner.getActionCountRemaining(data.actions.type.blackOps, black_op.name) > 0) {
                 //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.blackOps, black_op.name)
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
-                if ((bladeburner_rank > black_op.reqRank) &&
-                    (chance[0] >= config.bladeburner_black_op_success_chance_minimum)) {
+                if ((rank > black_op.reqRank) &&
+                    (chance[0] >= config.black_op_success_chance_minimum)) {
                     //return this information
-                    return { type: data.bladeburner_actions.type.blackOps, name: black_op.name }
+                    return { type: data.actions.type.blackOps, name: black_op.name }
                 }
                 //stop looking!
                 break
@@ -273,46 +274,47 @@ function determine_action(ns) {
         }
         //operations
         //for each operation
-        for (const activity in data.bladeburner_actions.operations) {
+        for (const activity in data.actions.operations) {
             //get operation information
-            const operation = data.bladeburner_actions.operations[activity]
+            const operation = data.actions.operations[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.operations, operation)
+            const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.operations, operation)
             //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.operations, operation)
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, operation)
             //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
+            if ((action_count >= 1) && (chance[0] >= config.success_chance_minimum)) {
                 //return this information
-                return { type: data.bladeburner_actions.type.operations, name: operation }
+                return { type: data.actions.type.operations, name: operation }
             }
         }
         //contracts
         //for each contract
-        for (const activity in data.bladeburner_actions.contracts) {
+        for (const activity in data.actions.contracts) {
             //get contract information
-            const contract = data.bladeburner_actions.contracts[activity]
+            const contract = data.actions.contracts[activity]
             //get action count
-            const action_count = ns.bladeburner.getaction_countRemaining(data.bladeburner_actions.type.contracts, contract)
+            const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
             //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.type.contracts, contract)
+            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract)
             //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum)) {
+            if ((action_count >= 1) && (chance[0] >= config.success_chance_minimum)) {
                 //return this information
-                return { type: data.bladeburner_actions.type.contracts, name: contract }
+                return { type: data.actions.type.contracts, name: contract }
             }
         }
     }
     //general
     //if over threshold
-    if (bladeburner_chaos_lowest > data.bladeburner_chaos_threshold) {
+    /*
+    if (chaos_lowest > data.chaos_threshold) {
         //lower chaos
-        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.diplomacy }
-    }
+        return { type: data.actions.type.general, name: data.actions.general.diplomacy }
+    }*/
     //if no operations or contracts available
-    if (bladeburner_get_lowest_action_count(ns) == 0) {
+    if (get_lowest_action_count(ns) == 0) {
         //generate operations and contracts
-        return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.inciteViolence }
+        return { type: data.actions.type.general, name: data.actions.general.inciteViolence }
     }
     //default: raise success chances
-    return { type: data.bladeburner_actions.type.general, name: data.bladeburner_actions.general.fieldAnalysis }
+    return { type: data.actions.type.general, name: data.actions.general.fieldAnalysis }
 }
