@@ -232,7 +232,7 @@ function manage_augment_installation(ns) {
         //read the port if we need to wait
         const reason_to_wait = ns.peek(common.port.reset)
         //check if there is no reason to wait
-        if (reason_to_wait == portNoData) {
+        if (reason_to_wait == common.port_no_data) {
             //TODO: better way to go over the factions? Check each faction and start with the faction with the smallest difference between rep cost and rep have? 
             //for every joined faction
             for (const faction of ns.getPlayer().factions) {
@@ -945,7 +945,7 @@ function update_ui(ns, bit_node_multipliers) {
         //check what is on the port
         const value = ns.peek(common.port[port])
         //if a value is set
-        if (value != portNoData) {
+        if (value != common.port_no_data) {
             //show the value + activity.type.slice(1).
             headers.push(port.charAt(0).toUpperCase() + port.slice(1))
             values.push(value)
