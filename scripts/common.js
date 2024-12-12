@@ -614,7 +614,7 @@ function getExecuteServers(ns) {
  * Cost: 2
  *  getServer (2)
  */
-function get_server_specific(ns, server_has_ram = false) {
+export function get_server_specific(ns, server_has_ram = false) {
     //create a list (of objects) to return
     let server_list = []
     //get all servers
