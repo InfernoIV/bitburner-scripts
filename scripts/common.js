@@ -154,7 +154,7 @@ export function number_formatter(number) {
     }
     let number_return = number
     if (largest_index > 0) {
-        number_return = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largestIndex)).toFixed(fraction_digits))
+        number_return = Math.sign(number) * ((Math.abs(number) / Math.pow(1000, largest_index)).toFixed(fraction_digits))
     }
     return number_return + symbols[largest_index]
 }
