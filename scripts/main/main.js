@@ -460,7 +460,7 @@ function manage_hacking(ns) {
     }
 
     //get all servers
-    for (const server of get_servers(ns)) {
+    for (const server of common.get_servers(ns)) {
         //if no admin rights (should resolve owned servers automatically)
         if (!ns.getServer(server).hasAdminRights) {
             //just try all tools (without checking if we have them...) and nuke
@@ -547,7 +547,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
                 //signal hackManager to stop
                 common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
                 //get all servers that can run scripts
-                const servers_that_can_execute = get_server_specific(ns, true)
+                const servers_that_can_execute = common.get_server_specific(ns, true)
                 //get script ram 
                 const script_ram = ns.getScriptRam(script)
                 //for each server
