@@ -359,7 +359,7 @@ function manage_factions(ns) {
     if (city_to_travel_to == "") {
 
         //if Tian Di Hui not joined
-        if ((factions.indexOf(common.factions.tianDiHui.name) == -1) && (stats.hacking >= 50)) {
+        if ((factions.indexOf(common.factions.tian_di_hui.name) == -1) && (stats.hacking >= 50)) {
             //travel to chongqing
             city_to_travel_to = common.cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
@@ -369,13 +369,13 @@ function manage_factions(ns) {
             city_to_travel_to = common.cities.chongqing //either Chongqing, New Tokyo, Ishima --> dark army only allows Chongqing
 
             //if The Syndicate not joined
-        } else if ((factions.indexOf(common.factions.theSyndicate.name) == -1) && (stats.hacking >= 200) && (stats.combat >= 200) && (stats.karma <= -90)) {
+        } else if ((factions.indexOf(common.factions.the_syndicate.name) == -1) && (stats.hacking >= 200) && (stats.combat >= 200) && (stats.karma <= -90)) {
             //travel to sector 12
             city_to_travel_to = common.cities.sector12 //either Aevum, Sector-12 --> sector 12 is the default
         }
 
         //if The Dark Army not joined
-    } else if ((factions.indexOf(common.factions.theDarkArmy.name) == -1) && (stats.hacking >= 300) && (stats.combat >= 300) && (stats.karma <= -45) && (stats.kills >= 5)) {
+    } else if ((factions.indexOf(common.factions.the_dark_army.name) == -1) && (stats.hacking >= 300) && (stats.combat >= 300) && (stats.karma <= -45) && (stats.kills >= 5)) {
         //travel to chongqing
         city_to_travel_to = common.cities.chongqing //only Chongqing
     }
