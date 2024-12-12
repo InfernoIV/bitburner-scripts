@@ -384,7 +384,7 @@ export function manage_actions(ns) {
         //create list of companies and their factions
         for (const company in player.jobs) {
             //get faction of the company
-            let company_faction = enum_company_factions[company]
+            let company_faction = company_factions[company]
             //if not joined
             if (player.factions.indexOf(company_faction) == -1) {
                 //check if other sleeves are working for the company
@@ -455,7 +455,7 @@ export function manage_actions(ns) {
  */
 export function buy_augments(ns) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
-    if (ns.peek(common.enum_port.reset) == "gang") {
+    if (ns.peek(common.port.reset) == "gang") {
         //do not buy augments
         return
     }
@@ -567,9 +567,9 @@ function get_activity(ns, index = -1) {
  */
 function get_faction_work_types(faction) {
     //for each faction
-    for (const faction_index in common.enum_factions) {
+    for (const faction_index in common.factions) {
         //get the faction data
-        const faction_data = common.enum_factions[faction_index]
+        const faction_data = common.factions[faction_index]
         //if the names match
         if (faction_data.name == faction) {
             //if it has work_types
@@ -595,7 +595,7 @@ function get_faction_work_types(faction) {
  */
 function should_work_for_faction(ns, faction) {
     //if sector-12
-    if (faction == common.enum_factions.sector12.name) {
+    if (faction == common.factions.sector12.name) {
         //always work for neuroflux governor
         return true
     }
