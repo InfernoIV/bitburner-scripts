@@ -45,7 +45,7 @@ export async function main(ns) {
 */
 
     //initialize
-    const [reset_info, bit_node_multipliers] = init(ns) //1,5 GB
+    const bit_node_multipliers = init(ns) //1,5 GB
     //sleeve
     sleeve.init(ns)
     //keep track of launched scripts
@@ -137,12 +137,12 @@ function init(ns) {
     
     //get information from files
     //get reset info
-    const reset_info = common.get_reset_info(ns) 
+    //const reset_info = common.get_reset_info(ns) 
     //get bitnode information from file
     const bit_node_multipliers = common.get_bit_node_multipliers(ns)
 
     //give the information back
-    return reset_info, bit_node_multipliers
+    return bit_node_multipliers
 }
 
 
