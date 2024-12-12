@@ -869,15 +869,15 @@ function update_ui(ns, bit_node_multipliers) {
     
     //add entropy
     headers.push("Entropy")
-    values.push(number_formatter(player.entropy))
+    values.push(common.number_formatter(player.entropy))
 
     //add karma
     headers.push("Karma")
-    values.push(number_formatter(player.karma) + "/" + number_formatter(data.requirements.karma_for_gang))
+    values.push(common.number_formatter(player.karma) + "/" + common.number_formatter(data.requirements.karma_for_gang))
 
     //add kills
     headers.push("Kills")
-    values.push(number_formatter(player.numPeopleKilled) + "/" + data.requirements.kills_for_factions)
+    values.push(common.number_formatter(player.numPeopleKilled) + "/" + data.requirements.kills_for_factions)
 
     //add hack tools
     const hacking = player.skills.hacking
