@@ -16,7 +16,7 @@ File to use when hacknet functionality IS unlocked
  *  upgradeHomeRam (3)
  *  hacknet (4)
  */
-export function manage_servers(ns) {
+export function manage_network(ns) {
     //get challenge flags
     const challenge_flags = common.get_challenge_flags(ns)
     
