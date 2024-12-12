@@ -93,10 +93,10 @@ export function update_ui(ns) {
         headers.push("Bladeburner stamina")
         const stamina = ns.bladeburner.getStamina()
         const stamina_percentage = Math.round(stamina[0] / stamina[1] * 100)
-        values.push(number_formatter(stamina[0]) + "/" + number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
+        values.push(common.number_formatter(stamina[0]) + "/" + common.number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
         //rank
         headers.push("Bladeburner rank")
-        values.push(number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + number_formatter(400e3))
+        values.push(common.number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + common.number_formatter(400e3))
 
         //blackOps completed
         const black_ops_completed = get_number_of_completed_black_ops(ns)
