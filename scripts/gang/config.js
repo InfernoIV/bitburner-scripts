@@ -7,8 +7,8 @@ export const log_level = -1
 export const log_disabled_topics = [
   "gang.purchaseEquipment",
   "gang.setMemberTask",
-  "gang.setTerritoryWarfare"",
-}
+  "gang.setTerritoryWarfare",
+]
 
 //desired train level (unlimited)
 export const desired_training_Level = 200//50
@@ -22,4 +22,3 @@ export const territory_clash_minimum_percentage = 0.55 //55%
 export const focus = data.focus_area.combat
 //gang to join
 export const faction_gang = data.factions.slum_snakes
-
