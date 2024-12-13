@@ -1,6 +1,7 @@
 //common
 import * as common from "scripts/common.js"
-
+//config
+import * as config from "./config.js"
 
 
 /** 
