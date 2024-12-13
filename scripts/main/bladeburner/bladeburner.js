@@ -30,14 +30,18 @@ export function manage_action(ns) {
     raise_skills(ns)
     //check if we need to travel elsewhere
     travel_to_best_city(ns)
-    //get the advised action
-    const best_action = determine_action(ns)
     //get the current activity
     const current_action = get_activity(ns)
+    //get the advised action
+    const best_action = determine_action(ns)
+
+    //debug
+    //common.log(ns, 1, common.info, "current_action: " + JSON.stringify(current_action))
+    //common.log(ns, 1, common.info, "best_action: " + JSON.stringify(best_action))
 
     //check if the current action is already being performed
-    if((current_action.type != best_action.type) ||
-       (current_action.name != best_action.name)) {
+    if ((current_action.type != best_action.type) ||
+        (current_action.name != best_action.name)) {
         //start this action
         ns.bladeburner.startAction(best_action.type, best_action.name)
     }
@@ -53,7 +57,7 @@ export function is_performing_black_op(ns) {
     //get bladeburner activity
     const activity = get_activity(ns)
     //check the type
-    if(activity.type == data.actions.type.blackOps) {
+    if (activity.type == data.actions.type.blackOps) {
         //indicate busy
         return true
     }
@@ -103,7 +107,7 @@ export function update_ui(ns) {
         //add the text
         headers.push("Bladeburner BlackOps")
         //add the data
-        values.push(black_ops_completed + "/"+ data.actions.blackOps.length) //was 21 (this should be dynamic
+        values.push(black_ops_completed + "/" + data.actions.blackOps.length) //was 21 (this should be dynamic
     }
     //return the headers and values
     return headers, values
@@ -251,6 +255,9 @@ function determine_action(ns) {
     const stamina = ns.bladeburner.getStamina()
     //if current stamina is higher than half max stamina (no penalties)
     if (stamina[0] > (stamina[1] / 2)) {
+        //debug
+        common.log(ns,1,common.info,"stamina: " + JSON.stringify(stamina))
+        
         //blackops
         //get current rank
         const rank = ns.bladeburner.getRank()
@@ -258,13 +265,17 @@ function determine_action(ns) {
         for (const activity in data.actions.blackOps) {
             //get black_op information
             const black_op = data.actions.blackOps[activity]
+
+            //debug
+            //common.log(ns,1,common.info,"black_op: " + black_op + " x" + ns.bladeburner.getActionCountRemaining(data.actions.type.blackOps, black_op.name) + " = " + ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.blackOps, black_op.name) + "%")
+
             //check if this is the black op that is to be done
             if (ns.bladeburner.getActionCountRemaining(data.actions.type.blackOps, black_op.name) > 0) {
                 //get chance
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
                 if ((rank > black_op.reqRank) &&
-                    (chance[0] >= config.black_op_success_chance_minimum)) {
+                    (chance[0] >= config.black_op_bladeburner_success_chance_minimum_player)) {
                     //return this information
                     return { type: data.actions.type.blackOps, name: black_op.name }
                 }
@@ -281,8 +292,12 @@ function determine_action(ns) {
             const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.operations, operation)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, operation)
+            
+            //debug
+            //common.log(ns,1,common.info,"Operation: " + operation + " x" + action_count + " = " + chance + "%")
+
             //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.success_chance_minimum)) {
+            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_player)) {
                 //return this information
                 return { type: data.actions.type.operations, name: operation }
             }
@@ -296,8 +311,12 @@ function determine_action(ns) {
             const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
             //get chance
             const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract)
+
+            //debug
+            //common.log(ns,1,common.info,"Contract: " + contract + " x" + action_count + " = " + chance + "%")
+
             //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.success_chance_minimum)) {
+            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_player)) {
                 //return this information
                 return { type: data.actions.type.contracts, name: contract }
             }
