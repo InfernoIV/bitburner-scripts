@@ -1,5 +1,5 @@
 //imports
-import { enum_scripts } from "scripts/common.js"
+import * as common from "scripts/common.js"
 
 
 /** 
@@ -17,11 +17,11 @@ export async function main(ns) {
     //if at least 1 augment bought
     if (augments_ready_for_install > 0) {
         //install augments
-        ns.singularity.installAugmentations(enum_scripts.boot)
+        ns.singularity.installAugmentations(common.scripts.boot)
         
         //no augments bought
     } else {
         //soft reset
-        ns.singularity.softReset(enum_scripts.boot)
+        ns.singularity.softReset(common.scripts.boot)
     }
 }
