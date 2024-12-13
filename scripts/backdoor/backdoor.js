@@ -1,7 +1,7 @@
 //import common functions
-import * as common from "./common.js"
+import * as common from "scripts/common.js"
 //import config
-import * as config from "/config.js"
+import * as config from "./config.js"
 
 
 
@@ -44,7 +44,7 @@ function init(ns) {
 /**
  * Function that checks on port 
 **/
-function async backdoor_server(ns, server) {
+async function backdoor_server(ns, server) {
     //create a list to hold the route
     let route = []
     //create a variable to save current server, and set it to current hostname
