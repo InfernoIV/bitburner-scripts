@@ -256,7 +256,7 @@ function determine_action(ns) {
     //if current stamina is higher than half max stamina (no penalties)
     if (stamina[0] > (stamina[1] / 2)) {
         //debug
-        common.log(ns,1,common.info,"stamina: " + JSON.stringify(stamina))
+        //common.log(ns,1,common.info,"stamina: " + JSON.stringify(stamina))
         
         //blackops
         //get current rank
