@@ -9,7 +9,7 @@ https://github.com/bitburner-official/bitburner-src/blob/dev/src/Gang/data/Const
 
 
 //common
-import * as common from "../common.js"
+import * as common from "scripts/common.js"
 //config
 import * as config from "./config.js"
 //data
@@ -57,7 +57,7 @@ export async function main(ns) {
  * focus of the gang
  */
 /** @param {NS} ns */
-function init(ns) {
+async function init(ns) {
     //disable logging
     common.disable_logging(ns, config.log_disabled_topics)
     
