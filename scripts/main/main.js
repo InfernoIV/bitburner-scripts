@@ -273,7 +273,7 @@ function buy_augments(ns) {
                 //try to buy
                 if(ns.singularity.purchaseAugmentation(faction, augment)) {
                     //log information
-                    common.log(ns,1,success,"Bought augment '" + augment + "' for player")
+                    common.log(ns,1,common.success,"Bought augment '" + augment + "' for player")
                 }
             }
         }
@@ -648,7 +648,7 @@ function manage_action_player(ns, bit_node_multipliers) {
         if (player_activity.value != crime_best) {
             //commit crime for karma
             if (!ns.singularity.commitCrime(crime_best, action_focus)) {
-                log(ns, 1, warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+                common.log(ns, 1, common.warning, "manage_actions failed 1. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
         
@@ -660,7 +660,7 @@ function manage_action_player(ns, bit_node_multipliers) {
         if (player_activity.value != crime_best) {
             //commit crime for karma
             if (!ns.singularity.commitCrime(crime_best, action_focus)) {
-                log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
+                common.log(ns, 1, warning, "manage_actions failed 2. singularity.commitCrime(" + crime_best + ", " + action_focus + ")")
             }
         }
         
@@ -833,7 +833,7 @@ function get_activity(ns) {
             //case common.activities.grafting: activity.value = player_activity.augmentation; break
             default:
                 //log information
-                log(ns, 1, info, "get_activity - Uncaught condition: " + player_activity.type)
+                common.log(ns, 1, common.info, "get_activity - Uncaught condition: " + player_activity.type)
                 //return immediately!
                 return activity
         }
