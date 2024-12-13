@@ -11,7 +11,7 @@ export async function main(ns) {
   //always work if stanek is unlocked  
   ns.stanek.acceptGift()
   //always work if stanek is unlocked
-  ns.singularity.joinFaction(common.faction.church_of_the_machine_god)
+  ns.singularity.joinFaction(common.factions.church_of_the_machine_god.name)
 
   //place the fragments
   place_fragments(ns)
