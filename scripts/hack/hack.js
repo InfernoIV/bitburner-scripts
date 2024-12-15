@@ -31,7 +31,7 @@ export async function main(ns) {
         //if stopped
         if (flag_stop == true) {
             //if we should start again
-            if ((ns.peek(enum_port.stopHack) == enum_hackingCommands.start)) {
+            if ((ns.peek(common.port.stopHack) == common.hacking_commands.start)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Resuming HackManager")
                 //reset flag
@@ -45,7 +45,7 @@ export async function main(ns) {
         //running normally
         } else {
             //if command for stpoping
-            if ((ns.peek(common.port.stopHack) == common.hackingCommands.stop)) {
+            if ((ns.peek(common.port.stopHack) == common.hacking_commands.stop)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Pausing HackManager")
                 //set wait time
