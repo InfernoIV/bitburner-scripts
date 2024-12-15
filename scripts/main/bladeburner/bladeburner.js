@@ -72,10 +72,12 @@ export function is_performing_black_op(ns) {
  * used for checking bit node destruction
  */
 export function has_completed_all_black_ops(ns) {
+    //get the total number of black ops
+    const total_number_of_black_ops = Object.keys(data.actions.blackOps).length
     //get the number of completed black ops
     const number_of_black_ops_completed = get_number_of_completed_black_ops(ns)
     //compare to all black ops
-    const has_completed_all_black_ops = number_of_black_ops_completed >= data.actions.blackOps.length
+    const has_completed_all_black_ops = number_of_black_ops_completed >= total_number_of_black_ops
     //return the value
     return has_completed_all_black_ops
 }
