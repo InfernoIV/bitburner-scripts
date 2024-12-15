@@ -44,6 +44,7 @@ export const port_no_data = "NULL PORT DATA"
 /**
  * enum of special servers
  * All servers will be backdoored, if possible
+ * Blacklist servers because they don't work of some reason?
  */
 export const servers = {
     home: "home",   //no effect
