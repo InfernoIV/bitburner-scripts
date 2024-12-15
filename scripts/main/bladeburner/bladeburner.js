@@ -26,6 +26,12 @@ export function get_access(ns) {
  * assigns actions
  */
 export function manage_action(ns) {
+    //if no access
+    if(!get_access(ns)) {
+        //stop
+        return
+    }
+
     //upgrade skills
     raise_skills(ns)
     //check if we need to travel elsewhere
@@ -54,6 +60,12 @@ export function manage_action(ns) {
  * used to block resets
 **/
 export function is_performing_black_op(ns) {
+    //if no access
+    if(!get_access(ns)) {
+        //stop
+        return false
+    }
+
     //get bladeburner activity
     const activity = get_activity(ns)
     //check the type
@@ -72,6 +84,12 @@ export function is_performing_black_op(ns) {
  * used for checking bit node destruction
  */
 export function has_completed_all_black_ops(ns) {
+    //if no access
+    if(!get_access(ns)) {
+        //stop
+        return false
+    }
+
     //get the total number of black ops
     const total_number_of_black_ops = Object.keys(data.actions.blackOps).length
     //get the number of completed black ops
