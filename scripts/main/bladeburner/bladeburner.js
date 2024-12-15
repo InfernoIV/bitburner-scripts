@@ -275,7 +275,7 @@ function determine_action(ns) {
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
                 if ((rank > black_op.reqRank) &&
-                    (chance[0] >= config.black_op_bladeburner_success_chance_minimum_player)) {
+                    (chance[0] >= config.bladeburner_success_chance_minimum_black_op)) {
                     //return this information
                     return { type: data.actions.type.blackOps, name: black_op.name }
                 }
