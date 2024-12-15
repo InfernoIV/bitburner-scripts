@@ -15,7 +15,7 @@ export async function main(ns) {
         //get hostname (only remove data when finished)
         let server = ns.peek(common.port.backdoor)
         //if set
-        if (server != common.portNoData) {
+        if (server != common.port_no_data) {
             //backdoor the server
             await backdoor_server(ns, server)
             //remove the current hostname from the port (only when it has finished
