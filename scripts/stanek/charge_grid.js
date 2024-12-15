@@ -35,9 +35,9 @@ export async function main(ns) {
         common.log(ns, config.log_level, common.success, "Charging fragments complete!")
 
         //after charging, rep for CotMG increases: check if we can buy augments
-        for (const augment of ns.singularity.getAugmentationsFromFaction(data.faction)) {
+        for (const augment of ns.singularity.getAugmentationsFromFaction(common.factions.church_of_the_machine_god)) {
             //try to buy augment
-            ns.singularity.purchaseAugmentation(data.faction, augment)
+            ns.singularity.purchaseAugmentation(common.factions.church_of_the_machine_god, augment)
         }
     }
 
