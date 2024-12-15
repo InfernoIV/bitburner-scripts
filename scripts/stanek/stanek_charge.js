@@ -20,7 +20,7 @@ export async function main(ns) {
         //save biggest RAM
         const max_ram = ns.getServerMaxRam(common.servers.home) - ns.getScriptRam(common.scripts.stanekCharge, common.servers.home)
         //calculate RAM cost
-        const script_ram = ns.getScriptRam(common.scripts.workerCharge, common.servers.home)
+        const script_ram = ns.getScriptRam(common.scripts.worker_charge, common.servers.home)
         //check how many threads we can run
         const threads = Math.floor(max_ram / script_ram)
 
