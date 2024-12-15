@@ -44,7 +44,6 @@ export const port_no_data = "NULL PORT DATA"
 /**
  * enum of special servers
  * All servers will be backdoored, if possible
- * Blacklist servers because they don't work of some reason?
  */
 export const servers = {
     home: "home",   //no effect
@@ -84,9 +83,9 @@ export const scripts = {
     worker_grow: "scripts/hack/worker_grow.js",
     worker_weaken: "scripts/hack/worker_weaken.js",
     //stanek
-    stanek_create: "scripts/stanek/stanek_create.js",
-    stanek_charge: "scripts/stanek/stanek_charge.js",
-    worker_charge: "scripts/stanek/stanek_worker_charge.js",
+    stanek_create: "scripts/stanek/create_grid.js",
+    stanek_charge: "scripts/stanek/charge_grid.js",
+    worker_charge: "scripts/stanek/worker_charge.js",
     //stanekBuy: "scripts/stanek/stanekBuy.js",
 }
 
@@ -403,6 +402,7 @@ export const factions = {
 
 
 //enum for checking features
+/*
 export const functionality = {
   //genesis: bit node 1: -
   gang: "gang", //bit node 2: namespace gang
@@ -417,7 +417,7 @@ export const functionality = {
   //Neuroflux: bit node 12: -
   stanek: "stanek", //bit node 13: namespace stanek
   ipvgo: "ipvgo", //bit node 14: namespace ipvgo
-}
+}*/
 
 
 
@@ -429,6 +429,7 @@ export const functionality = {
   * returns boolean indicating access to functionality
 * @param {NS} ns
 **/
+/*
 export function get_availability_functionality(ns, functionality) {
   
   //get current bit node and level
@@ -519,8 +520,7 @@ export function get_availability_functionality(ns, functionality) {
   //otherwise we don't have access
   return false
 }
-
-
+*/
 
 /**
  * Function that disables all logging for the array of strings that is provided
