@@ -12,16 +12,16 @@ export async function main(ns) {
     prepare_information(ns)
     
     //if stanek unlocked
-    if (common.get_availability_functionality(ns, common.functionality.stanek)) {
+    //if (common.get_availability_functionality(ns, common.functionality.stanek)) {
         //launch main script using jump server (only costs 1,6GB ram instead of this script ram)
         ns.run(common.scripts.jump, 1,
             common.scripts.stanek_create, true) //which script to launch, kill other scripts
-    } else {
+    /*} else {
         //launch directly to main
         //run jumpscript to boot main
         ns.run(common.scripts.jump, 1, 
         common.scripts.main, true)
-    } 
+    } */
 }
 
 
@@ -53,10 +53,10 @@ function prepare_information(ns) {
     //get the multipliers of this bitnode
     let bit_node_multipliers = dummy_bit_node_multipliers
     //check if we get bit node multipliers (needs bit node 
-    if (common.get_availability_functionality(ns, common.functionality.intelligence)) {
+    //if (common.get_availability_functionality(ns, common.functionality.intelligence)) {
         //add the actual bitnode multipliers
         bit_node_multipliers = ns.getBitNodeMultipliers(bit_node, level)
-    }
+    //}
     //write data to file
     ns.write(common.file_bit_node_multipliers, JSON.stringify(bit_node_multipliers), "w")
     //log information
@@ -65,10 +65,10 @@ function prepare_information(ns) {
     //set to 0 by default
     let num_sleeves = 0
     //check if we have unlocked sleeve
-    if(common.get_availability_functionality(ns, common.functionality.sleeve)) {
+    //if(common.get_availability_functionality(ns, common.functionality.sleeve)) {
         //get the actual number
         num_sleeves = ns.sleeve.getNumSleeves()
-    }
+    //}
     //write data to file
     ns.write(common.file_num_sleeves, JSON.stringify(num_sleeves), "w")
 }
