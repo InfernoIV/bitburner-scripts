@@ -6,6 +6,9 @@ export const bladeburner_chaos_threshold = data.bladeburner_chaos_value_for_pena
 
 //success chance for blade burner actions for player
 export const bladeburner_success_chance_minimum_player = 1
+//success chance for blade burner actions for black ops
+export const bladeburner_success_chance_minimum_black_op = 1
+
 
 //success chance for blade burner actions for sleeve
 export const bladeburner_success_chance_minimum_sleeve = 1
