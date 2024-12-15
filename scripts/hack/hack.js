@@ -97,9 +97,9 @@ class targetInfo {
         this.waitTime = 0
         this.wait = 0
         //define scripts
-        this.scriptWeaken = common.scripts.workerWeaken 
-        this.scriptGrow = common.scripts.workerGrow 
-        this.scriptHack = common.scripts.workerHack
+        this.scriptWeaken = common.scripts.worker_weaken 
+        this.scriptGrow = common.scripts.worker_grow 
+        this.scriptHack = common.scripts.worker_hack
         //set costs
         this.cost = {
             weaken: ns.getScriptRam(this.scriptWeaken),
