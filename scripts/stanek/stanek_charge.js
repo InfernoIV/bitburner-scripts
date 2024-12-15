@@ -13,7 +13,7 @@ import * as data from "./data.js"
  */
 export async function main(ns) {
     //if we can charge fragments (faction COTMG is joined)
-    if (ns.getPlayer().factions.indexOf(data.faction) > -1) {
+    if (ns.getPlayer().factions.indexOf(common.factions.church_of_the_machine_god.name) > -1) {
         //kill all scripts
         ns.killall(common.servers.home, true)  
       
