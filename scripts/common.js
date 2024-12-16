@@ -62,13 +62,12 @@ export const servers = {
 export const scripts = {
     //script
     boot: "scripts/boot.js",
+    jump: "scripts/jump_script.js",
+    jump2: "scripts/jump.js",
     //main
-    main: "scripts/main/main.js",
-    //utility
-    jump: "scripts/utility/jump_script.js",
-    jump2: "scripts/utility/jump.js",
-    destroy_bitNode: "scripts/utility/destroy_bit_node.js",
-    reset: "scripts/utility/reset.js",
+    main: "scripts/main/main.js",    
+    destroy_bitNode: "scripts/main/destroy_bit_node.js",
+    reset: "scripts/main/reset.js",
     //backdoor
     backdoor: "scripts/backdoor/backdoor.js",
     //gang
