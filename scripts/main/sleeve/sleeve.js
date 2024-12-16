@@ -41,7 +41,7 @@ export function init(ns) {
 
 /**
  * Function that checks and returns the list of actions
- * Sleeves are to be divided over work (bladeburner > faction > company > crime)
+ * Sleeves are to be divided over work (shock > karma > kills > bladeburner > faction > company > crime)
  */
 function determine_actions(ns, number_of_sleeves) {
   //get sleeve shock values
@@ -58,6 +58,9 @@ function determine_actions(ns, number_of_sleeves) {
   //array of sleeve actions
   let desired_actions = []
 
+  //check faction and company work first
+
+  
   //assign bladeburner actions
   //bladeburner.manage_actions(ns, sleeve_actions_future)
   
@@ -208,6 +211,7 @@ function determine_actions(ns, number_of_sleeves) {
 
   
 /**
+ * Function that executes the actions, if not already performing the action
  * number_of_sleeves is implicit due to desired_actions length
  */
 function execute_actions(ns, desired_actions) {
@@ -237,9 +241,7 @@ function execute_actions(ns, desired_actions) {
             //get faction
             const faction = desired_action.value
             //get work type
-            const work_type = determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction))
-            //debug
-            //common.log(ns, 1, common.fail, "Starting sleeve " + index + " on faction work for " + faction)            
+            const work_type = determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction))   
             //try to prevent crashes
             try {
                 //set to faction work
@@ -258,9 +260,7 @@ function execute_actions(ns, desired_actions) {
         //company work
         case data.activities.company:
             //get company
-            const company = desired_action.value
-            //debug
-            //common.log(ns, 1, common.info, index + " sleeve_actions_future: " + JSON.stringify(sleeve_actions_future))
+            const company = desired_action.value        
             //try to prevent crashes
             try {
                 //set to company work
@@ -287,18 +287,24 @@ function execute_actions(ns, desired_actions) {
       //stop looking
       break
 
-    case data.activities.recovery:  //shock recovery - properties: type
-
+    //shock recovery
+    case data.activities.recovery:  //properties: type
+        //start recovery
+        ns.sleeve.setToShockRecovery(index)
+        //stop looking
+        break
+          
     //bladeburner
     case data.activities.bladeburner:  //properties: type, actionType, actionName, cyclesWorked, cyclesNeeded, nextCompletion, tasksCompleted
     case data.activities.infiltrate:  //properties: type, cyclesWorked, cyclesNeeded, nextCompletion
     case data.activities.support:  //support as member of bladeburner? properties: type
       //do bladeburner stuff
-
+      bladeburner.execute_action(ns, index, desired_action)
       //stop looking
       break
       
     //not used
+    
     //case data.activities.study: //studying
     //case data.activities.synchro: //properties: type
         //failsafe
