@@ -5,7 +5,18 @@ import * as config from "./config.js"
 
 
 
-/** @param {NS} ns */
+/**
+ * Function that manages the backdooring servers
+ * waits for data from main.js to backdoor the received servers
+ * Cost: 5,8 GB
+ *   base script cost: 1,6 GB
+ *   ns.peek: 0 GB
+ *   Inherited init: 2 GB
+ *   Inherited backdoor_server: 2,2 GB (overlaps 2 GB with init)
+ *   ns.readPort: 0 GB
+ *   ns.sleep: 0 GB
+ * @param {NS} ns 
+ */
 export async function main(ns) {
     //initialize
     init(ns)
@@ -30,7 +41,9 @@ export async function main(ns) {
 
 
 /**
- * Function that disables logging
+ * Function that disables logging and connects to home
+ * Cost: 2 GB
+ *   ns.singularity.connect: 2 GB
  */
 function init(ns) {
     //disable logging
@@ -43,6 +56,10 @@ function init(ns) {
 
 /**
  * Function that checks on port 
+ * Cost: 4,2 gb
+ *   ns.scan: 0,2 GB
+ *   ns.singularity.connect: 2 GB
+ *   ns.singularity.installBackdoor: 2 GB
 **/
 async function backdoor_server(ns, server) {
     //create a list to hold the route
