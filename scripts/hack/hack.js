@@ -115,6 +115,8 @@ class targetInfo {
         //refresh servers
         this.servers = get_servers(ns) //getExecuteServers(ns)
         //log(ns, 1, info, "servers: " + JSON.stringify(this.servers))
+        copy_scripts(ns)
+        
         //variable to save the target to
         let new_target = ""
         //variable to temporarly store new target
@@ -163,6 +165,19 @@ class targetInfo {
         return true
     }
 
+
+    /**
+     * Scripts that copies all scripts to all hosts
+     */
+    copy_scripts(ns) {
+        //for each server
+        for (const server of this.servers) {
+            //copy scripts
+            ns.scp(this.scriptWeaken, server)
+            ns.scp(this.scriptGrow, server)
+            ns.scp(this.scriptHack, server)
+        }
+    }
 
     /** @param {NS} ns */
     generateThreads(ns) {
