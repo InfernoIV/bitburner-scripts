@@ -16,10 +16,11 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  * Cost: 8 GB
  *   ns.bladeburner.getActionEstimatedSuccessChance: 4 GB
  *   ns.bladeburner.getCityChaos: 4 GB
+ * @param {NS} ns
 **/
 export function determine_action(ns, index) {
     //check if we have enough chance to recruit
-    if(ns.bladeburner.getActionEstimatedSuccessChance(data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    if(ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
          return { type: data.activities.bladeburner, value: data.actions.sleeve.recruitment } //bladeburner action
     }     
@@ -35,7 +36,7 @@ export function determine_action(ns, index) {
         return { type: data.activities.infiltrate, value: data.actions.sleeve.infiltrate_synthoids } //specific type
     }
     //if we can raise chance for the player
-    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.sleeve.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to field analysis
          return { type: data.activities.bladeburner, value: data.actions.sleeve.field_analysis } //bladeburner action
     }
