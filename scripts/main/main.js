@@ -6,9 +6,6 @@ import * as common_cost from "scripts/common_costs.js"
 import * as config from "./config.js"
 //data
 import * as data from "./data.js"
-  
-
-
 //sleeve
 import * as sleeve from "/scripts/main/sleeve/sleeve.js"
 //bladeburner
