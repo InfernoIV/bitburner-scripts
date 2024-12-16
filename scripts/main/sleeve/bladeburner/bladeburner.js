@@ -22,23 +22,23 @@ export function determine_action(ns, index) {
     //check if we have enough chance to recruit
     if(ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
-         return { type: data.activities.bladeburner, value: data.actions.sleeve.recruitment } //bladeburner action
+         return { type: data.actions.sleeve.recruitment, value: data.actions.sleeve.recruitment } //bladeburner action
     }     
     //if city chaos is over threshold (negatively impacts success chance)
     else if (ns.bladeburner.getCityChaos(bladeburner.get_best_city(ns)) > config.bladeburner_chaos_threshold) {
         //lower chaos (todo: move sleeve???)
-        return { type: data.activities.bladeburner, value: data.actions.sleeve.diplomacy } //bladeburner action
+        return { type: data.actions.sleeve.diplomacy, value: data.actions.sleeve.diplomacy } //bladeburner action
     }
     //if action count is too low
     else if (bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
         //set to infiltrate to raise action count
         //or to incite violence??
-        return { type: data.activities.infiltrate, value: data.actions.sleeve.infiltrate_synthoids } //specific type
+        return { type: data.actions.sleeve.infiltrate_synthoids, value: data.actions.sleeve.infiltrate_synthoids } //specific type
     }
     //if we can raise chance for the player
     else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, data.actions.operations.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to field analysis
-         return { type: data.activities.bladeburner, value: data.actions.sleeve.field_analysis } //bladeburner action
+         return { type: data.actions.sleeve.field_analysis, value: data.actions.sleeve.field_analysis } //bladeburner action
     }
     //check for contracts and otherwise return DENIED
     else {
@@ -54,7 +54,7 @@ export function determine_action(ns, index) {
             //if this action can be performed and we have enough chance
             if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_sleeve)) {
                 //return this information
-                return { type: data.activities.bladeburner, name: contract } //type: data.actions.type.contracts
+                return { type: data.actions.sleeve.take_on_contracts, name: contract } //type: data.actions.type.contracts
             }
         }
         
@@ -83,6 +83,7 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
             ns.sleeve.setToBladeburnerAction(index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
             
         //if the type is a blade burner action
+        case data.actions.sleeve.field_analysis:
         case data.actions.sleeve.recruitment:
         case data.actions.sleeve.infiltrate_synthoids: 
         case data.actions.sleeve.diplomacy: 
