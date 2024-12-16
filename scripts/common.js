@@ -382,27 +382,6 @@ export function has_completed_bit_node_level(ns, bit_node, level = 1) {
 
 
 /**
- * Function that returns the installed augments
- * @param {NS} ns
- * Cost: 0 GB (1 GB if ns.getRestInfo is used)
- */
-export function get_augmentations_installed(ns) {
-    //owned augments
-    const augments_owned = get_reset_info(ns).ownedAugs //ns.getResetInfo().ownedAugs
-    //create return value
-    let augments_list = []
-    //for each augment
-    for (let key of augments_owned) {
-        //use only the name
-        augments_list.push(key[0])
-    }
-    //return the list
-    return augments_list
-}
-
-
-
-/**
  * Function that disables all logging for the array of strings that is provided
  * Cost: 0 GB
  */
