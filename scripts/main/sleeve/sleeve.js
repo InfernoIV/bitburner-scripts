@@ -136,10 +136,10 @@ function determine_actions(ns, number_of_sleeves) {
  * number_of_sleeves is implicit due to desired_actions length
  */
 function execute_actions(ns, desired_actions) {
+  //derive the number of sleeves
+  const number_of_sleeves = desired_actions.length
   //get current actions  
   const current_actions = get_current_actions(ns, number_of_sleeves)
-  //derive the number of sleeves
-  const number_of_sleeves = current_actions.length
   
   //for each sleeve
   for (let index = 0; index < number_of_sleeves; index++) {
