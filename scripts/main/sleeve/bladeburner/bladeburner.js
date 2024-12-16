@@ -13,6 +13,9 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  * Function that determines the sleeve work for bladeburner
  * tries to assign bladeburner work from the lowest index, not checking stats
  * function should be executed before assigning normal work!
+ * Cost: 8 GB
+ *   ns.bladeburner.getActionEstimatedSuccessChance: 4 GB
+ *   ns.bladeburner.getCityChaos: 4 GB
 **/
 export function bladeburner_manage_actions(ns, sleeve_actions) {
     //check if we have enough chance to recruit, default to sleeve 0
@@ -62,6 +65,8 @@ export function bladeburner_manage_actions(ns, sleeve_actions) {
 /**
  * Function that executes the bladeburner actions for the sleeves
  * This way, the bladeburner functions for sleeves are contained in in this script
+ * Cost: 4 GB
+ *   ns.sleeve.setToBladeburnerAction: 4 GB
 **/
 export function bladeburner_execute_actions(ns, sleeve_actions) {
     //for each sleeve
@@ -80,7 +85,7 @@ export function bladeburner_execute_actions(ns, sleeve_actions) {
                 break
                 
             default:
-                //do not handle, is a normal actin
+                //do not handle, is a normal action
         }
     }
 }
