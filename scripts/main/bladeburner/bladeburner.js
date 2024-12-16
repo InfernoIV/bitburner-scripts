@@ -198,7 +198,7 @@ function raise_skills(ns) {
  * Function that get the lowest action count of all operations and contracts
  * Enables determination when sleeves should do infiltrations to raise the counts\
 **/
-function get_lowest_action_count(ns) {
+export function get_lowest_action_count(ns) {
     //set variable to return, set to high so it can be lowered
     let lowest_action_count = 999
     //for each operation
