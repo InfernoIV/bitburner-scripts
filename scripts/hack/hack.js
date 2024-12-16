@@ -113,7 +113,7 @@ class targetInfo {
     /** @param {NS} ns */
     async determineTarget(ns) {
         //refresh servers
-        this.servers = common.getServers(ns) //getExecuteServers(ns)
+        this.servers = common.get_servers(ns) //getExecuteServers(ns)
         //log(ns, 1, info, "servers: " + JSON.stringify(this.servers))
         //variable to save the target to
         let new_target = ""
