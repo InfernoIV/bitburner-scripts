@@ -20,7 +20,7 @@ Functions and cost
 //imports
 import * as common from "scripts/common.js"
 //cost
-import get_augmentations_installed from "scripts/common.js"
+import { get_augmentations_installed } from "scripts/common_cost.js"
 //data
 import * as data from "../data.js"
 //config
