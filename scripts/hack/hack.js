@@ -2,7 +2,8 @@
 import * as config from "./config.js"
 //common
 import * as common from "scripts/common.js"
-
+//common cost
+import * as common_cost from "scripts/common_cost.js"
 
 
 /** @param {NS} ns */
@@ -12,13 +13,13 @@ export async function main(ns) {
     //log start
     common.log(ns, config.log_level, common.success, "Looking for servers to execute hacks")
     //get servers
-    let number_of_execute_servers = common.get_server_specific(ns, true).length 
+    let number_of_execute_servers = common_cost.get_server_specific(ns, true).length 
     //wait until servers become available
     while (number_of_execute_servers == 0) {
         //wait a bit
         await ns.sleep(1 * 1000)
         //update
-        number_of_execute_servers = common.get_server_specific(ns, true).length 
+        number_of_execute_servers = common_cost.get_server_specific(ns, true).length 
     }
     //log information
     common.log(ns, config.log_level, common.success, "Found " + number_of_execute_servers + " servers to execute hacks")
@@ -442,7 +443,7 @@ class targetInfo {
         //save the ram of the execute server
         let server_ram = 0
         //for every available server
-        for (const server of common.get_server_specific(ns,true)) { //getExecuteServers(ns)) {
+        for (const server of common_cost.get_server_specific(ns,true)) { //getExecuteServers(ns)) {
             //get the cores
             let cores = ns.getServer(server).cpuCores
             //safeguard
