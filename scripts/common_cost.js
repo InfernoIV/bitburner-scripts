@@ -2,6 +2,8 @@
 File to be used by multiple scripts, but these have functions that costs ram
 Conditional import is advised to minimize costs
 */
+//common
+import * as common from "scripts/common.js"
 
 
 
@@ -46,7 +48,7 @@ export function get_servers(ns) {
     //create list to save hostnames into
     let server_list = []
     //start scanning from home
-    scan_server(ns, servers.home, server_list)
+    scan_server(ns, common.servers.home, server_list)
     //return the server list
     return server_list
 }
