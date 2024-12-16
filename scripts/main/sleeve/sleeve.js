@@ -12,15 +12,19 @@ Functions and cost
   0 GB  init
   x GB  manage_actions
   x GB  buy_augments_sleeve
-  x GB  get_num_sleeves
+  x GB  get_number_of_sleeves
   x GB  update_ui
   4 GB  get_activity
 */
 
-import * as data from "../data.js"
-
 //imports
 import * as common from "scripts/common.js"
+//data
+import * as data from "../data.js"
+//config
+import * as config from "./config.js"
+//bladeburner
+import * as bladeburner from "./bladeburner/bladeburner.js"
 
 
 
@@ -36,53 +40,57 @@ export function init(ns) {
 
 
 /**
- * Function that manages the actions of the sleeve
- *  Sleeve: 28 GB
- *      setToCommitCrime (4)
- *      setToFactionWork (4)
- *      setToCompanyWork (4)
- *      setToBladeburnerAction (4)
- *      getSleeve (4)
- *      setToShockRecovery (4)
- *      Inherited: 4 GB
- *          get_activity (4)   
+ * Function that checks and returns the list of actions
+ * Sleeves are to be divided over work (bladeburner > faction > company > crime)
  */
-export function manage_actions(ns) {
-    //get the number of sleeves available
-    const sleeves_available = get_num_sleeves(ns)
-    //get the bitnode multipliers
-    const bit_node_multipliers = common.get_bit_node_multipliers(ns)
-    //get player
-    const player = ns.getPlayer()
-    //sleeve actions
-    //shock value that is wanted (96%)
-    const sleeve_shock_desired_maximum = 0.96
-    //get all max shock value
-    let sleeve_shock = []
+function determine_actions(ns, number_of_sleeves) {
+  //get sleeve shock values
+  const shock = get_shock(ns)
+  //get the bitnode multipliers
+  const bit_node_multipliers = common.get_bit_node_multipliers(ns)
+  //get player
+  const player = ns.getPlayer()
+  //get factions to work for
+  let factions_requiring_work = get_factions_to_work_for()
+  //get companies to work for
+  let companies_requiring_work = get_companies_to_work_for()
+  
+  //array of sleeve actions
+  let desired_actions = []
 
-    //for each sleeve
-    for (let index = 0; index < sleeves_available; index++) {
-        //get shock value
-        const shock = ns.sleeve.getSleeve(index).shock
-        //add the shock to the list
-        sleeve_shock.push(shock)
-    }
-
-    //if there is a sleeve with too much shock
-    if (Math.max(sleeve_shock) > sleeve_shock_desired_maximum) {
+  //assign bladeburner actions
+  //bladeburner.manage_actions(ns, sleeve_actions_future)
+  
+  //if there is a sleeve with too much shock
+    if (Math.max(sleeve_shock) > config.shock_maximum_desired ) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
-            //if not doing the correct work
+        for (let index = 0; index < number_of_sleeves; index++) {
+          //add to the list
+          actions.push(data.activities.recovery)
+            /*
+          //if not doing the correct work
             if (get_activity(ns, index).type != data.activities.recovery) {
                 //perform recovery
                 ns.sleeve.setToShockRecovery(index)
+            }*/
+        }
+    
+    //not reached target kills
+    } else if (player.numPeopleKilled < data.requirements.kills_for_factions) {
+        //for each sleeve
+        for (let index = 0; index < number_of_sleeves; index++) {
+            //get best crime for kills
+            let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, crime_focus.kills)
+            //if not performing the correct work
+            if (get_activity(ns, index).value != crime_best) {
+                //perform crime
+                ns.sleeve.setToCommitCrime(index, crime_best)
             }
         }
-
-        //if we have not reached target karma
+      //if we have not reached target karma
     } else if (player.karma > data.requirements.karma_for_gang) {
         //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
+        for (let index = 0; index < number_of_sleeves; index++) {
             //get best crime for karma
             let crime_best = ns.enums.CrimeType.mug//get_crime_best(ns, bit_node_multipliers, player, crime_focus.karma)
             //if not doing the correct work
@@ -92,73 +100,16 @@ export function manage_actions(ns) {
             }
         }
 
-        //not reached target kills
-    } else if (player.numPeopleKilled < data.requirements.kills_for_factions) {
-        //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
-            //get best crime for kills
-            let crime_best = ns.enums.CrimeType.homicide//get_crime_best(ns, bit_node_multipliers, player, crime_focus.kills)
-            //if not performing the correct work
-            if (get_activity(ns, index).value != crime_best) {
-                //perform crime
-                ns.sleeve.setToCommitCrime(index, crime_best)
-            }
-        }
+       //keep track of sleeve actions to be done
+      let desired_actions = []
+      
+      //for each sleeve
+      for (let index = 0; index < number_of_sleeves; index++) {
+          //set default action to crime
+          desired_actions[index] = { type: data.activities.crime, value: crime_best }
+      }
 
-        //sleeves are to be divided over work (faction > company > crime)
-    } else {
-        //get all the current actions
-        let sleeve_actions_current = []
-        //get all sleeve actions
-        for (let index = 0; index < sleeves_available; index++) {
-            //add activity of the specific sleeve to the list
-            sleeve_actions_current.push(get_activity(ns, index))
-        }
-
-        //get a list of all factions to work for
-        let factions_to_work_for = []
-        //for each unlocked faction
-        for (const faction of player.factions) {
-            //common.log(ns, 1, common.info, "faction: " + faction + "(" + get_faction_work_types(faction) + ") -> " + should_work_for_faction(ns, faction))
-            //if the faction has work types and if there are still augments available
-            if ((get_faction_work_types(faction).length > 0) &&
-                (should_work_for_faction(ns, faction))) {
-                //add faction to the list
-                factions_to_work_for.push(faction)
-            }
-        }
-        //debug
-        //common.log(ns, 1, common.info, "factions_to_work_for: " + JSON.stringify(factions_to_work_for))
-
-
-        //get a list of all companies to work for
-        let companies_to_work_for = []
-        //create list of companies and their factions
-        for (const company in player.jobs) {
-            //if company faction is not joined
-            if (player.factions.indexOf(data.company_factions[company]) == -1) {
-                //add company to the list
-                companies_to_work_for.push(company)
-            }
-        }
-        //common.log(ns, 1, common.info, "companies_to_work_for: " + JSON.stringify(companies_to_work_for))
-
-        //keep track of sleeve actions to be done
-        let sleeve_actions_future = []
-        //define best crime for skills
-        const crime_best = ns.enums.CrimeType.grandTheftAuto //TODO: get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), crime_focus.skills)
-        //for each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
-            //set default action to crime
-            sleeve_actions_future[index] = { type: data.activities.crime, value: crime_best }
-        }
-        //debug
-        //common.log(ns, 1, common.info, "sleeve_actions_future (start): " + JSON.stringify(sleeve_actions_future))
-
-
-
-
-        //determine faction work
+      //determine faction work
         for (const faction of factions_to_work_for) {
             //set flag to check if sleeve is already working for this specific faction
             let sleeve_assigned = false
@@ -173,7 +124,7 @@ export function manage_actions(ns) {
                 //debug
                 //common.log(ns, 1, common.info, "sleeve_action: " + JSON.stringify(sleeve_action))
 
-                sleeve_action
+                //sleeve_action
                 //if doing faction work and working for this faction
                 if ((sleeve_action.type == data.activities.faction) &&
                     (sleeve_action.value == faction)) {
@@ -249,200 +200,156 @@ export function manage_actions(ns) {
                 }
             }
         }
-
-        //debug
-        //common.log(ns, 1, common.info, "sleeve_actions_future (end): " + JSON.stringify(sleeve_actions_future))
-
-        //set all sleeve actions
-        for (let index = 0; index < sleeves_available; index++) {
-            
-            
-            //compare current vs wanted
-            if ((sleeve_actions_current[index].type == sleeve_actions_future[index].type) &&
-                (sleeve_actions_current[index].value == sleeve_actions_future[index].value)) {
-                //doing correct work, no change needed
-            } else {
-                //debug
-                //common.log(ns, 1, common.warning, "Sleeve " + index + " wants to do " + sleeve_actions_future.type)
-                //change in work is needed
-                switch (sleeve_actions_future[index].type) {
-                    //faction work
-                    case data.activities.faction:
-                        //get faction
-                        const faction = sleeve_actions_future[index].value
-                        //get work type
-                        const work_type = determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction))
-                        //debug
-                        //common.log(ns, 1, common.fail, "Starting sleeve " + index + " on faction work for " + faction)
-                        
-                        //try to prevent crashes
-                        try {
-                        //set to faction work
-                            ns.sleeve.setToFactionWork(index, faction, work_type)
-                        //if failed        
-                        } catch (err) {
-                            //log
-                            common.log(ns, 1, common.error, "Failed to start sleeve " + index + " on faction work @ " + faction + ": " + err)
-                            common.log(ns, 1, common.warning, "sleeve_actions_current: " + JSON.stringify(sleeve_actions_current))
-                            common.log(ns, 1, common.warning, "sleeve_actions_future: " + JSON.stringify(sleeve_actions_future))
-                        }
-                        //stop looking
-                        break
+      
+      //return the list
+      return desired_actions
+}
 
 
-                    //company work
-                    case data.activities.company:
-                        //debug
-                        //common.log(ns, 1, common.info, index + " sleeve_actions_future: " + JSON.stringify(sleeve_actions_future))
-                        //get company
-                        const company = sleeve_actions_future[index].value
-                        //try to prevent crashes
-                        try {
-                            //set to company work
-                            ns.sleeve.setToCompanyWork(index, company)
-                        //if failed        
-                        } catch (err) {
-                            //log
-                            common.log(ns, 1, common.error, "Failed to start sleeve " + index + " on company work @ " + company + ": " + err)
-                            common.log(ns, 1, common.warning, "sleeve_actions_current: " + JSON.stringify(sleeve_actions_current))
-                            common.log(ns, 1, common.warning, "sleeve_actions_future: " + JSON.stringify(sleeve_actions_future))
-                        }
-                        //stop looking
-                        break
-
-                    //crime
-                    default:
-                        //if not working on the desired crime
-                        if (get_activity(ns, index).value != crime_best) {
-                            //assign to crime
-                            if (!ns.sleeve.setToCommitCrime(index, crime_best)) {
-                                //if failed, log!
-                                log(ns, 1, error, "Failed to start sleeve " + index + " on crime: " + crime_best)
-                            }
-                        }
-                }
-            }
-        }
-
-        /*
-        //factions
-        //get available factions
-        for (const faction of player.factions) {
-            //get work types
-            const work_types = get_faction_work_types(faction)
-            //if the faction has work_types
-            if (work_types.length > 0) {
-                //if there are still augments available
-                if (should_work_for_faction(ns, faction)) {
-                    //set a flag to check
-                    let already_working_for_faction = false
-                    //check other sleeves
-                    for (let index = 0; index < sleeves_available; index++) {
-                        //get activity
-                        const activity = get_activity(ns, index)
-                        //if a sleeve is already working for this faction
-                        if ((activity.type == activities.faction) &&
-                            (activity.value == faction)) {
-                            //assign this job to the sleeve
-                            sleeve_actions_future[index] = activity
-                            //set flag to indicate someone is already working on this
-                            already_working_for_faction = true
-                            //stop searching
-                            break
-                        }
-                    }
-                    //if flag is not set
-                    if (!already_working_for_faction) {
-                        //check each sleeve
-                        for (let index = 0; index < sleeves_available; index++) {
-                            //check if the sleeve is not assigned
-                            if (!Object.hasOwn(sleeve_actions_future, index)) {
-                                //get best faction work
-                                const faction_work_best = determine_faction_work(ns.sleeve.getSleeve(index), work_types)
-                                //try to start
-                                try {
-                                    //work for this faction
-                                    if (ns.sleeve.setToFactionWork(index, faction, faction_work_best)) {
-                                        //save information
-                                        sleeve_actions_future[index] = { type: activities.faction, value: faction }
-                                        //stop
-                                        break
-                                    }
-                                } catch (error) {
-                                    log(ns, 1, error, "setToFactionWork " + faction + ": " + error)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        */
-
-        /*
-        //companies
-        //create list of companies and their factions
-        for (const company in player.jobs) {
-            //get faction of the company
-            let company_faction = company_factions[company]
-            //if not joined
-            if (player.factions.indexOf(company_faction) == -1) {
-                //check if other sleeves are working for the company
-                //set a flag to check
-                let company_already_working = false
-                //check other sleeves
-                for (let index = 0; index < sleeves_available; index++) {
-                    //get activity
-                    const activity = get_activity(ns, index)
-                    //if a sleeve is already working for this company
-                    if ((activity.type == activities.company) &&
-                        (activity.value == company)) {
-                        //assign this job to the sleeve
-                        sleeve_actions_future[index] = activity
-                        //set flag to indicate someone is already working on this
-                        company_already_working = true
-                        //stop searching
-                        break
-                    }
-                }
-                //if flag is not set
-                if (!company_already_working) {
-                    //check each sleeve
-                    for (let index = 0; index < sleeves_available; index++) {
-                        //check if the sleeve is not assigned
-                        if (!Object.hasOwn(sleeve_actions_future, index)) {
-                            try {
-                                //work for company
-                                ns.sleeve.setToCompanyWork(index, company)
-                                //save information
-                                sleeve_actions_future[index] = { type: activities.company, value: company }
   
-                            } catch (error) {
-                                log(ns, 1, error, "setToCompanyWork " + company + ": " + error)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+/**
+ * number_of_sleeves is implicit due to desired_actions length
+ */
+function execute_actions(ns, desired_actions) {
+  //get current actions  
+  const current_actions = get_current_actions(ns, number_of_sleeves)
+  //derive the number of sleeves
+  const number_of_sleeves = current_actions.length
   
-        //check each sleeve
-        for (let index = 0; index < sleeves_available; index++) {
-            //check if the sleeve is not assigned
-            if (!Object.hasOwn(sleeve_actions_future, index)) {
-                //get best crime for skills
-                let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), crime_focus.skills)
-                //if not working on the desired crime
-                if (get_activity(ns, index).value != crime_best) {
-                    //assign to crime
-                    ns.sleeve.setToCommitCrime(index, crime_best)
-                }
-                //save information
-                sleeve_actions_future[index] = { type: activities.crime, value: crime_best }
+  //for each sleeve
+  for (let index = 0; index < number_of_sleeves; index++) {
+    //get current action
+    const current_action = current_actions[index]
+    //get desired action
+    const desired_action = desired_actions[index]
+    //check if we need to do something
+    const working_on_the_same_type = (current_action.type == desired_action.type)
+    const working_on_the_same_value = (current_action.value == desired_action.value)
+    
+    //if we are NOT doing the same work
+    if(!working_on_the_same_type || !working_on_the_same_value) {
+      
+      //check what to do according to the index
+      switch(current_action.type) {
+        
+        //faction work
+        case data.activities.faction:
+            //get faction
+            const faction = desired_action.value
+            //get work type
+            const work_type = determine_faction_work(ns.sleeve.getSleeve(index), get_faction_work_types(faction))
+            //debug
+            //common.log(ns, 1, common.fail, "Starting sleeve " + index + " on faction work for " + faction)            
+            //try to prevent crashes
+            try {
+                //set to faction work
+                ns.sleeve.setToFactionWork(index, faction, work_type)
+            //if failed        
+            } catch (err) {
+                //log
+                common.log(ns, 1, common.error, "Failed to start sleeve " + index + " on faction work @ " + faction + ": " + err)
+                common.log(ns, 1, common.warning, "sleeve_actions_current: " + JSON.stringify(current_actions))
+                common.log(ns, 1, common.warning, "sleeve_actions_future: " + JSON.stringify(desired_actions))
             }
-        }
-        */
+            //stop looking
+            break
+  
+  
+        //company work
+        case data.activities.company:
+            //get company
+            const company = desired_action.value
+            //debug
+            //common.log(ns, 1, common.info, index + " sleeve_actions_future: " + JSON.stringify(sleeve_actions_future))
+            //try to prevent crashes
+            try {
+                //set to company work
+                ns.sleeve.setToCompanyWork(index, company)
+            //if failed        
+            } catch (err) {
+                //log
+                common.log(ns, 1, common.error, "Failed to start sleeve " + index + " on company work @ " + company + ": " + err)
+                common.log(ns, 1, common.warning, "sleeve_actions_current: " + JSON.stringify(current_actions))
+                common.log(ns, 1, common.warning, "sleeve_actions_future: " + JSON.stringify(desired_actions))
+            }
+            //stop looking
+            break
+
+    //crime
+    case data.activities.crime: 
+      //get crime
+      const crime = desired_action.value   
+      //assign to crime
+      if (!ns.sleeve.setToCommitCrime(index, crime)) {
+          //if failed, log!
+          common.log(ns, 1, common.error, "Failed to start sleeve " + index + " on crime: " + best_crime)
+      }
+      //stop looking
+      break
+
+    case data.activities.recovery:  //shock recovery - properties: type
+
+    //bladeburner
+    case data.activities.bladeburner:  //properties: type, actionType, actionName, cyclesWorked, cyclesNeeded, nextCompletion, tasksCompleted
+    case data.activities.infiltrate:  //properties: type, cyclesWorked, cyclesNeeded, nextCompletion
+    case data.activities.support:  //support as member of bladeburner? properties: type
+      //do bladeburner stuff
+
+      //stop looking
+      break
+      
+    //not used
+    //case data.activities.study: //studying
+    //case data.activities.synchro: //properties: type
+        //failsafe
+        default:
+            //log warning
+            common.log(ns, 1, common.warning, "execute_actions - Uncaught condition: " + JSON.Stringify(current_action))
+          //stop looking
+          break
+      }
     }
+  }
+}
+  
+
+
+/**
+ * Function that collects and return the actions of the number of sleeves provided
+ */
+function get_current_actions(ns, number_of_sleeves) {
+//get all the current actions
+    let current_actions = []
+    //get all sleeve actions
+    for (let index = 0; index < number_of_sleeves; index++) {
+        //add activity of the specific sleeve to the list
+        current_actions.push(get_activity(ns, index))
+    }
+  //return the list
+  return current_actions
+}
+
+
+  
+/**
+ * Function that manages the actions of the sleeve
+ *  Sleeve: 28 GB
+ *      setToCommitCrime (4)
+ *      setToFactionWork (4)
+ *      setToCompanyWork (4)
+ *      setToBladeburnerAction (4)
+ *      getSleeve (4)
+ *      setToShockRecovery (4)
+ *      Inherited: 4 GB
+ *          get_activity (4)   
+ */
+export function manage_actions(ns) {
+    //get the number of sleeves available
+    const number_of_sleeves = get_number_of_sleeves(ns)
+    //get desired actions
+    const desired_actions = determine_actions(ns, number_of_sleeves)
+    //execute actions (both normal and bladeburner)
+    execute_actions(ns, desired_actions)
 }
 
 
@@ -460,7 +367,7 @@ export function buy_augments(ns) {
         return
     }
     //for each sleeve
-    for (let index = 0; index < get_num_sleeves(ns); index++) {
+    for (let index = 0; index < get_number_of_sleeves(ns); index++) {
         //for each sleeve augment
         //TODO: possible to hardcode the augment list?
         //TODO: get rid of try / catch
@@ -485,7 +392,7 @@ export function update_ui(ns) {
     let headers = []
     let values = []
     //for each sleeve
-    for (let index = 0; index < get_num_sleeves(ns); index++) {
+    for (let index = 0; index < get_number_of_sleeves(ns); index++) {
         //get sleeve activity
         const activity = get_activity(ns, index)
         //add to header
@@ -500,10 +407,28 @@ export function update_ui(ns) {
 
 
 /**
+ * Function that will return all shock values
+ */
+function get_shock(ns) {
+  //get all max shock value
+    let sleeve_shock = []
+    //for each sleeve
+    for (let index = 0; index < sleeves_available; index++) {
+        //get shock value
+        const shock = ns.sleeve.getSleeve(index).shock
+        //add the shock to the list
+        sleeve_shock.push(shock)
+    }
+  //return the array
+  return sleeve_shock
+}
+
+
+/**
  * Function that reads number of sleeves from file
  * Cost: 0 GB
  */
-function get_num_sleeves(ns) {
+function get_number_of_sleeves(ns) {
     //read data from file (single int)
     return JSON.parse(ns.read(common.file_num_sleeves))
 }
@@ -677,3 +602,168 @@ function determine_faction_work(person, work_types) {
     }
     return best_work_type
 }
+
+
+  
+/*
+ * Function that returns the factions of which should be worked for
+ */
+function get_factions_to_work_for(ns) {
+  //get a list of all factions to work for
+  let factions_to_work_for = []
+  //for each unlocked faction
+  for (const faction of player.factions) {
+      //common.log(ns, 1, common.info, "faction: " + faction + "(" + get_faction_work_types(faction) + ") -> " + should_work_for_faction(ns, faction))
+      //if the faction has work types and if there are still augments available
+      if ((get_faction_work_types(faction).length > 0) &&
+          (should_work_for_faction(ns, faction))) {
+          //add faction to the list
+          factions_to_work_for.push(faction)
+      }
+  }
+  //debug
+  //common.log(ns, 1, common.info, "factions_to_work_for: " + JSON.stringify(factions_to_work_for))
+  //return the list
+  return factions_to_work_for
+}
+
+
+  
+/**
+ * Function that returns the companies of which should be worked for
+ */
+function get_companies_to_work_for(ns) {
+  //get a list of all companies to work for
+  let companies_to_work_for = []
+  //create list of companies and their factions
+  for (const company in player.jobs) {
+      //if company faction is not joined
+      if (player.factions.indexOf(data.company_factions[company]) == -1) {
+          //add company to the list
+          companies_to_work_for.push(company)
+      }
+  }
+  //debug
+  //common.log(ns, 1, common.info, "companies_to_work_for: " + JSON.stringify(companies_to_work_for))
+  //return the list
+  return companies_to_work_for
+}
+
+ /*
+        //factions
+        //get available factions
+        for (const faction of player.factions) {
+            //get work types
+            const work_types = get_faction_work_types(faction)
+            //if the faction has work_types
+            if (work_types.length > 0) {
+                //if there are still augments available
+                if (should_work_for_faction(ns, faction)) {
+                    //set a flag to check
+                    let already_working_for_faction = false
+                    //check other sleeves
+                    for (let index = 0; index < sleeves_available; index++) {
+                        //get activity
+                        const activity = get_activity(ns, index)
+                        //if a sleeve is already working for this faction
+                        if ((activity.type == activities.faction) &&
+                            (activity.value == faction)) {
+                            //assign this job to the sleeve
+                            sleeve_actions_future[index] = activity
+                            //set flag to indicate someone is already working on this
+                            already_working_for_faction = true
+                            //stop searching
+                            break
+                        }
+                    }
+                    //if flag is not set
+                    if (!already_working_for_faction) {
+                        //check each sleeve
+                        for (let index = 0; index < sleeves_available; index++) {
+                            //check if the sleeve is not assigned
+                            if (!Object.hasOwn(sleeve_actions_future, index)) {
+                                //get best faction work
+                                const faction_work_best = determine_faction_work(ns.sleeve.getSleeve(index), work_types)
+                                //try to start
+                                try {
+                                    //work for this faction
+                                    if (ns.sleeve.setToFactionWork(index, faction, faction_work_best)) {
+                                        //save information
+                                        sleeve_actions_future[index] = { type: activities.faction, value: faction }
+                                        //stop
+                                        break
+                                    }
+                                } catch (error) {
+                                    log(ns, 1, error, "setToFactionWork " + faction + ": " + error)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+        /*
+        //companies
+        //create list of companies and their factions
+        for (const company in player.jobs) {
+            //get faction of the company
+            let company_faction = company_factions[company]
+            //if not joined
+            if (player.factions.indexOf(company_faction) == -1) {
+                //check if other sleeves are working for the company
+                //set a flag to check
+                let company_already_working = false
+                //check other sleeves
+                for (let index = 0; index < sleeves_available; index++) {
+                    //get activity
+                    const activity = get_activity(ns, index)
+                    //if a sleeve is already working for this company
+                    if ((activity.type == activities.company) &&
+                        (activity.value == company)) {
+                        //assign this job to the sleeve
+                        sleeve_actions_future[index] = activity
+                        //set flag to indicate someone is already working on this
+                        company_already_working = true
+                        //stop searching
+                        break
+                    }
+                }
+                //if flag is not set
+                if (!company_already_working) {
+                    //check each sleeve
+                    for (let index = 0; index < sleeves_available; index++) {
+                        //check if the sleeve is not assigned
+                        if (!Object.hasOwn(sleeve_actions_future, index)) {
+                            try {
+                                //work for company
+                                ns.sleeve.setToCompanyWork(index, company)
+                                //save information
+                                sleeve_actions_future[index] = { type: activities.company, value: company }
+  
+                            } catch (error) {
+                                log(ns, 1, error, "setToCompanyWork " + company + ": " + error)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+  
+        //check each sleeve
+        for (let index = 0; index < sleeves_available; index++) {
+            //check if the sleeve is not assigned
+            if (!Object.hasOwn(sleeve_actions_future, index)) {
+                //get best crime for skills
+                let crime_best = ns.enums.CrimeType.grandTheftAuto//get_crime_best(ns, bit_node_multipliers, ns.sleeve.getSleeve(index), crime_focus.skills)
+                //if not working on the desired crime
+                if (get_activity(ns, index).value != crime_best) {
+                    //assign to crime
+                    ns.sleeve.setToCommitCrime(index, crime_best)
+                }
+                //save information
+                sleeve_actions_future[index] = { type: activities.crime, value: crime_best }
+            }
+        }
+        */
