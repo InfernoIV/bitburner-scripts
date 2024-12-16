@@ -1,5 +1,7 @@
 //common functions
-import * as common from "../common.js"
+import * as common from "scripts/common.js"
+//common functions with cost
+import * as common_cost from "scripts/common_costs.js"
 //config
 import * as config from "./config.js"
 //data
@@ -108,7 +110,7 @@ function init(ns) {
     ns.clearPort(common.port.reset)
 
     //for each server
-    for (const server of common.get_servers(ns)) {
+    for (const server of common_cost.get_servers(ns)) {
         //check if it is home
         const is_server_home = (server == common.servers.home)
         //kill all scripts
@@ -459,7 +461,7 @@ function manage_hacking(ns) {
     }
 
     //get all servers
-    for (const server of common.get_servers(ns)) {
+    for (const server of common_cost.get_servers(ns)) {
         //if no admin rights (should resolve owned servers automatically)
         if (!ns.getServer(server).hasAdminRights) {
             //just try all tools (without checking if we have them...) and nuke
@@ -546,7 +548,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
                 //signal hackManager to stop
                 common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
                 //get all servers that can run scripts
-                const servers_that_can_execute = common.get_server_specific(ns, true)
+                const servers_that_can_execute = common_cost.get_server_specific(ns, true)
                 //get script ram 
                 const script_ram = ns.getScriptRam(script)
                 //for each server
