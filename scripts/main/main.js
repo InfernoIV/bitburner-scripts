@@ -64,11 +64,11 @@ export async function main(ns) {
         launched_scripts = manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
 
         //player actions & bladeburner: 71 GB
-        manage_action_player(ns, bit_node_multipliers)   //71 GB
+        manage_action_player(ns)   //71 GB
         buy_augments(ns)  //10 GB
         
         //sleeve: ? GB
-        sleeve.manage_actions(ns, bit_node_multipliers)
+        sleeve.manage_actions(ns)
         sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
@@ -618,13 +618,14 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
  *          bladeburner_get_activity (1)
  *          bladeburner_determine_action (28)
  */
-function manage_action_player(ns, bit_node_multipliers) {
+function manage_action_player(ns) {
     //if the player is focussed (should only happen after resuming play (starting the game)
     if(ns.singularity.isFocused()) {
         //stop action
         ns.singularity.stopAction()
     }
     
+    //bit_node_multipliers
     //get player
     const player = ns.getPlayer()
     //get player activity
