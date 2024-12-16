@@ -141,9 +141,23 @@ export function update_ui(ns) {
  * Population should be more than 0 (otherwise we cannot do anything)
 **/
 function travel_to_best_city(ns) {
-    //go to lowest chaos city (lower chaos = higher success chances)
+    //get the best city
+    const best_city = get_best_city(ns)
+    //travel to the city
+    ns.bladeburner.switchCity(best_city)
+}
+
+
+
+/**
+ * Function that gets the best city
+ */
+export function get_best_city(ns) {
+//go to lowest chaos city (lower chaos = higher success chances)
     //keep track of previous chaos
     let chaos_lowest = 999999
+    //save the city
+    let best_city = common.cities.sector12
     //check the lowest chaos city
     for (const cityEntry in common.cities) {
         //get city
@@ -154,12 +168,14 @@ function travel_to_best_city(ns) {
         //and actions will default to Field analysis, which will do nothing...
         //if lower than previous and there is synthoids in the city
         if (cityChaos < chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
-            //switch city
-            ns.bladeburner.switchCity(city)
+            //update best city
+            best_city = city
             //update lowest chaos
             chaos_lowest = cityChaos
         }
     }
+    //return the best city
+    return best_city
 }
 
 
