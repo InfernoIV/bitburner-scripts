@@ -74,3 +74,24 @@ function scan_server(ns, hostname, server_list) {
         }
     }
 }
+
+
+
+/**
+ * Function that returns the installed augments
+ * @param {NS} ns
+ * Cost: 1 GB (1 GB if ns.getRestInfo is used)
+ */
+export function get_augmentations_installed(ns) {
+    //owned augments
+    const augments_owned = ns.getResetInfo().ownedAugs //get_reset_info(ns).ownedAugs doesn't work...
+    //create return value
+    let augments_list = []
+    //for each augment
+    for (let key of augments_owned) {
+        //use only the name
+        augments_list.push(key[0])
+    }
+    //return the list
+    return augments_list
+}
