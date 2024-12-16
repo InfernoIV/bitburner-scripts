@@ -443,7 +443,9 @@ class targetInfo {
         //save the ram of the execute server
         let server_ram = 0
         //for every available server
-        for (const server of get_server_specific(ns,true)) { //getExecuteServers(ns)) {
+        for (const server_data of get_server_specific(ns,true)) { //getExecuteServers(ns)) {
+            //get server name
+            const server = server_data.hostname
             //get the cores
             let cores = ns.getServer(server).cpuCores
             //safeguard
