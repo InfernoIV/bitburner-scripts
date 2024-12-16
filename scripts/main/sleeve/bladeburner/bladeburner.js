@@ -30,7 +30,7 @@ export function determine_action(ns, index) {
         return { type: data.activities.bladeburner, value: data.actions.sleeve.diplomacy } //bladeburner action
     }
     //if action count is too low
-    else if (bladeburner.bladeburner_get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
+    else if (bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
         //set to infiltrate to raise action count
         //or to incite violence??
         return { type: data.activities.infiltrate, value: data.actions.sleeve.infiltrate_synthoids } //specific type
