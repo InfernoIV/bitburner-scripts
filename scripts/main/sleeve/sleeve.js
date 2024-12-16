@@ -230,7 +230,7 @@ function execute_actions(ns, desired_actions) {
         //failsafe
         default:
             //log warning
-            common.log(ns, 1, common.warning, "execute_actions - Uncaught condition: " + JSON.Stringify(current_action))
+            common.log(ns, 1, common.warning, "execute_actions - Uncaught condition: " + JSON.stringify(current_action))
           //stop looking
           break
       }
