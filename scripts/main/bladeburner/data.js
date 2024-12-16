@@ -93,7 +93,5 @@ export const actions = {
         infiltrate_synthoids: "Infiltrate synthoids", //add action count to operations and contracts
         support_main_sleeve: "Support main sleeve", //become part of team, like a team member
         take_on_contracts: "Take on contracts", //perform contract work
-        //operation: 
-        investigation: "Investigation",
     },
 }
