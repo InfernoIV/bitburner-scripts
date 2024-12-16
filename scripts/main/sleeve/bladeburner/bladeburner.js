@@ -36,7 +36,7 @@ export function determine_action(ns, index) {
         return { type: data.activities.infiltrate, value: data.actions.sleeve.infiltrate_synthoids } //specific type
     }
     //if we can raise chance for the player
-    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, data.actions.operations.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to field analysis
          return { type: data.activities.bladeburner, value: data.actions.sleeve.field_analysis } //bladeburner action
     }
