@@ -92,8 +92,87 @@ export const scripts = {
 
 
 /**
+ * Enum stating all cities
+ */
+export const cities = {
+    aevum: "Aevum",
+    chongqing: "Chongqing",
+    ishima: "Ishima",
+    newTokyo: "New Tokyo",
+    sector12: "Sector-12",
+    volhaven: "Volhaven",
+}
+
+
+
+// hacking commands
+export const hacking_commands = {
+    start: "Start",
+    stop: "Stop",
+}
+
+
+
+/**
+ * Enum of all factions with their work types
+ * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
+ * Work types: "field", "hacking", "security" 	
+ */
+export const factions = {
+    //special factions (no faction work available)
+    slum_snakes: { name: "Slum Snakes" },
+    bladeburners: { name: "Bladeburners" },
+    church_of_the_machine_god: { name: "Church of the Machine God" },
+    shadows_of_anarchy: { name: "Shadows of Anarchy" },
+
+    //important factions
+    daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
+    illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
+    the_covenant: { name: "The Covenant", work_types: ["field", "hacking"] },
+
+    //company factions
+    e_corp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
+    mega_corp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
+    bachman_and_ssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
+    blade_industries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
+    nwo: { name: "NWO", work_types: ["field", "hacking", "security"] },
+    clarke_incorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
+    omni_tek_incorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
+    four_sigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
+    kuai_gong_international: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
+    fulcrum_secret_technologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
+
+    //hacking factions
+    bit_runners: { name: "BitRunners", work_types: ["hacking"] },
+    the_black_hand: { name: "The Black Hand", work_types: ["field", "hacking"] },
+    nite_sec: { name: "NiteSec", work_types: ["hacking"] },
+    cyber_sec: { name: "CyberSec", work_types: ["hacking"] },
+
+    //location factions
+    aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
+    chongqing: { name: "Chongqing", work_types: ["field", "hacking", "security"] },
+    ishima: { name: "Ishima", work_types: ["field", "hacking", "security"] },
+    newTokyo: { name: "New Tokyo", work_types: ["field", "hacking", "security"] },
+    sector12: { name: "Sector-12", work_types: ["field", "hacking", "security"] },
+    volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
+
+    //crime factions
+    speakers_for_the_dead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
+    the_dark_army: { name: "The Dark Army", work_types: ["field", "hacking"] },
+    the_syndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
+    silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
+    tetrads: { name: "Tetrads", work_types: ["field", "security"] },
+
+    //other factions
+    netburners: { name: "Netburners", work_types: ["hacking"] },
+    tian_di_hui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
+}
+
+
+
+/**
  * Function that enables easy logging
- * Cost: 0
+ * Cost: 0 GB
  */
 export function log(ns, loglevel = 0, type = info, message = "") {
   //get time
@@ -132,7 +211,7 @@ export function log(ns, loglevel = 0, type = info, message = "") {
 
 /**
  * Function that formats numbers
- * Cost: 0
+ * Cost: 0 GB
  */
 export function number_formatter(number) {
     const fraction_digits = 3
@@ -162,30 +241,8 @@ export function number_formatter(number) {
 
 
 /**
- * Enum stating all cities
- */
-export const cities = {
-    aevum: "Aevum",
-    chongqing: "Chongqing",
-    ishima: "Ishima",
-    newTokyo: "New Tokyo",
-    sector12: "Sector-12",
-    volhaven: "Volhaven",
-}
-
-
-
-// hacking commands
-export const hacking_commands = {
-    start: "Start",
-    stop: "Stop",
-}
-
-
-
-/**
  * Function that overwrites the specified port with new data
- * Cost: 0
+ * Cost: 0 GB
  */
 export function over_write_port(ns, port, data) {
     //clear port
@@ -198,7 +255,7 @@ export function over_write_port(ns, port, data) {
 
 /**
  * Function that retrieves bitnode information from file
- * Cost: 0
+ * Cost: 0 GB
  */
 export function get_bit_node_multipliers(ns) {
     //read data from file
@@ -209,7 +266,7 @@ export function get_bit_node_multipliers(ns) {
 
 /**
  * Function that retrieves bitnode information from file
- * Cost: 0
+ * Cost: 0 GB
  * @param {NS} ns
  */
 export function get_reset_info(ns) {
@@ -221,7 +278,7 @@ export function get_reset_info(ns) {
 
 /**
  * Function that returns the next target bit node
- * Cost: ???
+ * Cost: 0 GB (hardcoded..)
  */
 export function get_next_bit_node(ns) {
     //TODO: getResetInfo is broken, return 12
@@ -291,6 +348,7 @@ export function get_next_bit_node(ns) {
 
 /**
  * Function that returns if the specific bit node has been completed on a specific level (otherwise level 1) 
+ * Cost: 0 GB
  */
 export function has_completed_bit_node_level(ns, bit_node, level = 1) {
     //TODO: getResetInfo is currently broken
@@ -327,10 +385,11 @@ export function has_completed_bit_node_level(ns, bit_node, level = 1) {
 /**
  * Function that returns the installed augments
  * @param {NS} ns
+ * Cost: 0 GB (1 GB if ns.getRestInfo is used)
  */
 export function get_augmentations_installed(ns) {
     //owned augments
-    const augments_owned = ns.getResetInfo().ownedAugs//get_reset_info(ns).ownedAugs
+    const augments_owned = get_reset_info(ns).ownedAugs //ns.getResetInfo().ownedAugs
     //create return value
     let augments_list = []
     //for each augment
@@ -345,58 +404,28 @@ export function get_augmentations_installed(ns) {
 
 
 /**
- * Enum of all factions with their work types
- * Slum snakes (gang faction) and bladeburner cannot be worked for, hence they have no work_types
- * Work types: "field", "hacking", "security" 	
+ * Function that disables all logging for the array of strings that is provided
+ * Cost: 0 GB
  */
-export const factions = {
-    //special factions (no faction work available)
-    slum_snakes: { name: "Slum Snakes" },
-    bladeburners: { name: "Bladeburners" },
-    church_of_the_machine_god: { name: "Church of the Machine God" },
-    shadows_of_anarchy: { name: "Shadows of Anarchy" },
-
-    //important factions
-    daedalus: { name: "Daedalus", work_types: ["field", "hacking"] },
-    illuminati: { name: "Illuminati", work_types: ["field", "hacking"] },
-    the_covenant: { name: "The Covenant", work_types: ["field", "hacking"] },
-
-    //company factions
-    e_corp: { name: "ECorp", work_types: ["field", "hacking", "security"] },
-    mega_corp: { name: "MegaCorp", work_types: ["field", "hacking", "security"] },
-    bachman_and_ssociates: { name: "Bachman & Associates", work_types: ["field", "hacking", "security"] },
-    blade_industries: { name: "Blade Industries", work_types: ["field", "hacking", "security"] },
-    nwo: { name: "NWO", work_types: ["field", "hacking", "security"] },
-    clarke_incorporated: { name: "Clarke Incorporated", work_types: ["field", "hacking", "security"] },
-    omni_tek_incorporated: { name: "OmniTek Incorporated", work_types: ["field", "hacking", "security"] },
-    four_sigma: { name: "Four Sigma", work_types: ["field", "hacking", "security"] },
-    kuai_gong_international: { name: "KuaiGong International", work_types: ["field", "hacking", "security"] },
-    fulcrum_secret_technologies: { name: "Fulcrum Secret Technologies", work_types: ["hacking", "security"] },
-
-    //hacking factions
-    bit_runners: { name: "BitRunners", work_types: ["hacking"] },
-    the_black_hand: { name: "The Black Hand", work_types: ["field", "hacking"] },
-    nite_sec: { name: "NiteSec", work_types: ["hacking"] },
-    cyber_sec: { name: "CyberSec", work_types: ["hacking"] },
-
-    //location factions
-    aevum: { name: "Aevum", work_types: ["field", "hacking", "security"] },
-    chongqing: { name: "Chongqing", work_types: ["field", "hacking", "security"] },
-    ishima: { name: "Ishima", work_types: ["field", "hacking", "security"] },
-    newTokyo: { name: "New Tokyo", work_types: ["field", "hacking", "security"] },
-    sector12: { name: "Sector-12", work_types: ["field", "hacking", "security"] },
-    volhaven: { name: "Volhaven", work_types: ["field", "hacking", "security"] },
-
-    //crime factions
-    speakers_for_the_dead: { name: "Speakers for the Dead", work_types: ["field", "hacking", "security"] },
-    the_dark_army: { name: "The Dark Army", work_types: ["field", "hacking"] },
-    the_syndicate: { name: "The Syndicate", work_types: ["field", "hacking", "security"] },
-    silhouette: { name: "Silhouette", work_types: ["field", "hacking"] },
-    tetrads: { name: "Tetrads", work_types: ["field", "security"] },
-
-    //other factions
-    netburners: { name: "Netburners", work_types: ["hacking"] },
-    tian_di_hui: { name: "Tian Di Hui", work_types: ["hacking", "security"] },
+export function disable_logging(ns, log_topics) {
+  //assuming array of log topics
+  //stop logging of the stop logging...
+  ns.disableLog("disableLog")
+  //for each topic of the argument
+    for (const log_topic of log_topics) {
+        //ensure improper config not crashing the script
+        try {
+            //if log topic set
+            if(log_topic != "") {
+                //disable logging
+                ns.disableLog(log_topic)
+            }
+        //error occurs
+        } catch (err) {
+            //log the error
+            log(ns, 1, error, "Disable logging failed for '" + log_topic + "'") 
+        }
+    }
 }
 
 
@@ -522,33 +551,12 @@ export function get_availability_functionality(ns, functionality) {
 }
 */
 
-/**
- * Function that disables all logging for the array of strings that is provided
- */
-export function disable_logging(ns, log_topics) {
-  //assuming array of log topics
-  //stop logging of the stop logging...
-  ns.disableLog("disableLog")
-  //for each topic of the argument
-    for (const log_topic of log_topics) {
-        //ensure improper config not crashing the script
-        try {
-            //if log topic set
-            if(log_topic != "") {
-                //disable logging
-                ns.disableLog(log_topic)
-            }
-        //error occurs
-        } catch (err) {
-            //log the error
-            log(ns, 1, error, "Disable logging failed for '" + log_topic + "'") 
-        }
-    }
-}
 
 
-
-/** @param {NS} ns */
+/** 
+ * Function that gets all servers
+ * @param {NS} ns 
+ 
 function getServers(ns) {
     //create a list to save hostnames to
     let scanList = []
@@ -557,10 +565,10 @@ function getServers(ns) {
     //add purchased servers to the list
     return scanList.concat(ns.getPurchasedServers())
 }
+*/
 
 
-
-/** @param {NS} ns */
+/** @param {NS} ns 
 function scanServer(ns, hostname, scanList) {
     //add this hostname to the list				
     scanList.push(hostname)
@@ -575,7 +583,7 @@ function scanServer(ns, hostname, scanList) {
         }
     }
 }
-
+*/
 
 
 /** @param {NS} ns */
@@ -606,71 +614,3 @@ function getExecuteServers(ns) {
     //log(ns,1,info,"executeServers: " + executeServers)
     return executeServers
 }*/
-
-
-/**
- * Function that only returns servers (objects) 
- * That have RAM or money, and that have admin access (can run scripts)
- * Parameter determines if it returns ram (true) or money (false) server objects
- * Cost: 2
- *  getServer (2)
- */
-export function get_server_specific(ns, server_has_ram = false) {
-    //create a list (of objects) to return
-    let server_list = []
-    //get all servers
-    const servers_all = get_servers(ns)
-    //for each server
-    for (let index = 0; index < servers_all.length; index++) {
-        //get server information
-        let server = ns.getServer(servers_all[index])
-        //if we have admin rights
-        if (server.hasAdminRights) {
-            //if we need to check ram and there is ram, or if we need to check money and there is money
-            if (((server_has_ram) && (server.maxRam > 0)) || ((!server_has_ram) && (server.moneyMax > 0))) {
-                //add the server object to the list
-                server_list.push(server)
-            }
-        }
-    }
-    //return server list
-    return server_list
-}
-
-
-
-/**
- * Function that will retrieve all server hostnames
- * Cost: none
- */
-export function get_servers(ns) {
-    //create list to save hostnames into
-    let server_list = []
-    //start scanning from home
-    scan_server(ns, servers.home, server_list)
-    //return the server list
-    return server_list
-}
-
-
-
-/**
- * Function that will retrieve all servers, sub function of get_servers
- * Cost: 
- *  scan (0,2)
- */
-function scan_server(ns, hostname, server_list) {
-    //get the neighbours of the server
-    const neighbours = ns.scan(hostname)
-    //for each neighbour
-    for (const neighbour of neighbours) {
-        //if not in the list
-        if (server_list.indexOf(neighbour) == -1) {
-            //add to list
-            server_list.push(neighbour)
-            //start scanning
-            scan_server(ns, neighbour, server_list)
-        }
-    }
-}
-
