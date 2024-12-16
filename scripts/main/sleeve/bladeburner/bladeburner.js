@@ -17,7 +17,7 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  *   ns.bladeburner.getActionEstimatedSuccessChance: 4 GB
  *   ns.bladeburner.getCityChaos: 4 GB
 **/
-export function bladeburner_manage_actions(ns, sleeve_actions) {
+export function manage_actions(ns, sleeve_actions) {
     //check if we have enough chance to recruit, default to sleeve 0
     if(ns.bladeburner.getActionEstimatedSuccessChance(data.bladeburner_actions.sleeve.recruitment, 0) >= config.bladeburner_success_chance_minimum_sleeve   {
         //set sleeve 0 to recruit
@@ -68,25 +68,22 @@ export function bladeburner_manage_actions(ns, sleeve_actions) {
  * Cost: 4 GB
  *   ns.sleeve.setToBladeburnerAction: 4 GB
 **/
-export function bladeburner_execute_actions(ns, sleeve_actions) {
-    //for each sleeve
-    for (let index = 0; index < sleeve_actions.length; index++) {
-        //get the action
-        const sleeve_action = sleeve_actions[index]
-        //check if we want to handle it
-        switch (sleeve_action.type) {
-            //if the type is a blade burner action
-            case data.bladeburner_actions.sleeve.recruitment:
-            case data.bladeburner_actions.sleeve.infiltrate_synthoids: 
-            case data.bladeburner_actions.sleeve.diplomacy: 
-                //set to bladeburner action
-                ns.sleeve.setToBladeburnerAction(index, sleeve_action.type)
-                //only handle bladeburner stuff
-                break
-                
-            default:
-                //do not handle, is a normal action
-        }
+export function execute_action(ns, sleeve_index, sleeve_action) {
+    //check if we want to handle it
+    switch (sleeve_action.type) {
+        //if the type is a blade burner action
+        case data.bladeburner_actions.sleeve.recruitment:
+        case data.bladeburner_actions.sleeve.infiltrate_synthoids: 
+        case data.bladeburner_actions.sleeve.diplomacy: 
+            //set to bladeburner action
+            ns.sleeve.setToBladeburnerAction(index, sleeve_action.type)
+            //only handle bladeburner stuff
+            break
+            
+        default:
+            //do not handle, is a normal action
+            //log warning
+            common.log(ns, 1, common.warning, "execute_action - uncaught condition: " + sleeve_index + " has action " + sleeve_action)
     }
 }
 
