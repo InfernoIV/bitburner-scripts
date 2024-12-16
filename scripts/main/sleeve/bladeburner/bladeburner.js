@@ -26,7 +26,7 @@ export function determine_action(ns, index) {
     //if action count is too low
     else if (bladeburner.bladeburner_get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
         //set to infiltrate to raise action count
-        return { type: data.activities.infiltrate, value: bladeburner.data.actions.sleeve.infiltrate_synthoids} //specific type
+        return { type: data.activities.infiltrate, value: bladeburner.data.actions.sleeve.infiltrate_synthoids } //specific type
     }
     //if city chaos is over threshold
     else if (ns.bladeburner.getCityChaos(bladeburner.bladeburner_get_best_city(ns)) > config.bladeburner_chaos_threshold) {
@@ -64,5 +64,27 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
             //do not handle, is a normal action
             //log warning
             common.log(ns, 1, common.warning, "execute_action - uncaught condition: " + sleeve_index + " has action " + sleeve_action)
+    }
+}
+
+/**
+* Function that checks what value to return for the activity
+*/
+export function get_activity(ns, activity) {
+    //depending on type
+    switch (activity.type) {
+            //bladeburner action
+        case data.activities.bladeburner: 
+            //derive the action
+            return sleeve_activity.actionName
+        
+            //infiltration action
+        case data.activities.infiltrate: 
+            //has no value, create the value
+            return bladeburner.data.actions.sleeve.infiltrate_synthoids
+        
+            //uncaught condition
+        default: 
+            return ""
     }
 }
