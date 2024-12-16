@@ -1,7 +1,7 @@
 //common functions
 import * as common from "scripts/common.js"
 //common functions with cost
-import * as common_cost from "scripts/common_costs.js"
+import * as common_cost from "scripts/common_cost.js"
 //config
 import * as config from "./config.js"
 //data
