@@ -19,6 +19,8 @@ Functions and cost
 
 //imports
 import * as common from "scripts/common.js"
+//cost
+import get_augmentations_installed from "scripts/common.js"
 //data
 import * as data from "../data.js"
 //config
@@ -441,7 +443,7 @@ function should_work_for_faction(ns, faction) {
         //keep track of the highest rep
         let rep_highest = -1
         //get owned augments
-        let ownedAugs = common.get_augmentations_installed(ns)
+        let ownedAugs = get_augmentations_installed(ns)
         //for each augment of the faction
         for (let augment of ns.singularity.getAugmentationsFromFaction(faction)) {
             //if augment is not owned
