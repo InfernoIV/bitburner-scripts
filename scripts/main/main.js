@@ -184,7 +184,7 @@ function manage_bit_node_destruction(ns) {
     let can_execute_destruction = false
 
     //if the red pill is installed
-    if (common.get_augmentations_installed(ns).indexOf(data.augments.the_red_pill) > -1) {
+    if (common_cost.get_augmentations_installed(ns).indexOf(data.augments.the_red_pill) > -1) {
         //then we can check the world daemon backdoor (otherwise the server doesn't exist)
         if (ns.getServer(common.servers.world_daemon).backdoorInstalled) {
             //backdoor is installed, proceed with destruction
@@ -262,7 +262,7 @@ function buy_augments(ns) {
         return
     }
     //get owned augments (to include bought?)
-    let augments_installed = common.get_augmentations_installed(ns)
+    let augments_installed = common_cost.get_augmentations_installed(ns)
     //for every joined faction
     for (const faction of ns.getPlayer().factions) {
         //for each augment of the faction
@@ -294,7 +294,7 @@ function manage_factions(ns) {
     //get the player factions
     const factions = player.factions
     //get the owned augments (not bought)
-    const augments_installed = common.get_augmentations_installed(ns)
+    const augments_installed = common_cost.get_augmentations_installed(ns)
     //check for multual exlusive factions
     //TODO: are the city_group names (cities) the same as the faction names?
     const city_group_1 = [common.cities.sector12, common.cities.aevum]
@@ -638,7 +638,7 @@ function manage_action_player(ns) {
     //variables to check
     const enough_hacking_skill = ns.getPlayer().skills.hacking >= config.stat_minimum_hacking
     const enough_karma = player.karma < data.requirements.karma_for_gang
-    const can_perform_dual_actions = common.get_augmentations_installed(ns).indexOf(data.augments.blades_simulacrum) > -1
+    const can_perform_dual_actions = common_cost.get_augmentations_installed(ns).indexOf(data.augments.blades_simulacrum) > -1
     
     //if not enough hacking skill
     if (!enough_hacking_skill) {
@@ -915,7 +915,7 @@ function update_ui(ns, bit_node_multipliers) {
     //add augments bought
     headers.push("Augments bought")
     //add global
-    values.push(common.get_augmentations_installed(ns).length + "+" + get_number_of_augments_ready_for_installationation() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
+    values.push(common_cost.get_augmentations_installed(ns).length + "+" + get_number_of_augments_ready_for_installationation() + "/" + bit_node_multipliers["DaedalusAugsRequirement"])
 
     //sleeve, should not do anything if not unlocked
     //add sleeve values
