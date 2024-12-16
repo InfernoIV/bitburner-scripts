@@ -569,7 +569,7 @@ class action_list {
     //create list
     this.list = []
     //create filler object
-    const filler_object = { type = "filler" } 
+    const filler_object = { type: "filler" } 
     //fill the list
     for(let index = 0; index < number_of_sleeves; index++) {
       //add filler
