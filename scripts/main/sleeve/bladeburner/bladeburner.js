@@ -1,3 +1,5 @@
+//common
+import * as common from "scripts/common.js"
 //bladeburner config
 import * as config from "../../bladeburner/config.js"
 //bladeburner data
@@ -50,6 +52,9 @@ export function bladeburner_manage_actions(ns, sleeve_actions) {
         //set sleeve to work on lowering chaos
         sleeve_actions[index] = { type: data.bladeburner_actions.sleeve.diplomacy }
     }
+    
+    //return the value back
+    return sleeve_actions
 }
 
 
