@@ -115,7 +115,7 @@ class targetInfo {
         //refresh servers
         this.servers = get_servers(ns) //getExecuteServers(ns)
         //log(ns, 1, info, "servers: " + JSON.stringify(this.servers))
-        copy_scripts(ns)
+        this.copy_scripts(ns)
         
         //variable to save the target to
         let new_target = ""
