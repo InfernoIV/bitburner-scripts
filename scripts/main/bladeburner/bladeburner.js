@@ -386,13 +386,17 @@ function determine_action(ns) {
  */
 function clear_teams(ns) {
     //for each black operations
-    for (const black_operation in data.actions.blackOps) {
+    for (const activity in data.actions.blackOps) {
+        //get black  operation information
+        const black_operation = data.actions.blackOps[activity]
         //set size to 0
         ns.bladeburner.setTeamSize(data.actions.type.blackOps, black_operation.name, 0)
     }
-    //for each black operations
-    for (const operation in data.actions.operations) {
+    //for each operation
+    for (const activity in data.actions.operations) {
+        //get operation information
+        const operation = data.actions.operations[activity]
         //set size to 0
-        ns.bladeburner.setTeamSize(data.actions.type.blackOps, operation.name, 0)
+        ns.bladeburner.setTeamSize(data.actions.type.operations, operation.name, 0)
     }
 }
