@@ -149,7 +149,8 @@ export function get_activity(ns, activity) {
         case "Contracts": 
             //derive the action
             return activity.actionName
-
+        case "Recruitment":
+            return "Recruitment"
         /*
         //infiltration action
         case data.activities.infiltrate:
