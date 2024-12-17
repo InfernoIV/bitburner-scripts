@@ -59,7 +59,7 @@ export async function main(ns) {
 /** @param {NS} ns */
 async function init(ns) {
     //disable logging
-    common.disable_logging(ns, config.log_disabled_topics)
+    //common.disable_logging(ns, config.log_disabled_topics)
     
     //if already in a gang
     if (ns.gang.inGang()) {
@@ -215,7 +215,7 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
     //if the wanted level is rising
     } else if (wanted_level_rising) {
         //lower wanted level
-        return data.gang_task.lowerWanted
+        return data.gang_task.lower_wanted
         
     //if not all upgrades unlocked
     } else if (!desired_upgrades_unlocked) {
@@ -381,7 +381,7 @@ function perform_task(ns, gang_own, gang_member, task_focus) {
         //set to lowering wanted, determined by focus
         task = data.lower_wanted_action[config.focus]
     }
-    /*
+    
     //depending on the focus, set the task
     switch (task_focus) {
         //train hacking
@@ -444,7 +444,7 @@ function perform_task(ns, gang_own, gang_member, task_focus) {
             //stop
             break
     }
-    */
+    
     //If the member is not performing the task
     if (gang_member.task != task) {
         //set member to perform task
@@ -572,20 +572,20 @@ function calculate_gains(ns, gang, member, task, type) {
         (task.agiWeight / 100) * member.agi +
         (task.chaWeight / 100) * member.cha
     //add the type specific multiplier and difficulty into account
-    stat_weight -= typeSpecific.statWeight * task.difficulty
+    stat_weight -= type_specific.statWeight * task.difficulty
     //if below 0, return 0
     if (stat_weight <= 0) return 0
 
     //calculate the territory multiplier
     const territory_multiplier = Math.max(0.005, Math.pow(gang.territory * 100, task.territory[type]) / 100)
     //sanity check
-    if (isNaN(territory_multiplier) || territoryMult <= 0) return 0
+    if (isNaN(territory_multiplier) || territory_multiplier <= 0) return 0
     //TODO: Properly fix
     const territory_penalty = gang.territory //(0.2 * gang.territory + 0.8) * currentNodeMults.GangSoftcap
     const respect_multiplier = gang.respect / (gang.respect + gang.wantedLevel) //calculateWantedPenalty(gang)
 
     //final calulcation
-    return Math.pow(5 * typeSpecific.base * statWeight * territory_multiplier * respect_multiplier, territory_penalty)
+    return Math.pow(5 * type_specific.base * stat_weight * territory_multiplier * respect_multiplier, territory_penalty)
 }
 
 
@@ -639,7 +639,9 @@ function manage_ascension(ns, gang_member) {
     }
     if (fNeeded < f) {
         if (ns.gang.ascendMember(gang_member.name)) {
-            log(ns, config.log_level, success, "Ascended " + gang_member.name + "!")
+            common.log(ns, config.log_level, common.success, "Ascended " + gang_member.name + "!")
+        } else {
+            common.log(ns, config.log_level, common.fail, "Failed to ascend " + gang_member.name + "!")
         }
     }
 }
