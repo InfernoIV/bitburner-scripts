@@ -19,10 +19,6 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  * @param {NS} ns
 **/
 export function determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned) {
-    
-    const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index)
-    common.log(ns,1,common.info, index + " has " + JSON.stringify(chance) + " chance for recruitment of the " + config.bladeburner_success_chance_minimum_sleeve + " needed = " + (chance >= config.bladeburner_success_chance_minimum_sleeve) + " or " + (1.1 > 1))
-
     //check if we have enough chance to recruit
     if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index)[0] >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
