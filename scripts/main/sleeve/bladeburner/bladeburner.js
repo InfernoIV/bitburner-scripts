@@ -54,7 +54,7 @@ export function determine_action(ns, index) {
             //if this action can be performed and we have enough chance
             if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_sleeve)) {
                 //return this information
-                return { type: data.actions.sleeve.take_on_contracts, name: contract } //type: data.actions.type.contracts
+                return { type: data.actions.sleeve.take_on_contracts, value: contract } //type: data.actions.type.contracts
             }
         }
         
@@ -72,6 +72,21 @@ export function determine_action(ns, index) {
  *   ns.sleeve.setToBladeburnerAction: 4 GB
 **/
 export function execute_action(ns, sleeve_index, sleeve_action) {
+    //check the type
+    switch(sleeve_action.type) {
+        case "Take on contracts":
+        //set to bladeburner operation
+        ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
+        //stop
+        break
+
+        default:
+            //do not handle, is a normal action
+            //log warning
+            common.log(ns, 1, common.warning, "bb - execute_action - uncaught condition: " + sleeve_index + " has action " + JSON.stringify(sleeve_action))
+
+    }
+    /*
     //check if we want to handle it
     switch (sleeve_action.value) {
 
@@ -79,9 +94,12 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
         case data.actions.contracts.retirement: 
         case data.actions.contracts.bountyHunter: 
         case data.actions.contracts.tracking: 
+        case "Tracking":
             //set to bladeburner operation
             ns.sleeve.setToBladeburnerAction(index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
-            
+            //stop
+            break
+
         //if the type is a blade burner action
         case data.actions.sleeve.field_analysis:
         case data.actions.sleeve.recruitment:
@@ -91,12 +109,18 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
             ns.sleeve.setToBladeburnerAction(index, sleeve_action.value)
             //only handle bladeburner stuff
             break
-            
+        
+        /*case 
+
+            //do nothing
+            break*/
+    /*
         default:
             //do not handle, is a normal action
             //log warning
-            common.log(ns, 1, common.warning, "execute_action - uncaught condition: " + sleeve_index + " has action " + sleeve_action)
+            common.log(ns, 1, common.warning, "bb - execute_action - uncaught condition: " + sleeve_index + " has action " + JSON.stringify(sleeve_action))
     }
+    */
 }
 
 /**
