@@ -96,7 +96,7 @@ function determine_actions(ns, number_of_sleeves) {
         //get sleeve
         const sleeve = ns.sleeve.getSleeve(index)
         //check if we can do bladeburner work
-        const bladeburner_action = bladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned)
+        const bladeburner_action = bladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
 
         //if too much shock (round up for comparison)
         if (Math.max(sleeve.shock) > config.shock_maximum_desired) {
@@ -156,11 +156,15 @@ function execute_actions(ns, desired_actions) {
         if(current_action.type == "BLADEBURNER" && working_on_the_same_value) {
             working_on_the_same_type = true
         }
-        
+        //infiltrate as well
+        if(current_action.type == "INFILTRATE" && desired_action.type == "Infiltrate synthoids") {
+            working_on_the_same_type = true        
+        }
+         
         //if we are NOT doing the same work
         if (!working_on_the_same_type || !working_on_the_same_value) {
             //debug
-            //common.log(ns,1,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
+            common.log(ns,1,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
             //check what to do according to the index
             switch (desired_action.type) {
 
@@ -204,9 +208,10 @@ function execute_actions(ns, desired_actions) {
                     break
 
                 //crime
+                case "CRIME":
                 case data.activities.crime:
                     //debug
-                    //common.log(ns,1,common.success,index + " started " + JSON.stringify(desired_action))
+                    common.log(ns,0,common.info,index + "  has " + JSON.stringify(desired_action))
                     //get crime
                     const crime = desired_action.value
                     //assign to crime
@@ -227,6 +232,7 @@ function execute_actions(ns, desired_actions) {
                 //bladeburner
                 case data.activities.bladeburner:  //properties: type, actionType, actionName, cyclesWorked, cyclesNeeded, nextCompletion, tasksCompleted
                 case "Take on contracts":
+                case "Infiltrate synthoids":
                 case data.activities.infiltrate:  //properties: type, cyclesWorked, cyclesNeeded, nextCompletion
                     //case data.activities.support:  //support as member of bladeburner? properties: type
                     //common.log(ns,1,common.info, index + " desired_action: " + JSON.stringify(desired_action))
@@ -242,7 +248,7 @@ function execute_actions(ns, desired_actions) {
                 //failsafe
                 default:
                     //log warning
-                    common.log(ns, 0, common.warning, "execute_actions - Uncaught condition: " + JSON.stringify(current_action))
+                    common.log(ns, 0, common.warning, "sleeve execute_actions - Uncaught condition: " + JSON.stringify(desired_action))
                     //stop looking
                     break
             }
@@ -584,6 +590,8 @@ class action_list {
         this.list = []
         //variable to check if bladeburner contract has been assigned
         this.bladeburner_contract_assigned = false
+        //variable to check if bladeburner infiltrate has been assigned
+        this.bladeburner_infiltrate_assigned = false
         //create filler object
         const filler_object = { type: "filler" }
         //fill the list
@@ -605,6 +613,10 @@ class action_list {
         if(action.type == "Take on contracts") {
             //set flag to true
             this.bladeburner_contract_assigned = true
+        }
+        if(action.type == "Infiltrate synthoids") {
+            //set flag to true
+            this.bladeburner_infiltrate_assigned = true
         }
 
         //debug
