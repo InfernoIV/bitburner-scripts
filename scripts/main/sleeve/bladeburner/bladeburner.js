@@ -18,12 +18,12 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  *   ns.bladeburner.getCityChaos: 4 GB
  * @param {NS} ns
 **/
-export function determine_action(ns, index) {
+export function determine_action(ns, index, bladeburner_contract_assigned) {
     //check if we have enough chance to recruit
-    if(ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
-         return { type: data.actions.sleeve.recruitment, value: data.actions.sleeve.recruitment } //bladeburner action
-    }     
+        return { type: data.actions.sleeve.recruitment, value: data.actions.sleeve.recruitment } //bladeburner action
+    }
     //if city chaos is over threshold (negatively impacts success chance)
     else if (ns.bladeburner.getCityChaos(bladeburner.get_best_city(ns)) > config.bladeburner_chaos_threshold) {
         //lower chaos (todo: move sleeve???)
@@ -38,28 +38,31 @@ export function determine_action(ns, index) {
     //if we can raise chance for the player
     else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, data.actions.operations.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to field analysis
-         return { type: data.actions.sleeve.field_analysis, value: data.actions.sleeve.field_analysis } //bladeburner action
+        return { type: data.actions.sleeve.field_analysis, value: data.actions.sleeve.field_analysis } //bladeburner action
     }
     //check for contracts and otherwise return DENIED
     else {
-        //for each contract
-        for (const activity in data.actions.contracts) {
-            //get contract information
-            const contract = data.actions.contracts[activity]
-            //get action count
-            const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
-            //get chance
-            const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract, index)
-    
-            //if this action can be performed and we have enough chance
-            if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_sleeve)) {
-                //return this information
-                return { type: data.actions.sleeve.take_on_contracts, value: contract } //type: data.actions.type.contracts
+        //check if a sleeve was already assigned to a contract
+        if (!bladeburner_contract_assigned) {
+            //for each contract
+            for (const activity in data.actions.contracts) {
+                //get contract information
+                const contract = data.actions.contracts[activity]
+                //get action count
+                const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
+                //get chance
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract, index)
+
+                //if this action can be performed and we have enough chance
+                if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_sleeve)) {
+                    //return this information
+                    return { type: data.actions.sleeve.take_on_contracts, value: contract } //type: data.actions.type.contracts
+                }
             }
         }
-        
+
         //cannot do (or allowed to) any bladeburner work
-        return { type: "DENIED", value: "DENIED" }    
+        return { type: "DENIED", value: "DENIED" }
     }
 }
 
@@ -73,12 +76,12 @@ export function determine_action(ns, index) {
 **/
 export function execute_action(ns, sleeve_index, sleeve_action) {
     //check the type
-    switch(sleeve_action.type) {
+    switch (sleeve_action.type) {
         case "Take on contracts":
-        //set to bladeburner operation
-        ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
-        //stop
-        break
+            //set to bladeburner operation
+            ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
+            //stop
+            break
 
         default:
             //do not handle, is a normal action
@@ -129,18 +132,18 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
 export function get_activity(ns, activity) {
     //depending on type
     switch (activity.type) {
-            //bladeburner action
-        case data.activities.bladeburner: 
+        //bladeburner action
+        case data.activities.bladeburner:
             //derive the action
             return sleeve_activity.actionName
-        
-            //infiltration action
-        case data.activities.infiltrate: 
+
+        //infiltration action
+        case data.activities.infiltrate:
             //has no value, create the value
             return data.actions.sleeve.infiltrate_synthoids
-        
-            //uncaught condition
-        default: 
+
+        //uncaught condition
+        default:
             return ""
     }
 }
