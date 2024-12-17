@@ -18,7 +18,7 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  *   ns.bladeburner.getCityChaos: 4 GB
  * @param {NS} ns
 **/
-export function determine_action(ns, index, bladeburner_contract_assigned) {
+export function determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned) {
     //check if we have enough chance to recruit
     if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
@@ -29,8 +29,10 @@ export function determine_action(ns, index, bladeburner_contract_assigned) {
         //lower chaos (todo: move sleeve???)
         return { type: data.actions.sleeve.diplomacy, value: data.actions.sleeve.diplomacy } //bladeburner action
     }
+
     //if action count is too low
-    else if (bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) {
+    else if ((bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) &&
+            (bladeburner_infiltrate_assigned == false)) {
         //set to infiltrate to raise action count
         //or to incite violence??
         return { type: data.actions.sleeve.infiltrate_synthoids, value: data.actions.sleeve.infiltrate_synthoids } //specific type
@@ -80,6 +82,12 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
         case "Take on contracts":
             //set to bladeburner operation
             ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
+            //stop
+            break
+
+        case "Infiltrate synthoids":
+            //set to bladeburner general action
+            ns.sleeve.setToBladeburnerAction(sleeve_index, sleeve_action.type)
             //stop
             break
 
