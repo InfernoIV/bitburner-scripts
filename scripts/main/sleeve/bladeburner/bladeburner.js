@@ -130,20 +130,22 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
 * Function that checks what value to return for the activity
 */
 export function get_activity(ns, activity) {
+    //common.log(ns,1,common.info,"bb - get_activity: " + JSON.stringify(activity))
     //depending on type
-    switch (activity.type) {
+    switch (activity.actionType) {
         //bladeburner action
-        case data.activities.bladeburner:
+        //case data.activities.bladeburner:
+        case "Contracts": 
             //derive the action
-            return sleeve_activity.actionName
-
+            return activity.actionName
+        
         //infiltration action
-        case data.activities.infiltrate:
+        /*case data.activities.infiltrate:
             //has no value, create the value
             return data.actions.sleeve.infiltrate_synthoids
-
+*/
         //uncaught condition
         default:
-            return ""
+            return "DENIED"
     }
 }
