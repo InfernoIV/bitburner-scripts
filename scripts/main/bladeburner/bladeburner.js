@@ -307,6 +307,10 @@ function determine_action(ns) {
 
             //check if this is the black op that is to be done
             if (ns.bladeburner.getActionCountRemaining(data.actions.type.blackOps, black_op.name) > 0) {
+                //get team size first
+                const available_members = ns.bladeburner.getTeamSize()
+                //set all members
+                ns.bladeburner.setTeamSize(data.actions.type.blackOps, black_op.name, available_members)
                 //get chance
                 const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.blackOps, black_op.name)
                 //check if we have enough rank and enough chance
@@ -315,6 +319,8 @@ function determine_action(ns) {
                     //return this information
                     return { type: data.actions.type.blackOps, name: black_op.name }
                 }
+                //clear team size, since not enough chance
+                clear_teams(ns)
                 //stop looking!
                 break
             }
@@ -372,4 +378,21 @@ function determine_action(ns) {
     }
     //default: raise success chances
     return { type: data.actions.type.general, name: data.actions.general.fieldAnalysis }
+}
+
+
+/**
+ * Function that clears the teams
+ */
+function clear_teams(ns) {
+    //for each black operations
+    for (const black_operation of data.actions.blackOps) {
+        //set size to 0
+        ns.Bladeburner.setTeamSize(data.actions.type.blackOps, black_operation.name, 0)
+    }
+    //for each black operations
+    for (const operation of data.actions.operations) {
+        //set size to 0
+        ns.Bladeburner.setTeamSize(data.actions.type.blackOps, operation.name, 0)
+    }
 }
