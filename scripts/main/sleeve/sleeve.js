@@ -150,11 +150,17 @@ function execute_actions(ns, desired_actions) {
         //get desired action
         const desired_action = desired_actions[index]
         //check if we need to do something
-        const working_on_the_same_type = (current_action.type == desired_action.type)
-        const working_on_the_same_value = (current_action.value == desired_action.value)
-
+        let working_on_the_same_type = (current_action.type == desired_action.type)
+        let working_on_the_same_value = (current_action.value == desired_action.value)
+        //bladeburner is being difficult
+        if(current_action.type == "BLADEBURNER" && working_on_the_same_value) {
+            working_on_the_same_type = true
+        }
+        
         //if we are NOT doing the same work
         if (!working_on_the_same_type || !working_on_the_same_value) {
+            //debug
+            common.log(ns,1,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
             //check what to do according to the index
             switch (desired_action.type) {
 
@@ -223,7 +229,7 @@ function execute_actions(ns, desired_actions) {
                 case "Take on contracts":
                 case data.activities.infiltrate:  //properties: type, cyclesWorked, cyclesNeeded, nextCompletion
                     //case data.activities.support:  //support as member of bladeburner? properties: type
-                    common.log(ns,1,common.info, index + " desired_action: " + JSON.stringify(desired_action))
+                    //common.log(ns,1,common.info, index + " desired_action: " + JSON.stringify(desired_action))
                     //do bladeburner stuff
                     bladeburner.execute_action(ns, index, desired_action)
                     //stop looking
