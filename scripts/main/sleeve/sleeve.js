@@ -160,7 +160,7 @@ function execute_actions(ns, desired_actions) {
         //if we are NOT doing the same work
         if (!working_on_the_same_type || !working_on_the_same_value) {
             //debug
-            common.log(ns,1,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
+            //common.log(ns,1,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
             //check what to do according to the index
             switch (desired_action.type) {
 
@@ -206,7 +206,7 @@ function execute_actions(ns, desired_actions) {
                 //crime
                 case data.activities.crime:
                     //debug
-                    common.log(ns,1,common.success,index + " started " + JSON.stringify(desired_action))
+                    //common.log(ns,1,common.success,index + " started " + JSON.stringify(desired_action))
                     //get crime
                     const crime = desired_action.value
                     //assign to crime
