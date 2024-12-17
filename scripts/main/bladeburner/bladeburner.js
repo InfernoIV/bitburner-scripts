@@ -397,6 +397,6 @@ function clear_teams(ns) {
         //get operation information
         const operation = data.actions.operations[activity]
         //set size to 0
-        ns.bladeburner.setTeamSize(data.actions.type.operations, operation.name, 0)
+        ns.bladeburner.setTeamSize(data.actions.type.operations, operation, 0)
     }
 }
