@@ -441,8 +441,8 @@ class targetInfo {
     /** @param {NS} ns */
     async executeHack(ns) {
         //formate messages
-        const money_percentage = "" + number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + number_formatter(ns.getServerMaxMoney(this.hostname))
-        const security_percentage = "" + number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
+        const money_percentage = "" + common.number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + common.number_formatter(ns.getServerMaxMoney(this.hostname))
+        const security_percentage = "" + common.number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + common.number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
         common.over_write_port(ns, common.port.hack, "Hack: " + this.hostname)
         //updateUI(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
