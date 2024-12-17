@@ -548,11 +548,11 @@ class targetInfo {
 
                 if (!ns.exec(this.scriptGrow, server_to_execute_hack_on, threads.grow, /*    */ this.hostname, delays.grow, threads.grow, server_to_execute_hack_on, config.log_level)) {
                     common.log(ns, 1, common.warning, server_to_execute_hack_on + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                    counter++
+                    //counter++
                 }
                 if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken, /* */this.hostname, delays.weaken, threads.weaken, server_to_execute_hack_on, config.log_level)) {
                     common.log(ns, 1, common.warning, server_to_execute_hack_on + " failed to start " + "weaken (" + threads.weaken + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                    counter++
+                    //counter++
                 }
                 break
                 
@@ -565,19 +565,19 @@ class targetInfo {
                 try {
                     if (!ns.exec(this.scriptHack, server_to_execute_hack_on, threads.hack, /* */this.hostname, delays.hack, threads.hack, server_to_execute_hack_on, config.log_level)) {
                         log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "hack (" + threads.hack + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                        counter++
+                        //counter++
                     }
                     if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken1, this.hostname, delays.weaken1, threads.weaken1, server_to_execute_hack_on, config.log_level)) {
                         log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "weaken1 (" + threads.weaken1 + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                        counter++
+                        //counter++
                     }
                     if (!ns.exec(this.scriptGrow, server_to_execute_hack_on, threads.grow, /* */this.hostname, delays.grow, threads.grow, server_to_execute_hack_on, config.log_level)) {
                         log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "grow (" + threads.grow + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                        counter++
+                        //counter++
                     }
                     if (!ns.exec(this.scriptWeaken, server_to_execute_hack_on, threads.weaken2, this.hostname, delays.weaken2, threads.weaken2, server_to_execute_hack_on, config.log_level)) {
                         log(ns, 1, warning, server_to_execute_hack_on + " failed to start " + "weaken2 (" + threads.weaken2 + ") -> " + JSON.stringify(ns.getServer(server_to_execute_hack_on)))
-                        counter++
+                        //counter++
                     }
 
                     /*counter++
