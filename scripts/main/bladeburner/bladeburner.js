@@ -388,11 +388,11 @@ function clear_teams(ns) {
     //for each black operations
     for (const black_operation in data.actions.blackOps) {
         //set size to 0
-        ns.Bladeburner.setTeamSize(data.actions.type.blackOps, black_operation.name, 0)
+        ns.bladeburner.setTeamSize(data.actions.type.blackOps, black_operation.name, 0)
     }
     //for each black operations
     for (const operation in data.actions.operations) {
         //set size to 0
-        ns.Bladeburner.setTeamSize(data.actions.type.blackOps, operation.name, 0)
+        ns.bladeburner.setTeamSize(data.actions.type.blackOps, operation.name, 0)
     }
 }
