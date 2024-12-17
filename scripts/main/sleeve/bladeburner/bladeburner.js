@@ -20,7 +20,7 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
 **/
 export function determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned) {
     //check if we have enough chance to recruit
-    if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index)[0] >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
         return { type: data.actions.sleeve.recruitment, value: data.actions.sleeve.recruitment } //bladeburner action
     }
@@ -38,7 +38,7 @@ export function determine_action(ns, index, bladeburner_contract_assigned, blade
         return { type: data.actions.sleeve.infiltrate_synthoids, value: data.actions.sleeve.infiltrate_synthoids } //specific type
     }
     //if we can raise chance for the player
-    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, data.actions.operations.investigation, index) >= config.bladeburner_success_chance_minimum_sleeve) {
+    else if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.operations, data.actions.operations.investigation, index)[0] >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to field analysis
         return { type: data.actions.sleeve.field_analysis, value: data.actions.sleeve.field_analysis } //bladeburner action
     }
@@ -53,10 +53,10 @@ export function determine_action(ns, index, bladeburner_contract_assigned, blade
                 //get action count
                 const action_count = ns.bladeburner.getActionCountRemaining(data.actions.type.contracts, contract)
                 //get chance
-                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract, index)
+                const chance = ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.contracts, contract, index)[0]
 
                 //if this action can be performed and we have enough chance
-                if ((action_count >= 1) && (chance[0] >= config.bladeburner_success_chance_minimum_sleeve)) {
+                if ((action_count >= 1) && (chance >= config.bladeburner_success_chance_minimum_sleeve)) {
                     //return this information
                     return { type: data.actions.sleeve.take_on_contracts, value: contract } //type: data.actions.type.contracts
                 }
@@ -84,7 +84,8 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
             ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
             //stop
             break
-
+            
+        case "Recruitment":
         case "Infiltrate synthoids":
             //set to bladeburner general action
             ns.sleeve.setToBladeburnerAction(sleeve_index, sleeve_action.type)
@@ -134,6 +135,8 @@ export function execute_action(ns, sleeve_index, sleeve_action) {
     */
 }
 
+
+
 /**
 * Function that checks what value to return for the activity
 */
@@ -146,14 +149,16 @@ export function get_activity(ns, activity) {
         case "Contracts": 
             //derive the action
             return activity.actionName
-        
+
+        /*
         //infiltration action
-        /*case data.activities.infiltrate:
+        case data.activities.infiltrate:
             //has no value, create the value
             return data.actions.sleeve.infiltrate_synthoids
-*/
+        */
+
         //uncaught condition
         default:
-            return "DENIED"
+            return ""
     }
 }
