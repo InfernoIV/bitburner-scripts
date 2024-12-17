@@ -52,9 +52,16 @@ function determine_actions(ns, number_of_sleeves) {
     const current_actions = get_current_actions(ns, number_of_sleeves)
     //array of desired actions
     let desired_actions = new action_list(number_of_sleeves)
+    //get factions
+    let factions_to_work_for = get_factions_to_work_for(ns, player)
+    //get companies
+    let companies_to_work_for = get_companies_to_work_for(ns, player)
+    //debug
+    //common.log(ns,1,common.info,"factions_to_work_for: " + JSON.stringify(factions_to_work_for))
+    //common.log(ns,1,common.info,"companies_to_work_for: " + JSON.stringify(companies_to_work_for))
 
     //check faction work
-    for (const faction in get_factions_to_work_for(ns, player)) {
+    for (const faction in factions_to_work_for) {
         //for each sleeve
         for (let index = 0; index < number_of_sleeves; index++) {
             //get current action
@@ -73,7 +80,7 @@ function determine_actions(ns, number_of_sleeves) {
     }
 
     //check company work
-    for (const company in get_companies_to_work_for(ns, player)) {
+    for (const company in companies_to_work_for) {
         //for each sleeve
         for (let index = 0; index < number_of_sleeves; index++) {
             //get current action
@@ -118,6 +125,30 @@ function determine_actions(ns, number_of_sleeves) {
             //add action
             desired_actions.add_action(ns, index, bladeburner_action)
         }
+        //check faction work
+        else if (factions_to_work_for.length > 0) {
+            //get faction
+            const faction = factions_to_work_for[0]
+            //add action
+            const added_action = desired_actions.add_action(ns, index, { type: data.activities.faction, value: faction })
+            //if added
+            if (added_action) {
+                //remove the faction from the lsit
+                factions_to_work_for.shift()
+            }
+        }
+        //check company work
+        else if (companies_to_work_for.length > 0) {
+            //get faction
+            const company = companies_to_work_for[0]
+            //add action
+            const added_action = desired_actions.add_action(ns, index, { type: data.activities.company, value: company })
+            //if added
+            if (added_action) {
+                //remove the faction from the lsit
+                companies_to_work_for.shift()
+            }
+        }
         //default: set to crime
         else {
             //best crime 
@@ -153,26 +184,26 @@ function execute_actions(ns, desired_actions) {
         let working_on_the_same_type = (current_action.type == desired_action.type)
         let working_on_the_same_value = (current_action.value == desired_action.value)
         //bladeburner is being difficult
-        if(current_action.type == "BLADEBURNER" && working_on_the_same_value) {
+        if (current_action.type == "BLADEBURNER" && working_on_the_same_value) {
             working_on_the_same_type = true
-            
+
         }
         //infiltrate as well
-        if(current_action.type == "INFILTRATE" && desired_action.type == "Infiltrate synthoids") {
-            working_on_the_same_type = true    
-            working_on_the_same_value = true   
-    
+        if (current_action.type == "INFILTRATE" && desired_action.type == "Infiltrate synthoids") {
+            working_on_the_same_type = true
+            working_on_the_same_value = true
+
         }
         //infiltrate as well
-        if(current_action.type == "BLADEBURNER" && desired_action.type == "Recruitment") {
-            working_on_the_same_type = true     
-            working_on_the_same_value = true   
+        if (current_action.type == "BLADEBURNER" && desired_action.type == "Recruitment") {
+            working_on_the_same_type = true
+            working_on_the_same_value = true
         }
-         
+
         //if we are NOT doing the same work
         if (!working_on_the_same_type || !working_on_the_same_value) {
             //debug
-            common.log(ns,0,common.info,"Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action) )
+            common.log(ns, 0, common.info, "Current: " + JSON.stringify(current_action) + ", desired: " + JSON.stringify(desired_action))
             //check what to do according to the index
             switch (desired_action.type) {
 
@@ -219,7 +250,7 @@ function execute_actions(ns, desired_actions) {
                 case "CRIME":
                 case data.activities.crime:
                     //debug
-                    common.log(ns,0,common.info,index + "  has " + JSON.stringify(desired_action))
+                    common.log(ns, 0, common.info, index + "  has " + JSON.stringify(desired_action))
                     //get crime
                     const crime = desired_action.value
                     //assign to crime
@@ -619,11 +650,11 @@ class action_list {
         //get assigned action
         const assigned_action = this.list[index]
         //only 1 sleeve can take on contracts
-        if(action.type == "Take on contracts") {
+        if (action.type == "Take on contracts") {
             //set flag to true
             this.bladeburner_contract_assigned = true
         }
-        if(action.type == "Infiltrate synthoids") {
+        if (action.type == "Infiltrate synthoids") {
             //set flag to true
             this.bladeburner_infiltrate_assigned = true
         }
@@ -634,7 +665,11 @@ class action_list {
         if (assigned_action.type == "filler") {
             //assign action
             this.list[index] = action
+            //incidate success
+            return true
         }
+        //indicate failure
+        return false
     }
 
 }
