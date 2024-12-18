@@ -32,7 +32,7 @@ export async function main(ns) {
         //if stopped
         if (flag_stop == true) {
             //if we should start again
-            if ((ns.peek(common.port.stopHack) == common.hacking_commands.start)) {
+            if ((ns.peek(common.port.communication_hack_manager) == common.port_commands.enable)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Resuming HackManager")
                 //reset flag
@@ -46,7 +46,7 @@ export async function main(ns) {
         //running normally
         } else {
             //if command for stpoping
-            if ((ns.peek(common.port.stopHack) == common.hacking_commands.stop)) {
+            if ((ns.peek(common.port.communication_hack_manager) == common.port_commands.disable)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Pausing HackManager")
                 //set wait time
@@ -84,7 +84,7 @@ function init(ns) {
     //disable logging
     common.disable_logging(ns, config.log_disabled_topics)
     //clear UI data
-    ns.clearPort(common.port.hack)
+    ns.clearPort(common.port.communication_hack_manager)
 }
 
 class targetInfo {
@@ -369,8 +369,7 @@ class targetInfo {
         //while the security is not min
         while (ns.getServerSecurityLevel(this.hostname) > security_min) {
             //log info to UI
-            common.over_write_port(ns, common.port.hack, "Weaken: " + this.hostname)
-            //updateUI(ns, this.hostname, "Weaken: " + Math.floor(security_min / ns.getServerSecurityLevel(this.hostname)) + "%")
+            update_ui(ns, this.hostname, "Weaken: " + Math.floor(security_min / ns.getServerSecurityLevel(this.hostname)) + "%")
             //weaken the server
             await this.executeBatch(ns, "weaken")
         }
@@ -380,8 +379,7 @@ class targetInfo {
         //while money is not max
         while (ns.getServerMoneyAvailable(this.hostname) < money_max) {
             //log info to UI
-            common.over_write_port(ns, common.port.hack, "Grow: " + this.hostname)
-            //updateUI(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / money_max) + "%")
+            update_ui(ns, this.hostname, "Grow: " + Math.floor(ns.getServerMoneyAvailable(this.hostname) / money_max) + "%")
             //grow the money
             await this.executeBatch(ns, "grow")
         }
@@ -444,8 +442,7 @@ class targetInfo {
         const money_percentage = "" + common.number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + common.number_formatter(ns.getServerMaxMoney(this.hostname))
         const security_percentage = "" + common.number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + common.number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
-        common.over_write_port(ns, common.port.hack, "Hack: " + this.hostname)
-        //updateUI(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
+        update_ui(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
         //execute the batch
         await this.executeBatch(ns, "hack")
     }
@@ -614,10 +611,13 @@ class targetInfo {
 
 
 
-/** @param {NS} ns */
-function updateUI(ns, header, value) {
+/** 
+ * Function that sends data to UI
+ * @param {NS} ns 
+ */
+function update_ui(ns, header, value) {
+    //create message
+    const message = header + ", " + value
     //write data to port
-    common.over_write_port(ns, common.port.hack, header + ", " + value)
-    //common.over_write_port(ns, common.port.hack, value)
-    //TODO: properly fix
+    common.over_write_port(ns, common.port.ui_hack, message)
 }

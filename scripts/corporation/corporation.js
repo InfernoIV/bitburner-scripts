@@ -1,14 +1,5 @@
-import { log, success, warning, error, info, numberFormatter } from "scripts/log.js"
-//import { overWritePort, portCorporation, portBlockReset } from "scripts/port.js"
-//TODO: check import above
-/*
-  Script that creates and manages the corporation (Agriculture -> Tobacco)          
-*/
-
-
-/*
-import { data.corporation_requirement_money } from "scripts/corporation.js"
-*/
+//common
+import * as common from "scripts/common.js"
 //config
 import * as config from "./config.js"
 //data
@@ -16,27 +7,13 @@ import * as data from "./data.js"
 
 
 
-
-
-/*
-Main function
-*/
 /** @param {NS} ns */
 export async function main(ns) {
     //initialize
     init(ns)
-
-    //if no corporation
-    if (!ns.corporation.hasCorporation()) {
-        //while corporation is not created
-        while (!ns.corporation.createCorporation("InfernoIV", true)) {
-            //wait a bit
-            await ns.sleep(1000)
-        }
-    }
-
-    //get corporation
-    let corp = ns.corporation.getCorporation()
+  
+    //create corporation
+    let corp = create_corporation(ns)
 
     //if tobacco has not been created yet, then agriculture is not or may not be finished...
     if (corp.divisions.length < 2) {
@@ -46,12 +23,19 @@ export async function main(ns) {
 
     //if the company is not public, then tobacco has not been finished
     if (!corp.public) {
-        //setup tobacco
-        await setupTobacco(ns)
+      //indicate no need for funds and research
+      set_funds_needed(ns, false)
+      set_research_needed(ns, false)
+        
+      //stop blocking resets
+      block_reset(ns, false)
+        
+      //setup tobacco
+      await setupTobacco(ns)
     }
 
     //set UI to maintain
-    updateUI(ns, success, "Tobacco - Maintain")
+    updateUI(ns, common.success, "Tobacco - Maintain")
 
     //main loop
     while (true) {
@@ -62,9 +46,48 @@ export async function main(ns) {
 
 
 
-/*
-function that sets 1 time things on boot
-*/
+/**
+ * Function that determines if funds are needed
+ */
+function set_funds_needed(ns, is_funds_needed) {
+  //write the variable to port
+  common.over_write_port(ns, common.port.hash_corporation_funds, is_funds_needed)
+}
+
+
+
+/**
+ * Function that determines if research is needed
+ */
+function set_research_needed(ns, is_research_needed) {
+  //write the variable to port
+  common.over_write_port(ns, common.port.hash_corporation_research, is_research_needed)
+}
+
+
+
+/**
+ * Function that will block reset from ocurring
+ */
+function block_reset(ns, block_reset) {
+    //if blocking the reset
+    if(block_reset) {
+        //we are blocking the reset
+        common.over_write_port(ns, common.port.reset_corporation, common.port_commands.block_reset)
+    } 
+    //we are not blocking the reset
+    else {
+        //clear the port
+        ns.clearPort(common.port.reset_corporation)
+    }
+}
+
+
+
+/**
+ * Function that sets 1 time things on boot
+ * Cost: 0 GB
+ */
 function init(ns) {
     //disable logs
     common.disable_logging(ns, config.disabled_logs)
@@ -73,16 +96,43 @@ function init(ns) {
     //productCounter = 0// + ns.corporation.getDivision().products.length
 
     //clear data
-    ns.clearPort(portCorporation)
+    ns.clearPort(common.port.ui_corporation)
+        
+    //indicate need for funds and research
+    set_funds_needed(ns, true)
+    set_research_needed(ns, true)
 
+    //block reset
+    block_reset(ns, true)
     //log(ns,1,info,"investment: " + JSON.stringify(ns.corporation.getInvestmentOffer()))
 }
 
 
 
-/*
-function that sets up agriculture
-*/
+/**
+ * Function that creates the corporation
+ * Cost: 
+   * Corporation.createCorporation: 20 GB
+   * Corporation.getCorporation: 10 GB
+ */
+async function create_corporation(ns) {
+  //if no corporation
+  if (!created_corporation(ns)) {
+    //while corporation is not created
+    while (!ns.corporation.createCorporation("InfernoIV", true)) {
+      //wait a bit
+      await ns.sleep(1000)
+    }
+  }
+  //return the corporation
+  return ns.corporation.getCorporation()
+}
+
+
+
+/**
+ * function that sets up agriculture
+ */
 async function setupAgriculture(ns) {
     //check where we are with investments
     let investment = ns.corporation.getInvestmentOffer()
@@ -112,7 +162,7 @@ Funtion that takes care of setting up agriculture
 */
 async function startAgriculture(ns) {
     //log information
-    updateUI(ns, info, "Agriculture 1.1: expand industry")
+    updateUI(ns, common.info, "Agriculture 1.1: expand industry")
 
     //try to expand to agriculture
     while (ns.corporation.getCorporation().divisions.length < 1) {
@@ -123,19 +173,19 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.2: unlock smartSupply")
+    updateUI(ns, common.info, "Agriculture 1.2: unlock smartSupply")
 
     //unlock smartSupply
     while (!await buyUnlock(ns, data.division_material, data.unlock.smartSupply)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.3: expand cities")
+    updateUI(ns, common.info, "Agriculture 1.3: expand cities")
 
     //expand to every city
     while (!await expandCities(ns, data.division_material)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.4: buy warehouses")
+    updateUI(ns, common.info, "Agriculture 1.4: buy warehouses")
 
     //check on warehouse exansions
     let ownedWarehouses = 0
@@ -157,7 +207,7 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.5: hire employees")
+    updateUI(ns, common.info, "Agriculture 1.5: hire employees")
 
     //for each city
     for (let city of data.cities_all) {
@@ -166,7 +216,7 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.6: set up supplies")
+    updateUI(ns, common.info, "Agriculture 1.6: set up supplies")
 
     //for each city
     for (let city of data.cities_all) {
@@ -178,7 +228,7 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.7: post advert")
+    updateUI(ns, common.info, "Agriculture 1.7: post advert")
 
     //if no adverts have been bought
     while (ns.corporation.getDivision(data.division_material).numAdVerts == 0) {
@@ -189,7 +239,7 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.8: upgrade warehouse")
+    updateUI(ns, common.info, "Agriculture 1.8: upgrade warehouse")
 
     //for each city
     for (let city of data.cities_all) {
@@ -198,7 +248,7 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.9: buy upgrades")
+    updateUI(ns, common.info, "Agriculture 1.9: buy upgrades")
 
     //buy upgrades
     while (!await buyUpgrade(ns, data.division_material, data.upgrade.focusWires, 2)) { }
@@ -208,7 +258,7 @@ async function startAgriculture(ns) {
     while (!await buyUpgrade(ns, data.division_material, data.upgrade.smartFactories, 2)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.10: hire more employees")
+    updateUI(ns, common.info, "Agriculture 1.10: hire more employees")
 
     //for each city
     for (let city of data.cities_all) {
@@ -217,19 +267,19 @@ async function startAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.11: buy materials")
+    updateUI(ns, common.info, "Agriculture 1.11: buy materials")
 
     //buy materials
     while (!await buyMaterials(ns, data.division_material, 125, 0, 75, 27000)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 1.12: investment $" + numberFormatter(targetInvestment))
+    updateUI(ns, common.info, "Agriculture 1.12: investment $" + numberFormatter(targetInvestment))
 
     //wait for investment
     await waitForInvestment(ns, data.division_material, targetInvestment)
 
     //log information
-    updateUI(ns, success, "Agriculture 1: complete")
+    updateUI(ns, common.success, "Agriculture 1: complete")
 }
 
 
@@ -239,7 +289,7 @@ Function that improves agriculture
 */
 async function improveAgriculture(ns) {
     //log information
-    updateUI(ns, info, "Agriculture 2.1: hire employees")
+    updateUI(ns, common.info, "Agriculture 2.1: hire employees")
 
     //for each city
     for (let city of data.cities_all) {
@@ -248,14 +298,14 @@ async function improveAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 2.2: buy upgrades")
+    updateUI(ns, common.info, "Agriculture 2.2: buy upgrades")
 
     //buy upgrades
     while (! await buyUpgrade(ns, data.division_material, data.upgrade.smartFactories, 10)) { }
     while (! await buyUpgrade(ns, data.division_material, data.upgrade.smartStorage, 10)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 2.3: upgrade warehouse")
+    updateUI(ns, common.info, "Agriculture 2.3: upgrade warehouse")
 
     //for each city
     for (let city of data.cities_all) {
@@ -264,13 +314,13 @@ async function improveAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 2.4: buy materials")
+    updateUI(ns, common.info, "Agriculture 2.4: buy materials")
 
     //buy materials
     while (!await buyMaterials(ns, data.division_material, 2675, 96, 2445, 119400)) { }
 
     //log information
-    updateUI(ns, info, "Agriculture 2.5: hire employees")
+    updateUI(ns, common.info, "Agriculture 2.5: hire employees")
 
     //for each city
     for (let city of data.cities_all) {
@@ -278,13 +328,13 @@ async function improveAgriculture(ns) {
         while (! await setEmployees(ns, data.division_material, city, 3, 2, 2, 2)) { }
     }
     //log information
-    updateUI(ns, info, "Agriculture 2.6: investment $" + numberFormatter(targetInvestment))
+    updateUI(ns, common.info, "Agriculture 2.6: investment $" + numberFormatter(targetInvestment))
 
     //wait for investment
     await waitForInvestment(ns, data.division_material, targetInvestment)
 
     //log information
-    updateUI(ns, success, "Agriculture 2: complete")
+    updateUI(ns, common.success, "Agriculture 2: complete")
 }
 
 
@@ -294,7 +344,7 @@ Function that finalized agriculture
 */
 async function finalizeAgriculture(ns) {
     //log information
-    updateUI(ns, info, "Agriculture 3.1: upgrade warehouse")
+    updateUI(ns, common.info, "Agriculture 3.1: upgrade warehouse")
 
     //for each city
     for (let city of data.cities_all) {
@@ -303,13 +353,13 @@ async function finalizeAgriculture(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Agriculture 3.2: buy material")
+    updateUI(ns, common.info, "Agriculture 3.2: buy material")
 
     //buy materials
     while (!await buyMaterials(ns, data.division_material, 6500, 630, 3750, 84000)) { }
 
     //log success
-    updateUI(ns, success, "Agriculture 3: completed")
+    updateUI(ns, common.success, "Agriculture 3: completed")
 }
 
 
@@ -361,7 +411,7 @@ Start setup of tobacco
 */
 async function startTobacco(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 1.1: expand industry")
+    updateUI(ns, common.info, "Tobacco 1.1: expand industry")
 
     //try to expand to agriculture
     while (ns.corporation.getCorporation().divisions.length < 2) {
@@ -372,12 +422,12 @@ async function startTobacco(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.2: expand cities")
+    updateUI(ns, common.info, "Tobacco 1.2: expand cities")
     //expand to every city
     while (!await expandCities(ns, data.division_product)) { }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.3: unlock warehouses")
+    updateUI(ns, common.info, "Tobacco 1.3: unlock warehouses")
     //buy all warehouses
     //check on warehouse exansions
     let ownedWarehouses = 0
@@ -399,7 +449,7 @@ async function startTobacco(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.4: set smartSupply")
+    updateUI(ns, common.info, "Tobacco 1.4: set smartSupply")
     //for each city
     for (let city of data.cities_all) {
         //set smart supply on
@@ -407,12 +457,12 @@ async function startTobacco(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.5: hire employees")
+    updateUI(ns, common.info, "Tobacco 1.5: hire employees")
     //expand Aevum to 30
     while (! await setEmployees(ns, data.division_product, data.city_main, 8, 9, 5, 8)) { }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.6: hire employees")
+    updateUI(ns, common.info, "Tobacco 1.6: hire employees")
     //expand other cities to 9
     for (let city of data.city_support) {
         //set employees
@@ -420,12 +470,12 @@ async function startTobacco(ns) {
     }
 
     //log information
-    updateUI(ns, info, "Tobacco 1.5: upgrade D.S.")
+    updateUI(ns, common.info, "Tobacco 1.5: upgrade D.S.")
     //buy small upgrade, to check progress
     buyUpgrade(ns, data.division_product, data.upgrade.dreamSense, 10)
 
     //log information
-    updateUI(ns, success, "Tobacco 1: completed")
+    updateUI(ns, common.success, "Tobacco 1: completed")
 }
 
 
@@ -435,34 +485,34 @@ Function that creates the first product
 */
 async function createProductTobacco(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 2.1: create product")
+    updateUI(ns, common.info, "Tobacco 2.1: create product")
 
     await createProduct(ns, data.division_product)
 
     //log information
-    updateUI(ns, info, "Tobacco 2.2: upgrade D.S.")
+    updateUI(ns, common.info, "Tobacco 2.2: upgrade D.S.")
     //upgrade dreamSense (to 10-30?)
     buyUpgrade(ns, data.division_product, data.upgrade.dreamSense, 20)
     //upgrade to 20
     //log information
-    updateUI(ns, info, "Tobacco 2.3: upgrade F.W.")
+    updateUI(ns, common.info, "Tobacco 2.3: upgrade F.W.")
     buyUpgrade(ns, data.division_product, data.upgrade.focusWires, 20)
     //log information
-    updateUI(ns, info, "Tobacco 2.4: upgrade N.A.")
+    updateUI(ns, common.info, "Tobacco 2.4: upgrade N.A.")
     buyUpgrade(ns, data.division_product, data.upgrade.neuralAccelerators, 20)
     //log information
-    updateUI(ns, info, "Tobacco 2.5: upgrade S.P.I.")
+    updateUI(ns, common.info, "Tobacco 2.5: upgrade S.P.I.")
     buyUpgrade(ns, data.division_product, data.upgrade.speechProcessorImplants, 20)
     //log information
-    updateUI(ns, info, "Tobacco 2.6: upgrade N.N.I.I.")
+    updateUI(ns, common.info, "Tobacco 2.6: upgrade N.N.I.I.")
     buyUpgrade(ns, data.division_product, data.upgrade.nuoptimalNootropicInjectorImplants, 20)
     //upgrade to 10
     //log information
-    updateUI(ns, info, "Tobacco 2.7: upgrade P.I.")
+    updateUI(ns, common.info, "Tobacco 2.7: upgrade P.I.")
     buyUpgrade(ns, data.division_product, data.upgrade.projectInsight, 10)
 
     //log information
-    updateUI(ns, success, "Tobacco 2: complete")
+    updateUI(ns, common.success, "Tobacco 2: complete")
 }
 
 
@@ -472,17 +522,17 @@ Fuction that creates the and product
 */
 async function createProductTobacco2(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 3.1: create product")
+    updateUI(ns, common.info, "Tobacco 3.1: create product")
 
     await createProduct(ns, data.division_product)
 
     //log information
-    updateUI(ns, info, "Tobacco 3.2: upgrade D.S.")
+    updateUI(ns, common.info, "Tobacco 3.2: upgrade D.S.")
     //upgrade dreamSense (to 10-30?)
     buyUpgrade(ns, data.division_product, data.upgrade.dreamSense, 30)
 
     //log information
-    updateUI(ns, success, "Tobacco 3: complete")
+    updateUI(ns, common.success, "Tobacco 3: complete")
 }
 
 
@@ -492,19 +542,19 @@ Function that raises stats while waiting for the investment
 */
 async function get_investment_3(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 4.1: upgrade W.A.")
+    updateUI(ns, common.info, "Tobacco 4.1: upgrade W.A.")
 
     //get wilson analytics to 10
     while (!await buyUpgrade(ns, data.division_product, data.upgrade.wilsonAnalytics, 10)) { }
 
     //log information
-    updateUI(ns, info, "Tobacco 4.2: investment $" + numberFormatter(targetInvestment))
+    updateUI(ns, common.info, "Tobacco 4.2: investment $" + numberFormatter(targetInvestment))
 
     //wait for investment
     await waitForInvestment(ns, data.division_product, config.investment_3, true)
 
     //log information
-    updateUI(ns, success, "Tobacco 4: complete")
+    updateUI(ns, common.success, "Tobacco 4: complete")
 }
 
 
@@ -514,13 +564,13 @@ improve setup of Tobacco
 */
 async function get_investment_4(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 5.1: investment : $" + numberFormatter(targetInvestment))
+    updateUI(ns, common.info, "Tobacco 5.1: investment : $" + numberFormatter(targetInvestment))
 
     //wait for investment
     await waitForInvestment(ns, data.division_product, config.investment_4, true)
 
     //log information
-    updateUI(ns, success, "Tobacco 5: complete")
+    updateUI(ns, common.success, "Tobacco 5: complete")
 }
 
 
@@ -530,18 +580,18 @@ finalize setup
 */
 async function goPublic(ns) {
     //log information
-    updateUI(ns, info, "Tobacco 6.1: go public")
+    updateUI(ns, common.info, "Tobacco 6.1: go public")
 
     //go public
     ns.corporation.goPublic(0)
 
     //log information
-    updateUI(ns, info, "Tobacco 6.2: Issue dividends")
+    updateUI(ns, common.info, "Tobacco 6.2: Issue dividends")
     //set dividends
     ns.corporation.issueDividends(config.corporation_greed)
 
     //log success
-    updateUI(ns, success, "Tobacco 6: complete")
+    updateUI(ns, common.success, "Tobacco 6: complete")
 }
 
 
@@ -863,7 +913,7 @@ function manageOfficeSoftStats(ns, division, city) {
             //buy tea
             if (ns.corporation.buyTea(division, city)) {
                 //log information
-                log(ns, 0, info, division + ", " + city + ": Bought tea for " + office.size + " employees ($" + numberFormatter(costs) + ")")
+                common.log(ns, 0, common.info, division + ", " + city + ": Bought tea for " + office.size + " employees ($" + numberFormatter(costs) + ")")
             }
         }
     }
@@ -879,7 +929,7 @@ function manageOfficeSoftStats(ns, division, city) {
             //throw a party
             if (ns.corporation.throwParty(division, city, (costPerEmployee * office.size))) {
                 //log information
-                log(ns, 0, info, division + ", " + city + ": threw party for " + office.size + " employees ($" + numberFormatter(costs) + ")")
+                common.log(ns, 0, common.info, division + ", " + city + ": threw party for " + office.size + " employees ($" + numberFormatter(costs) + ")")
             }
         }
     }
@@ -1151,7 +1201,7 @@ async function waitForInvestment(ns, division, targetInvestment, buyAdvert = fal
     //while not getting the correct offer (in total!)
     while ((investment.funds + ns.corporation.getCorporation().funds) < targetInvestment) {
         //update UI
-        updateUI(ns, info, "Investment " + investment.round + ": " + numberFormatter(investment.funds) + " / " + numberFormatter(targetInvestment))
+        updateUI(ns, common.info, "Investment " + investment.round + ": " + numberFormatter(investment.funds) + " / " + numberFormatter(targetInvestment))
         //if also buying adverts
         if (buyAdvert) {
             //buy advert, if possible
@@ -1162,7 +1212,7 @@ async function waitForInvestment(ns, division, targetInvestment, buyAdvert = fal
         //update investment
         investment = ns.corporation.getInvestmentOffer()
     }
-    log(ns, 1, success, "Accepted investment " + investment.round + " of $" + numberFormatter(Math.round(investment.funds)))
+    common.log(ns, 1, common.success, "Accepted investment " + investment.round + " of $" + numberFormatter(Math.round(investment.funds)))
     //accept investment
     ns.corporation.acceptInvestmentOffer()
     //await for next update
@@ -1176,9 +1226,9 @@ Function that interacts the status with the UI
 */
 function updateUI(ns, type, message) {
     //log information
-    log(ns, config.log_level , type, message)
+    common.log(ns, config.log_level , type, message)
     //update port
-    overWritePort(ns, portCorporation, message)
+    overWritePort(ns, common.port.ui_corporation, message)
 }
 
 
@@ -1209,7 +1259,7 @@ let totalCost = cost
 while(upgradelevel < 10) {
     cost = ns.corporation.getUpgradeLevelCost(upgradeName)
     totalCost += cost
-    log(ns,1,info,"Cost for " + (upgradelevel+1) + "'" + upgradeName + "' = $" + cost + " ($" + numberFormatter(cost) + ")")
+    common.log(ns,1,info,"Cost for " + (upgradelevel+1) + "'" + upgradeName + "' = $" + cost + " ($" + numberFormatter(cost) + ")")
     ns.corporation.levelUpgrade(upgradeName)
     upgradelevel = ns.corporation.getUpgradeLevel(upgradeName)
 }
@@ -1224,7 +1274,7 @@ totalCost = cost
 while(upgradelevel < 10) {
     cost = ns.corporation.getUpgradeLevelCost(upgradeName)
     totalCost += cost
-    log(ns,1,info,"Cost for " + (upgradelevel+1) + "'" + upgradeName + "' = $" + cost + " ($" + numberFormatter(cost) + ")")
+    common.log(ns,1,info,"Cost for " + (upgradelevel+1) + "'" + upgradeName + "' = $" + cost + " ($" + numberFormatter(cost) + ")")
     ns.corporation.levelUpgrade(upgradeName)
     upgradelevel = ns.corporation.getUpgradeLevel(upgradeName)
 }

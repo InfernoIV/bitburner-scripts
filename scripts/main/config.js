@@ -1,3 +1,8 @@
+//common
+import * as common from "scripts/common.js"
+
+
+
 //disabled log topics
 export const log_disabled_topics = [
   //normal
@@ -41,6 +46,29 @@ export const time_between_loops = 1 * 1000
 //minimum amount of augments before resetting
 export const augments_minimum_for_reset = 4 //to be set to 40 for achievement
 
-//target min chance before attempting bladeburner
-export const bladeburner_success_chance_minimum = 1
-export const bladeburner_black_op_success_chance_minimum = 0.5
+//ports to read for ui information
+//data: [ header, port number ]
+//["", common.port.],
+export const ports_to_read_ui = [
+  //hack manager
+  ["Hack", common.port.ui_hack],
+  ["Hack status", common.port.communication_hack_manager],
+  //backdoor
+  ["Backdoor", common.port.communication_backdoor],
+  //gang
+  ["Gang", common.port.ui_gang],
+  //corporation
+  ["Corporation", common.port.ui_corporation],
+  //bladeburner
+  ["Bladeburner Stamina", common.port.ui_bladeburner_stamina],
+  ["Bladeburner Rank", common.port.ui_bladeburner_rank],
+  ["Bladeburner Black Ops", common.port.ui_bladeburner_black_ops]
+  //hash
+  ["Hash bladeburner skill point", common.port.hash_bladeburner_skill_points],
+  ["Hash bladeburner rank", common.port.hash_bladeburner_rank],
+  ["Hash Corporation funds", common.port.hash_corporation_funds],
+  ["Hash Corporation research", common.port.hash_corporation_research],
+  //resets
+  ["Reset Gang", common.port.reset_gang],
+  ["Reset Corporation", common.port.reset_corporation],  
+]
