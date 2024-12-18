@@ -15,5 +15,5 @@ export async function main(ns) {
         await ns.stanek.chargeFragment(x, y)
     }
     //use ports to indicate status
-    ns.writePort(common.port.stanek, "Done")
+    ns.writePort(common.port.communication_stanek, common.port_commands.done)
 }
