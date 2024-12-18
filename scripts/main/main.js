@@ -945,10 +945,10 @@ function update_ui(ns, bit_node_multipliers) {
     values.push("_______________________________")
 
     //for each defined port from the config
-    for (const port_data of config.ports_to_read_ui) {  
+    for (const port_data_entry of config.ports_to_read_ui) {  
         //get port data 
-        const header = port_data[0]
-        const port_number = port_data[1]
+        const header = port_data_entry[0]
+        const port_number = port_data_entry[1]
         //get the data from the port
         const port_data = ns.peek(port_number)
         //check if we want to show
