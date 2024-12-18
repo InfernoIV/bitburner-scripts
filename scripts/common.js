@@ -21,18 +21,10 @@ export const fail = "FAIL"
 
 
 
-//communication port definitions
-export const port = {
-    //external scripts
-    reset: 1,
-    hack: 2,
-    gang: 3,
-    corporation: 4,
-    stock: 5,
-    backdoor: 6,
-    stopHack: 7,
-    //stanek: 8,
-    
+/*
+ * communication port definitions
+ */
+export const port = {   
     //communication
     communication_hack_manager: 10, //port to provide signal for the hackmanager to pause (to enable other scripts to start)
     communication_backdoor: 11, //port to provide information on which server to backdoor
@@ -54,7 +46,6 @@ export const port = {
     //reset communication: indicate blockage to prevent reset before it is ready / up to speed
     block_reset_gang: 40, //all territory conquered
     block_reset_corporation: 41, //company went public
-    
 }
 
 
