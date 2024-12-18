@@ -3,9 +3,9 @@ import * as data from "./data.js"
 //common
 import * as common from "scripts/common.js"
 //corporation
-import { created_corporation } from "scripts/corporation/corporation.js"
+import { created_corporation, funds_needed as corporation_funds_needed } from "scripts/corporation/corporation.js"
 //bladeburner
-//import { } from "scripts/main/bladeburner/bladeburner.js"
+import { get_access as bladeburner_get_access, rank_needed as bladeburner_rank_needed, skill_points_needed as bladeburner_skill_points_needed } from "scripts/main/bladeburner/bladeburner.js"
 
 
 
@@ -166,25 +166,22 @@ function manage_hashes(ns) {
     //if corporation is unlocked
     if(created_corporation(ns)) {
         //if funds are needed (how to determine?)
-        if(true) {
+        if(corporation_funds_needed(ns)) {
             //add to the list
             hash_spend_options.push(data.hash_upgrades.corporationFunds)
         }
-        //if research is needed (how to determine?)
-        if(true) {
-            //add to the list
-            hash_spend_options.push(data.hash_upgrades.corporationResearch)
-        }
+        //add research to the list
+        hash_spend_options.push(data.hash_upgrades.corporationResearch)
     }
     //if bladeburner is unlocked
-    if(false) {
+    if(bladeburner_get_access(ns)) {
         //if we need rank
-        if(true) {
+        if(bladeburner_rank_needed(ns)) {
             //add to the list
             hash_spend_options.push(data.hash_upgrades.bladeburnerRank)
         }
         //if we need skill points
-        if(true) {
+        if(bladeburner_skill_points_needed(ns)) {
             //add to the list
             hash_spend_options.push(data.hash_upgrades.bladeburnerSkillPoints)
         }
