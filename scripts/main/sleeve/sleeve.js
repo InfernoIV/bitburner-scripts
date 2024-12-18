@@ -346,7 +346,7 @@ export function manage_actions(ns) {
  */
 export function buy_augments(ns) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
-    if (ns.peek(common.port.reset) == "gang") {
+    if (ns.peek(common.port.block_reset_gang) == common.port_commands.block_reset) {
         //do not buy augments
         return
     }
