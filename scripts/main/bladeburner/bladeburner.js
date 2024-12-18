@@ -400,3 +400,23 @@ function clear_teams(ns) {
         ns.bladeburner.setTeamSize(data.actions.type.operations, operation, 0)
     }
 }
+
+
+
+/**
+ * Function that returns if rank is still needed
+ */
+export function rank_needed(ns) {
+    //stub
+    return true
+}
+
+
+
+/**
+ * Function that returns if skill points are still needed
+ */
+export function skill_points_needed(ns) {
+    //stub
+    return true
+}
