@@ -32,7 +32,7 @@ export async function main(ns) {
         //if stopped
         if (flag_stop == true) {
             //if we should start again
-            if ((ns.peek(common.port.communication_scale_down_hack) == common.port_commands.enable)) {
+            if ((ns.peek(common.port.communication_hack_manager) == common.port_commands.enable)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Resuming HackManager")
                 //reset flag
@@ -46,7 +46,7 @@ export async function main(ns) {
         //running normally
         } else {
             //if command for stpoping
-            if ((ns.peek(common.port.communication_scale_down_hack) == common.port_commands.disable)) {
+            if ((ns.peek(common.port.communication_hack_manager) == common.port_commands.disable)) {
                 //log information
                 common.log(ns, config.log_level, common.info, "Pausing HackManager")
                 //set wait time
@@ -84,7 +84,7 @@ function init(ns) {
     //disable logging
     common.disable_logging(ns, config.log_disabled_topics)
     //clear UI data
-    ns.clearPort(common.port.communication_scale_down_hack)
+    ns.clearPort(common.port.communication_hack_manager)
 }
 
 class targetInfo {
