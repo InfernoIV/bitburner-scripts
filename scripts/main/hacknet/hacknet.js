@@ -3,7 +3,7 @@ import * as data from "./data.js"
 //common
 import * as common from "scripts/common.js"
 //corporation
-//import { } from "scripts/corporation/corporation.js"
+import { created_corporation } from "scripts/corporation/corporation.js"
 //bladeburner
 //import { } from "scripts/main/bladeburner/bladeburner.js"
 
@@ -164,7 +164,7 @@ function manage_hashes(ns) {
     //check on what we would like to spend on
     let hash_spend_options = []
     //if corporation is unlocked
-    if(false) {
+    if(created_corporation(ns)) {
         //if funds are needed (how to determine?)
         if(true) {
             //add to the list
