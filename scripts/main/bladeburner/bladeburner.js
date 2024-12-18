@@ -65,8 +65,11 @@ export function manage_action(ns) {
 function update_hash_needs(ns) {
     //get rank
     const rank = ns.bladeburner.getRank()
-    //get required rank
-    const rank_required = data.actions.blackOps[data.actions.blackOps.length-1].reqRank
+    //get final ops
+    const last_black_ops = data.actions.blackOps[Object.keys(data.actions.blackOps)[Object.keys(data.actions.blackOps).length - 1]]
+    //get rank
+    const rank_required = last_black_ops.reqRank
+
     //if rank is too low
     if (rank < rank_required) {
         //indicate need
@@ -75,7 +78,7 @@ function update_hash_needs(ns) {
     //no need
     else {
         //clear port
-        ns.clearPort(ns, common.port.hash_bladeburner_rank)
+        ns.clearPort(common.port.hash_bladeburner_rank)
     }
 
     //always ask for skill points
@@ -148,8 +151,10 @@ function update_ui(ns) {
             
         //get rank
         const rank = ns.bladeburner.getRank()
-        //get required rank
-        const rank_required = data.actions.blackOps[data.actions.blackOps.length-1].reqRank
+        //get final ops
+        const last_black_ops = data.actions.blackOps[Object.keys(data.actions.blackOps)[Object.keys(data.actions.blackOps).length - 1]]
+        //get rank
+        const rank_required = last_black_ops.reqRank
         //create message
         const message_rank = common.number_formatter(Math.floor(rank)) + "/" + common.number_formatter(rank_required) //400e3
         //write data to port
