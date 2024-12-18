@@ -263,6 +263,7 @@ export function number_formatter(number) {
 
 /**
  * Function that overwrites the specified port with new data
+ * Can this cause 'race' conditions when the port is temporary empty?
  * Cost: 0 GB
  */
 export function over_write_port(ns, port, data) {
