@@ -18,7 +18,7 @@ export function manage_network(ns) {
     //manage the hashes and return the highest cost
     const highest_hash_cost = manage_hashes(ns) 
     //expand the network (get more RAM)
-    number_of_nodes_owned = expand_network(ns)
+    const number_of_nodes_owned = expand_network(ns)
     //unlock hacknet faction
     if(unlock_hacknet_faction(ns, number_of_nodes_owned)) {
         //if unlocked, upgrade in priority (level, cores, cache)
@@ -35,14 +35,14 @@ function expand_network(ns) {
     //try to upgrade home RAM first
     ns.singularity.upgradeHomeRam()
     //for each buyable server possible
-    for (const index = ns.hacknet.numNodes(); index < ns.hacknet.maxNumNodes(); index++) {
+    for (let index = ns.hacknet.numNodes(); index < ns.hacknet.maxNumNodes(); index++) {
         //buy server
         ns.hacknet.purchaseNode()
     }
     //get the number of nodes owned
     const number_of_nodes_owned = ns.hacknet.numNodes()
     //for each owned server
-    for (const server_index = 0; server_index < number_of_nodes_owned; server_index++) {
+    for (let server_index = 0; server_index < number_of_nodes_owned; server_index++) {
         //upgrade ram
         ns.hacknet.upgradeRam(server_index)
     }
@@ -56,10 +56,10 @@ function expand_network(ns) {
 * Function that will level stats to unlock the hacknet faction
 */
 function unlock_hacknet_faction(ns, number_of_nodes_owned) {
+    //get the stats of the network (which are important to check)      
+    let hacknet_stats = { level: 0, cores: 0, }
     //for each owned server
-    for (const server_index = 0; server_index < number_of_nodes_owned; server_index++) {
-        //get the stats of the network (which are important to check)      
-        let hacknet_stats = { level: 0, cores: 0, }
+    for (let server_index = 0; server_index < number_of_nodes_owned; server_index++) {  
         //for each owned node
         for (let node_index = 0; node_index < number_of_nodes_owned; node_index++) {
             //get the stats
@@ -106,7 +106,7 @@ function upgrade_network(ns, number_of_nodes_owned, highest_hash_cost) {
     //upgrade home cores
     ns.singularity.upgradeHomeCores()
     //for each owned server
-    for (const server_index = 0; server_index < number_of_nodes_owned; server_index++) {
+    for (let server_index = 0; server_index < number_of_nodes_owned; server_index++) {
         //TODO: determine priority
         
         //upgrade cores
@@ -147,6 +147,7 @@ function upgrade_network(ns, number_of_nodes_owned, highest_hash_cost) {
 * hashUpgrade properties:
    * cost: If the upgrade has a flat cost (never increases), it goes here. Otherwise, this property should be undefined. This property overrides the 'costPerLevel' property
    * costPerLevel: Base cost for this upgrade. Every time the upgrade is purchased, its cost increases by this same amount (so its 1x, 2x, 3x, 4x, etc.)
+   * @param {NS} ns
  */
 function manage_hashes(ns) {
     //set default target to money
@@ -186,7 +187,7 @@ function manage_hashes(ns) {
     //for each option
     for (const hash_spend_option in hash_spend_options) {
         //get cost
-        const cost = ns.hashCost(hash_spend_option, 1)
+        const cost = ns.hacknet.hashCost(hash_spend_option, 1)
         //if lower cost or if not set yet
         if((cost < hash_spend_cost) || (hash_spend_cost == -1)) {
             //save option
@@ -196,5 +197,8 @@ function manage_hashes(ns) {
         }
     }
     //spend the hashes (or fail when to expensive: then it will succeed in the future)
-    ns.hacknet.spendHashes(hash_spend_target)
+    if(ns.hacknet.spendHashes(hash_spend_target)) {
+        //log information
+        common.log(ns, 1, "Spend hashes on '" + hash_spend_target + "'")
+    }
 }
