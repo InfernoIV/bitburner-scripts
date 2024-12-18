@@ -60,6 +60,7 @@ export const port_commands = {
     no_data: "NULL PORT DATA",
     block_reset: "Block Reset", //used for blocking resets
     needed: "Needed", //used for indicating hash spend
+    done: "Done", // used by stanek to indicate success
 }
 
 
