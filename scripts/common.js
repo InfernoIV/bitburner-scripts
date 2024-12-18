@@ -49,8 +49,8 @@ export const port = {
     hash_corporation_research: 33, //indication that research is still needed
     
     //reset communication: indicate blockage to prevent reset before it is ready / up to speed
-    reset_gang: 40, //all territory conquered
-    reset_corporation: 41, //company went public
+    block_reset_gang: 40, //all territory conquered
+    block_reset_corporation: 41, //company went public
     
 }
 
