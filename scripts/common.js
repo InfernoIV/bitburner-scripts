@@ -31,13 +31,39 @@ export const port = {
     stock: 5,
     backdoor: 6,
     stopHack: 7,
-    stanek: 8,
+    //stanek: 8,
+    
+    //communication
+    communication_scale_down_hack: 10, //port to provide signal for the hackmanager to pause (to enable other scripts to start)
+    communication_backdoor: 11, //port to provide information on which server to backdoor
+    
+    //ui communication
+    ui_hack: 20, //port to provide information on hack status
+    ui_corporation: 21, //port to provide information on corporation status
+    ui_bladeburner: 22, //port to provide information on bladeburner status
+    
+    //hash communication
+    hash_bladeburner_skill_points: 30, //indication that skill points are still needed
+    hash_bladeburner_rank: 31, //indication that rank is still needed
+    hash_corporation_funds: 32, //indication that funds are still needed
+    hash_corporation_research: 33, //indication that research is still needed
+    
+    //reset communication: indicate blockage to prevent reset before it is ready / up to speed
+    reset_gang: 40, //all territory conquered
+    reset_corporation: 41, //company went public
+    
 }
 
 
 
-//no port data definition
-export const port_no_data = "NULL PORT DATA"
+/**
+ * port commands, used in communication with hack manager and hash communication
+ */
+export const port_commands = {
+    enable: "Disable",
+    disable: "Enable",
+    no_data: "NULL PORT DATA"
+}
 
 
 
@@ -100,14 +126,6 @@ export const cities = {
     newTokyo: "New Tokyo",
     sector12: "Sector-12",
     volhaven: "Volhaven",
-}
-
-
-
-// hacking commands
-export const hacking_commands = {
-    start: "Start",
-    stop: "Stop",
 }
 
 
