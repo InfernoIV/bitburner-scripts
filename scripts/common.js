@@ -40,7 +40,9 @@ export const port = {
     //ui communication
     ui_hack: 20, //port to provide information on hack status
     ui_corporation: 21, //port to provide information on corporation status
-    ui_bladeburner: 22, //port to provide information on bladeburner status
+    ui_bladeburner_stamina: 22, //port to provide information on bladeburner status
+    ui_bladeburner_rank: 23, //port to provide information on bladeburner status
+    ui_bladeburner_black_ops: 23, //port to provide information on bladeburner status
     
     //hash communication
     hash_bladeburner_skill_points: 30, //indication that skill points are still needed
