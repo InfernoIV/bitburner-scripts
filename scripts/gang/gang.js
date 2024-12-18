@@ -44,8 +44,6 @@ export async function main(ns) {
             previous_wanted_level = manage_member(ns, territory_clash, gang_member_name, previous_wanted_level)
             //wait for next update, so the effect of the task is taken into account (e.g. lowering wanted level)
             await ns.gang.nextUpdate()
-            //update UI
-            //updateUI(ns)
         }
     }
 }
@@ -60,7 +58,7 @@ export async function main(ns) {
 async function init(ns) {
     //disable logging
     //common.disable_logging(ns, config.log_disabled_topics)
-    
+
     //if already in a gang
     if (ns.gang.inGang()) {
         //set clash to false
@@ -201,14 +199,14 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
     //if the desired level or mulitplier is too low
     if (!training_level_reached || !training_multiplier_reached) {
         //update UI
-        common.over_write_port(ns, common.port.gang, "Training")
+        updateUI(ns, "Training")
         //return the action
         return train_action
         
     //if not enough members unlocked
     } else if (!gang_members_maxed) {
         //update UI
-        common.over_write_port(ns, common.port.gang, "Growing gang")
+        updateUI(ns, "Growing gang")
         //if members can be unlocked: gain reputation
         return data.gang_task.reputation
         
@@ -220,33 +218,27 @@ function determine_member_action(ns, wanted_level, previous_wanted_level, territ
     //if not all upgrades unlocked
     } else if (!desired_upgrades_unlocked) {
         //block resets
-        common.over_write_port(ns, common.port.reset, "gang")
+        block_reset(ns, true)
         //update UI
-        common.over_write_port(ns, common.port.gang, "Get equipment: " + upgrades_owned.length + " / " + config.desired_equipment)
+        updateUI(ns, "Get equipment: " + upgrades_owned.length + " / " + config.desired_equipment)
         //raise money to buy upgrades
         return data.gang_task.money
         
     //if clashing: gain territory  
     } else if (territory_clash == data.territory_clash.start ) {
-        //if we are still blocking resets
-        if (ns.peek(common.port.reset) == "gang") {
-            //remove this message
-            ns.readPort(common.port.reset)
-        }
+        //stop blocking resets
+        block_reset(ns, false)
         //update UI
-        common.over_write_port(ns, common.port.gang, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
+        updateUI(ns, "Territory Warfare: " + Math.round(ns.gang.getGangInformation().territory * 100) + "%")
         //perform gang war
         return data.gang_task.power
         
     //if all territory is owned: focus on getting money   
     } else if (territory_clash == data.territory_clash.complete) {
+        //stop blocking resets
+        block_reset(ns, false)
         //indicate status
-        common.over_write_port(ns, common.port.gang, "Farming")
-        //if we are still blocking resets
-        if (ns.peek(common.port.reset) == "gang") {
-            //remove this message
-            ns.readPort(common.port.reset)
-        }
+        updateUI(ns, "Farming")
         //raise money
         return data.gang_task.money
         
@@ -678,4 +670,31 @@ function get_upgrades(ns) {
     }
     //return the list
     return upgrade_list
+}
+
+
+/**
+ * Function that writes information to the port to be picked up by UI
+ */
+function updateUI(ns, message) {
+    //write data to port
+    common.over_write_port(ns, common.port.ui_gang, message)
+}
+
+
+
+/**
+ * Function that writes data to block reset
+ */
+function block_reset(ns, block_reset) {
+    //if blocking the reset
+    if(block_reset) {
+        //we are blocking the reset
+        common.over_write_port(ns, common.port.reset_gang, common.port_commands.block_reset)
+    } 
+    //we are not blocking the reset
+    else {
+        //clear the port
+        ns.clearPort(common.port.reset_gang)
+    }
 }
