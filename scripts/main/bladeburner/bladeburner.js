@@ -53,6 +53,33 @@ export function manage_action(ns) {
     }
     //update UI
     update_ui(ns)
+    //update hash needs
+    update_hash_needs(ns)
+}
+
+
+
+/**
+ * Function that indicate needs for skill points and rank
+ */
+function update_hash_needs(ns) {
+    //get rank
+    const rank = ns.bladeburner.getRank()
+    //get required rank
+    const rank_required = data.actions.blackOps[data.actions.blackOps.length-1].reqRank
+    //if rank is too low
+    if (rank < rank_required) {
+        //indicate need
+        common.over_write_port(ns, common.port.hash_bladeburner_rank, common.port_commands.needed)
+    } 
+    //no need
+    else {
+        //clear port
+        ns.clearPort(ns, common.port.hash_bladeburner_rank)
+    }
+
+    //always ask for skill points
+    common.over_write_port(ns, common.port.hash_bladeburner_skill_points, common.port_commands.needed)
 }
 
 
@@ -108,14 +135,8 @@ export function has_completed_all_black_ops(ns) {
  * Function that returns the headers and values used to update the ui
  */
 function update_ui(ns) {
-    //create new headers list
-    const headers = []
-    //create new values list
-    const values = []
-
     //if blade burner is active
     if (get_access(ns)) {
-        
         //get stamina stamina
         const stamina = ns.bladeburner.getStamina()
         //determine percentage
@@ -127,8 +148,10 @@ function update_ui(ns) {
             
         //get rank
         const rank = ns.bladeburner.getRank()
+        //get required rank
+        const rank_required = data.actions.blackOps[data.actions.blackOps.length-1].reqRank
         //create message
-        const message_rank = common.number_formatter(Math.floor(rank)) + "/" + common.number_formatter(400e3)
+        const message_rank = common.number_formatter(Math.floor(rank)) + "/" + common.number_formatter(rank_required) //400e3
         //write data to port
         common.over_write_port(ns, common.port.ui_bladeburner_rank, message_rank)
 
@@ -407,24 +430,4 @@ function clear_teams(ns) {
         //set size to 0
         ns.bladeburner.setTeamSize(data.actions.type.operations, operation, 0)
     }
-}
-
-
-
-/**
- * Function that returns if rank is still needed
- */
-export function rank_needed(ns) {
-    //stub
-    return true
-}
-
-
-
-/**
- * Function that returns if skill points are still needed
- */
-export function skill_points_needed(ns) {
-    //stub
-    return true
 }
