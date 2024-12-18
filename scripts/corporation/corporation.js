@@ -26,7 +26,10 @@ export async function main(ns) {
       //indicate no need for funds and research
       set_funds_needed(ns, false)
       set_research_needed(ns, false)
-      
+        
+      //stop blocking resets
+      block_reset(ns, false)
+        
       //setup tobacco
       await setupTobacco(ns)
     }
@@ -64,6 +67,24 @@ function set_research_needed(ns, is_research_needed) {
 
 
 /**
+ * Function that will block reset from ocurring
+ */
+function block_reset(ns, block_reset) {
+    //if blocking the reset
+    if(block_reset) {
+        //we are blocking the reset
+        common.over_write_port(ns, common.port.reset_corporation, common.port_commands.block_reset)
+    } 
+    //we are not blocking the reset
+    else {
+        //clear the port
+        ns.clearPort(common.port.reset_corporation)
+    }
+}
+
+
+
+/**
  * Function that sets 1 time things on boot
  * Cost: 0 GB
  */
@@ -76,12 +97,13 @@ function init(ns) {
 
     //clear data
     ns.clearPort(common.port.ui_corporation)
-
         
     //indicate need for funds and research
     set_funds_needed(ns, true)
     set_research_needed(ns, true)
-  
+
+    //block reset
+    block_reset(ns, true)
     //log(ns,1,info,"investment: " + JSON.stringify(ns.corporation.getInvestmentOffer()))
 }
 
