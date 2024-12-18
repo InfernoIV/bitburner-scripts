@@ -74,7 +74,7 @@ async function chargeFragments(ns, threads) {
                 fragment.x, fragment.y)
             //wait for the script to complete
             //while not getting the "Done" message
-            while (ns.readPort(common.port.stanek) != config.message_done) {
+            while (ns.readPort(common.port.communication_stanek) != config.message_done) {
                 //wait a bit
                 await ns.sleep(1)
             }
