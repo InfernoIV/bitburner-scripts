@@ -51,13 +51,24 @@ export async function main(ns) {
 
 
 /**
- * Function that returns if corporation i
+ * Function that returns if corporation is created
  * Cost: 0 GB
    * corporation.hasCorporation: 0 GB
  */
 export function created_corporation(ns) {
   //return if the corporation has started
   return ns.corporation.hasCorporation()
+}
+
+
+
+/**
+ * Function that determines if funds are needed
+ * Currently returns if the corporation is public?
+ */
+export function funds_needed(ns) {
+  //stub
+  return false
 }
 
 
