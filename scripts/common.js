@@ -65,7 +65,8 @@ export const port_commands = {
     enable: "Disable",
     disable: "Enable",
     no_data: "NULL PORT DATA",
-    block_reset: "Block Reset",
+    block_reset: "Block Reset", //used for blocking resets
+    needed: "Needed", //used for indicating hash spend
 }
 
 
