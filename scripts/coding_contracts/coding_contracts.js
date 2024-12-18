@@ -45,6 +45,7 @@ function check_for_contracts(ns) {
   //set the default value for the contract
   let contract = "NONE FOUND"
   //stub
+  //need to find '.cct' file on the root of the server
   return contract
 }
 
