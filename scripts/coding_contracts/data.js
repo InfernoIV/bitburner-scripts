@@ -352,7 +352,7 @@ const contract_type = {
         "&nbsp; &nbsp; 5aaabb45072 &nbsp; &nbsp; &nbsp;-> &nbsp;aaabbaaababababa\n",
         "&nbsp; &nbsp; 5aaabb450723abb &nbsp;-> &nbsp;aaabbaaababababaabb",
    */
-   Compression II: LZ Decompression: "Compression II: LZ Decompression",
+   compression_2_lz_decompression: "Compression II: LZ Decompression",
 
 /*
 "Lempel-Ziv (LZ) compression is a data compression technique which encodes data using references to",
