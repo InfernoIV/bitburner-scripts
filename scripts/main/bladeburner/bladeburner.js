@@ -51,6 +51,8 @@ export function manage_action(ns) {
         //start this action
         ns.bladeburner.startAction(best_action.type, best_action.name)
     }
+    //update UI
+    update_ui(ns)
 }
 
 
@@ -105,7 +107,7 @@ export function has_completed_all_black_ops(ns) {
 /**
  * Function that returns the headers and values used to update the ui
  */
-export function update_ui(ns) {
+function update_ui(ns) {
     //create new headers list
     const headers = []
     //create new values list
@@ -113,24 +115,30 @@ export function update_ui(ns) {
 
     //if blade burner is active
     if (get_access(ns)) {
-        //stamina
-        headers.push("Bladeburner stamina")
+        
+        //get stamina stamina
         const stamina = ns.bladeburner.getStamina()
+        //determine percentage
         const stamina_percentage = Math.round(stamina[0] / stamina[1] * 100)
-        values.push(common.number_formatter(stamina[0]) + "/" + common.number_formatter(stamina[1]) + " (" + stamina_percentage + "%)")
-        //rank
-        headers.push("Bladeburner rank")
-        values.push(common.number_formatter(Math.floor(ns.bladeburner.getRank())) + "/" + common.number_formatter(400e3))
+        //create message
+        const message_stamina = common.number_formatter(stamina[0]) + "/" + common.number_formatter(stamina[1]) + " (" + stamina_percentage + "%)"
+        //write data to port
+        common.over_write_port(ns, common.port.ui_bladeburner_stamina, message_stamina)
+            
+        //get rank
+        const rank = ns.bladeburner.getRank()
+        //create message
+        const message_rank = common.number_formatter(Math.floor(rank)) + "/" + common.number_formatter(400e3)
+        //write data to port
+        common.over_write_port(ns, common.port.ui_bladeburner_rank, message_rank)
 
-        //blackOps completed
+        //get number of black ops completed
         const black_ops_completed = get_number_of_completed_black_ops(ns)
-        //add the text
-        headers.push("Bladeburner BlackOps")
-        //add the data
-        values.push(black_ops_completed + "/" + data.actions.blackOps.length) //was 21 (this should be dynamic
+        //create message
+        const message_black_ops = black_ops_completed + "/" + data.actions.blackOps.length
+        //write data to port
+        common.over_write_port(ns, common.port.ui_bladeburner_black_ops, message_black_ops)                        
     }
-    //return the headers and values
-    return headers, values
 }
 
 
