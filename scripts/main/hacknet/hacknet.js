@@ -2,10 +2,6 @@
 import * as data from "./data.js"
 //common
 import * as common from "scripts/common.js"
-//corporation
-import { created_corporation, funds_needed as corporation_funds_needed } from "scripts/corporation/corporation.js"
-//bladeburner
-import { get_access as bladeburner_get_access, rank_needed as bladeburner_rank_needed, skill_points_needed as bladeburner_skill_points_needed } from "scripts/main/bladeburner/bladeburner.js"
 
 
 
@@ -163,29 +159,27 @@ function manage_hashes(ns) {
     }
     //check on what we would like to spend on
     let hash_spend_options = []
-    //if corporation is unlocked
-    if(created_corporation(ns)) {
-        //if funds are needed (how to determine?)
-        if(corporation_funds_needed(ns)) {
-            //add to the list
-            hash_spend_options.push(data.hash_upgrades.corporationFunds)
-        }
+    //if corporation funds are needed
+    if(ns.peek(common.port.hash_corporation_funds) == common.port_commands.needed) {
+        //add to the list
+        hash_spend_options.push(data.hash_upgrades.corporationFunds)
+    }
+    //if corporation research is need
+    if(ns.peek(common.port.hash_corporation_research) == common.port_commands.needed) {
         //add research to the list
         hash_spend_options.push(data.hash_upgrades.corporationResearch)
     }
-    //if bladeburner is unlocked
-    if(bladeburner_get_access(ns)) {
-        //if we need rank
-        if(bladeburner_rank_needed(ns)) {
-            //add to the list
-            hash_spend_options.push(data.hash_upgrades.bladeburnerRank)
-        }
-        //if we need skill points
-        if(bladeburner_skill_points_needed(ns)) {
-            //add to the list
-            hash_spend_options.push(data.hash_upgrades.bladeburnerSkillPoints)
-        }
+    //if we need bladeburner rank
+    if(ns.peek(common.port.hash_bladeburner_rank) == common.port_commands.needed) {
+        //add to the list
+        hash_spend_options.push(data.hash_upgrades.bladeburnerRank)
     }
+    //if we need bladeburner skill points
+   if(ns.peek(common.port.hash_bladeburner_skill_points) == common.port_commands.needed) {
+        //add to the list
+        hash_spend_options.push(data.hash_upgrades.bladeburnerSkillPoints)
+    }
+    
     //get the lowest to spend of the list
     //variable to store cost in (set to high)
     let hash_spend_cost = -1
@@ -201,6 +195,6 @@ function manage_hashes(ns) {
             hash_spend_cost = cost
         }
     }
-    //spend the hashes
+    //spend the hashes (or fail when to expensive: then it will succeed in the future)
     ns.hacknet.spendHashes(hash_spend_target)
 }
