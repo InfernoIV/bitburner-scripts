@@ -939,26 +939,23 @@ function update_ui(ns, bit_node_multipliers) {
         //add specifics to data
         values.push(sleeve_values[index])
     }
-    /*
-    //bladeburner
-    const [bladeburner_headers, bladeburner_values] = bladeburner.update_ui(ns)
-    headers.push(bladeburner_headers)
-    values.push(bladeburner_values)
-    */
+
     //space for readable text
     headers.push("_______________________________")
     values.push("_______________________________")
 
-    //external scripts
-    for (const port in common.port) {
-        //check what is on the port
-        const value = ns.peek(common.port[port])
-        //if a value is set
-        if (value != common.port_commands.no_data) {
-            //show the value + activity.type.slice(1).
-            //port name, with first letter to upper case
-            headers.push(port.charAt(0).toUpperCase() + port.slice(1))
-            values.push(value)
+    //for each defined port from the config
+    for (const port_data of config.ports_to_read_ui) {  
+        //get port data 
+        const header = port_data[0]
+        const port_number = port_data[1]
+        //get the data from the port
+        const port_data = ns.peek(port_number)
+        //check if we want to show
+        if(port_data != common.port_commands.no_data) {
+            //add data
+            headers.push(header)
+            values.push(port_data)
         }
     }
 
