@@ -24,13 +24,13 @@ export async function main(ns) {
     //main loop
     while (true) {
         //get hostname (only remove data when finished)
-        let server = ns.peek(common.port.backdoor)
+        const server = ns.peek(common.port.communication_backdoor)
         //if set
-        if (server != common.port_no_data) {
+        if (server != common.port_commands.no_data) {
             //backdoor the server
             await backdoor_server(ns, server)
-            //remove the current hostname from the port (only when it has finished
-            ns.readPort(common.port.backdoor)
+            //remove the current hostname from the port (only when it has finished)
+            ns.readPort(common.port.communication_backdoor)
         }
         //wait a bit
         await ns.sleep(100)
