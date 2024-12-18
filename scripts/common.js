@@ -28,6 +28,7 @@ export const port = {
     //communication
     communication_hack_manager: 10, //port to provide signal for the hackmanager to pause (to enable other scripts to start)
     communication_backdoor: 11, //port to provide information on which server to backdoor
+    communication_stanek: 11, //port to provide information to the stanek worker
     
     //ui communication
     ui_hack: 20, //port to provide information on hack status
