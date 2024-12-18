@@ -43,6 +43,7 @@ export const port = {
     ui_bladeburner_stamina: 22, //port to provide information on bladeburner status
     ui_bladeburner_rank: 23, //port to provide information on bladeburner status
     ui_bladeburner_black_ops: 24, //port to provide information on bladeburner status
+    ui_gang: 25, //port to provide information on gang status
     
     //hash communication
     hash_bladeburner_skill_points: 30, //indication that skill points are still needed
