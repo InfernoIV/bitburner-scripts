@@ -49,7 +49,9 @@ export async function main(ns) {
     sleeve.init(ns)
     //keep track of launched scripts
     let launched_scripts = []
-
+    //keep track of backdoored servers
+    let backdoored_servers = []
+    
     //main loop
     while (true) {
         //main script: 3,1 GB  
@@ -60,7 +62,7 @@ export async function main(ns) {
         manage_companies(ns) //3 GB
 
         //hacking & scripts: 18,7 GB
-        manage_hacking(ns)   //4,3 GB
+        backdoored_servers = manage_hacking(ns, backdoored_servers)   //4,3 GB
         launched_scripts = manage_scripts(ns, launched_scripts, bit_node_multipliers)  //4,4 GB
 
         //player actions & bladeburner: 71 GB
@@ -103,8 +105,9 @@ function init(ns) {
     //disable unwanted logs
     common.disable_logging(ns, config.log_disabled_topics) 
 
-    //clear reset port
-    ns.clearPort(common.port.reset)
+    //clear reset ports
+    ns.clearPort(common.port.block_reset_gang)
+    ns.clearPort(common.port.block_reset_corporation)
 
     //for each server
     for (const server of get_servers(ns)) {
@@ -115,7 +118,7 @@ function init(ns) {
     }
 
     //signal hackManager to stop
-    common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
+    common.over_write_port(ns, common.port.communication_hack_manager, common.port_commands.disable)
 
     //get the UI
     const doc = eval('document')
@@ -229,9 +232,12 @@ function manage_augment_installation(ns) {
     //if enough augments bought for a reset
     if (augments_to_be_installed >= config.augments_minimum_for_reset) {
         //read the port if we need to wait
-        const reason_to_wait = ns.peek(common.port.reset)
-        //check if there is no reason to wait
-        if (reason_to_wait == common.port_no_data) {
+        const block_reset_gang = ns.peek(common.port.block_reset_gang)
+        const block_reset_corporation = ns.peek(common.port.block_reset_corporation)
+        
+        //check if there is no reason to wait (gang and corporation are not blocking)
+        if ((block_reset_gang != common.port_commands.block_reset) &&
+           (block_reset_corporation != common.port_commands.block_reset_corporation)) {
             //TODO: better way to go over the factions? Check each faction and start with the faction with the smallest difference between rep cost and rep have? 
             //for every joined faction
             for (const faction of ns.getPlayer().factions) {
@@ -257,7 +263,7 @@ function manage_augment_installation(ns) {
  */
 function buy_augments(ns) {
     //if gang is busy with growing (and thus requiring money and blocking resets)
-    if (ns.peek(common.port.reset) == "gang") {
+    if (ns.peek(common.port.block_reset_gang) == common.port_commands.block_reset) {
         //do not buy augments
         return
     }
@@ -433,9 +439,9 @@ function manage_companies(ns) {
  * 
  * TODO: manager backdoor external script
  */
-function manage_hacking(ns) {
+function manage_hacking(ns, backdoored_servers) {
     //get player hacking stat
-    let hacking = ns.getPlayer().skills.hacking
+    const hacking = ns.getPlayer().skills.hacking
 
     //try to purchase TOR (returns true if we already have it)
     if (ns.singularity.purchaseTor()) {
@@ -473,9 +479,12 @@ function manage_hacking(ns) {
         if ((!server.startsWith("hacknet")) &&
             (ns.getServer(server).hasAdminRights) &&
             (!ns.getServer(server).backdoorInstalled) && 
-            (ns.getPlayer().skills.hacking >= ns.getServer(server).requiredHackingSkill)) {
-                //write hostname
-                ns.writePort(common.port.backdoor, server)
+            (ns.getPlayer().skills.hacking >= ns.getServer(server).requiredHackingSkill) &&
+            (backdoored_servers.indexOf(server) == -1)) {
+            //write hostname to backdoor manager
+            ns.writePort(common.port.communication_backdoor, server)
+            //add to list, to prevent repeated backdooring..
+            backdoored_servers.push(server)
         }
     }
 }
@@ -543,7 +552,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             //if not already launched
             if (launched_scripts.indexOf(script) == -1) {
                 //signal hackManager to stop
-                common.over_write_port(ns, common.port.stopHack, common.hacking_commands.stop)
+                common.over_write_port(ns, common.port.communication_hack_manager, common.port_commands.disable)
                 //get all servers that can run scripts
                 const servers_that_can_execute = get_server_specific(ns, true)
                 //get script ram 
@@ -590,7 +599,7 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
             }
         }
         //indicate to hack manager that it can resume
-        common.over_write_port(ns, common.port.stopHack, common.hacking_commands.start)
+        common.over_write_port(ns, common.port.communication_hack_manager, common.port_commands.enable)
     }
     //return the list
     return launched_scripts
@@ -930,12 +939,12 @@ function update_ui(ns, bit_node_multipliers) {
         //add specifics to data
         values.push(sleeve_values[index])
     }
-
+    /*
     //bladeburner
     const [bladeburner_headers, bladeburner_values] = bladeburner.update_ui(ns)
     headers.push(bladeburner_headers)
     values.push(bladeburner_values)
-
+    */
     //space for readable text
     headers.push("_______________________________")
     values.push("_______________________________")
@@ -945,8 +954,9 @@ function update_ui(ns, bit_node_multipliers) {
         //check what is on the port
         const value = ns.peek(common.port[port])
         //if a value is set
-        if (value != common.port_no_data) {
+        if (value != common.port_commands.no_data) {
             //show the value + activity.type.slice(1).
+            //port name, with first letter to upper case
             headers.push(port.charAt(0).toUpperCase() + port.slice(1))
             values.push(value)
         }
