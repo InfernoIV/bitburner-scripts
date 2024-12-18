@@ -4,7 +4,8 @@ import { log, success, warning, error, info, numberFormatter } from "scripts/log
 /*
   Script that creates and manages the corporation (Agriculture -> Tobacco)          
 */
-
+//common
+import * as common from "scripts/common.js"
 
 /*
 import { data.corporation_requirement_money } from "scripts/corporation.js"
@@ -15,9 +16,6 @@ import * as config from "./config.js"
 import * as data from "./data.js"
 
 
-
-
-
 /*
 Main function
 */
@@ -25,18 +23,8 @@ Main function
 export async function main(ns) {
     //initialize
     init(ns)
-
-    //if no corporation
-    if (!ns.corporation.hasCorporation()) {
-        //while corporation is not created
-        while (!ns.corporation.createCorporation("InfernoIV", true)) {
-            //wait a bit
-            await ns.sleep(1000)
-        }
-    }
-
-    //get corporation
-    let corp = ns.corporation.getCorporation()
+    //create corporation
+    let corp = create_corporation(ns)
 
     //if tobacco has not been created yet, then agriculture is not or may not be finished...
     if (corp.divisions.length < 2) {
@@ -62,9 +50,22 @@ export async function main(ns) {
 
 
 
-/*
-function that sets 1 time things on boot
-*/
+/**
+ * Function that returns if corporation i
+ * Cost: 0 GB
+   * corporation.hasCorporation: 0 GB
+ */
+export function created_corporation(ns) {
+  //return if the corporation has started
+  return ns.corporation.hasCorporation()
+}
+
+
+
+/**
+ * Function that sets 1 time things on boot
+ * Cost: 0 GB
+ */
 function init(ns) {
     //disable logs
     common.disable_logging(ns, config.disabled_logs)
@@ -79,10 +80,30 @@ function init(ns) {
 }
 
 
+/**
+ * Function that creates the corporation
+ * Cost: 
+   * Corporation.createCorporation: 20 GB
+   * Corporation.getCorporation: 10 GB
+ */
+async function create_corporation(ns) {
+  //if no corporation
+  if (!created_corporation(ns)) {
+    //while corporation is not created
+    while (!ns.corporation.createCorporation("InfernoIV", true)) {
+      //wait a bit
+      await ns.sleep(1000)
+    }
+  }
+  //return the corporation
+  return ns.corporation.getCorporation()
+}
 
-/*
-function that sets up agriculture
-*/
+
+
+/**
+ * function that sets up agriculture
+ */
 async function setupAgriculture(ns) {
     //check where we are with investments
     let investment = ns.corporation.getInvestmentOffer()
