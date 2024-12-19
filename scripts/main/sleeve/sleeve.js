@@ -106,11 +106,10 @@ function determine_actions(ns, number_of_sleeves) {
         const bladeburner_action = i_bladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
 
         //if too much shock (round up for comparison)
-        /*
         if (Math.max(sleeve.shock) > config.shock_maximum_desired) {
             //add action
             desired_actions.add_action(ns, index, { type: data.activities.recovery, value: " " })
-        }*/
+        }
         //not reached target kills
         /*else*/ if (player.numPeopleKilled < data.requirements.kills_for_factions) {
             //add action
