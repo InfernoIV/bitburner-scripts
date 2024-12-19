@@ -1,14 +1,20 @@
+//common
+import * as common from "scripts/common.js"
+
 /** @param {NS} ns */
 export async function main(ns) {
-    let scriptsJump = "scripts/jump.js"
-    let scriptMain = "scripts/main.js"
+    //get ram from home
+    const ramHome = ns.getServerMaxRam(common.servers.home)
+    //get ram of jump
+    //let ram_jump = ns.getScriptRam(common.scripts.jump)
+    //get ram of jump 2
+    let ram_jump_2 = ns.getScriptRam(common.scripts.jump2)
+    //get ram of main
+    let ram_main = ns.getScriptRam(common.scripts.main)
 
-    const ramHome = ns.getServerMaxRam("home")
-    let ramJump = ns.getScriptRam(scriptsJump) 
-    let ramMain =  ns.getScriptRam(scriptMain)
-
-    ns.tprint("ramHome: " + ramHome)
-    ns.tprint("ramJump: " + ramJump)
-    ns.tprint("ramMain: " + ramMain)
-    ns.tprint("total ram: " + (ramJump + ramMain))
+    //ns.tprint("ram Home: " + ramHome)
+    //ns.tprint("ram Jump: " + ram_jump)
+    //ns.tprint("ram Jump2: " + ram_jump_2)
+    //ns.tprint("ramMain: " + ram_main)
+    ns.tprint("total ram: " + (ram_jump_2 + ram_main) + " < " + ramHome + " = " + ((ram_jump_2 + ram_main) < ramHome))
 }
