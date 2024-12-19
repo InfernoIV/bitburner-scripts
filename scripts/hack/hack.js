@@ -442,7 +442,7 @@ class targetInfo {
         const money_percentage = "" + common.number_formatter(ns.getServerMoneyAvailable(this.hostname)) + "/" + common.number_formatter(ns.getServerMaxMoney(this.hostname))
         const security_percentage = "" + common.number_formatter(Math.floor(ns.getServerBaseSecurityLevel(this.hostname))) + "/" + common.number_formatter(Math.floor(ns.getServerSecurityLevel(this.hostname)))
         //update UI with the current server status
-        update_ui(ns, this.hostname, "Hack: " + moneyPercentage + ", " + securityPercentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
+        update_ui(ns, this.hostname, "Hack: " + money_percentage + ", " + security_percentage)//Math.round(moneyPercentage) + "%, " + Math.round(securityPercentage) + "%")
         //execute the batch
         await this.executeBatch(ns, "hack")
     }
