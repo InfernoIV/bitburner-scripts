@@ -203,7 +203,7 @@ export function get_best_city(ns) {
         //we also need to check if there are any synthoids, otherwise all operations and contracts have a 0% success chance 
         //and actions will default to Field analysis, which will do nothing...
         //if lower than previous and there is synthoids in the city
-        if (cityChaos < chaos_lowest && ns.bladeburner.getCityEstimatedPopulation(city) > 0) {
+        if (cityChaos < chaos_lowest /*&& ns.bladeburner.getCityEstimatedPopulation(city) > 0*/) {
             //update best city
             best_city = city
             //update lowest chaos
