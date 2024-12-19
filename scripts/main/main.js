@@ -462,7 +462,6 @@ function manage_hacking(ns, backdoored_servers) {
             ns.singularity.purchaseProgram(data.hack_tools.sQLInject)
         }
     }
-
     //get all servers
     for (const server of get_servers(ns)) {
         //if no admin rights (should resolve owned servers automatically)
@@ -487,6 +486,8 @@ function manage_hacking(ns, backdoored_servers) {
             backdoored_servers.push(server)
         }
     }
+    //return the list
+    return backdoored_servers
 }
 
 
