@@ -201,4 +201,9 @@ function manage_hashes(ns) {
         //log information
         common.log(ns, 1, "Spend hashes on '" + hash_spend_target + "'")
     }
+    //get hash data
+    const num_hashes = ns.hacknet.numHashes()
+    const max_hashes = ns.hacknet.hashCapacity()
+    //write data to port
+    common.over_write_port(ns, common.port.hash_amount, num_hashes + "/" + max_hashes)
 }
