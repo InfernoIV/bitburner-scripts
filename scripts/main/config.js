@@ -64,6 +64,7 @@ export const ports_to_read_ui = [
   ["Bladeburner Rank", common.port.ui_bladeburner_rank],
   ["Bladeburner Black Ops", common.port.ui_bladeburner_black_ops],
   //hash
+  ["Hashes", common.port.hash_amount],
   ["Hash bladeburner skill point", common.port.hash_bladeburner_skill_points],
   ["Hash bladeburner rank", common.port.hash_bladeburner_rank],
   ["Hash Corporation funds", common.port.hash_corporation_funds],
