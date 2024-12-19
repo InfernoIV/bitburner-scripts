@@ -5,7 +5,10 @@ import * as common from "./common.js"
 
 /** @param {NS} ns */
 export async function main(ns) {    
-    //TODO: check if getRestInfo is still broken (ownedSF is empty)
+    //run ram script fro debugging
+    ns.run(common.scripts.ram, 1)
+    
+    //TODO: check if getRestInfo is still broken (ownedSF is empty for some reason)
     common.log(ns, 1, common.info, "ns.getResetInfo(): " + JSON.stringify(ns.getResetInfo()))
     
     //prepare information to be used later by other functions
