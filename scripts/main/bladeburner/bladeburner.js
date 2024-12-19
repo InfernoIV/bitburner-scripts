@@ -163,7 +163,7 @@ function update_ui(ns) {
         //get number of black ops completed
         const black_ops_completed = get_number_of_completed_black_ops(ns)
         //create message
-        const message_black_ops = black_ops_completed + "/" + data.actions.blackOps.length
+        const message_black_ops = black_ops_completed + "/" + Object.keys(data.actions.blackOps).length
         //write data to port
         common.over_write_port(ns, common.port.ui_bladeburner_black_ops, message_black_ops)                        
     }
