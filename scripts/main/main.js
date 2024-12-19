@@ -946,6 +946,8 @@ function update_ui(ns, bit_node_multipliers) {
 
     //for each defined port from the config
     for (const port_data_entry of config.ports_to_read_ui) {  
+        //debug
+        //common.log(ns,1,common.info,"port_data_entry: " + JSON.stringify(port_data_entry))
         //get port data 
         const header = port_data_entry[0]
         const port_number = port_data_entry[1]
