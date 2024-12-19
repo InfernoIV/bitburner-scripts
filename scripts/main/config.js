@@ -69,6 +69,6 @@ export const ports_to_read_ui = [
   ["Hash Corporation funds", common.port.hash_corporation_funds],
   ["Hash Corporation research", common.port.hash_corporation_research],
   //resets
-  ["Reset Gang", common.port.reset_gang],
-  ["Reset Corporation", common.port.reset_corporation],  
+  ["Reset Gang", common.port.block_reset_gang],
+  ["Reset Corporation", common.port.block_reset_corporation],
 ]
