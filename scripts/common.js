@@ -110,6 +110,8 @@ export const scripts = {
     stanek_charge: "scripts/stanek/charge_grid.js",
     worker_charge: "scripts/stanek/worker_charge.js",
     //stanekBuy: "scripts/stanek/stanekBuy.js",
+    //utility
+    ram: "scripts/utility/ram.js",
 }
 
 
