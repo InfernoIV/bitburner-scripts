@@ -26,7 +26,7 @@ import * as data from "../data.js"
 //config
 import * as config from "./config.js"
 //bladeburner
-import * as bladeburner from "./bladeburner/bladeburner.js"
+import * as i_bladeburner from "./bladeburner/bladeburner.js"
 
 
 
@@ -103,7 +103,7 @@ function determine_actions(ns, number_of_sleeves) {
         //get sleeve
         const sleeve = ns.sleeve.getSleeve(index)
         //check if we can do bladeburner work
-        const bladeburner_action = bladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
+        const bladeburner_action = i_bladeburnerbladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
 
         //if too much shock (round up for comparison)
         /*
@@ -278,7 +278,7 @@ function execute_actions(ns, desired_actions) {
                     //case data.activities.support:  //support as member of bladeburner? properties: type
                     //common.log(ns,1,common.info, index + " desired_action: " + JSON.stringify(desired_action))
                     //do bladeburner stuff
-                    bladeburner.execute_action(ns, index, desired_action)
+                    i_bladeburner.execute_action(ns, index, desired_action)
                     //stop looking
                     break
 
@@ -435,7 +435,7 @@ function get_activity(ns, index = -1) {
                 //bladeburner
                 case data.activities.bladeburner:
                 case data.activities.infiltrate:
-                    activity.value = bladeburner.get_activity(ns, sleeve_activity)
+                    activity.value = i_bladeburner.get_activity(ns, sleeve_activity)
                     break //only type property
                 //case data.activities.support: activity.value = ""; break //only type property
                 //sleeve only
