@@ -928,7 +928,7 @@ function update_ui(ns, bit_node_multipliers) {
 
     //sleeve, should not do anything if not unlocked
     //add sleeve values
-    const sleeve_data = sleeve.update_ui(ns)
+    const sleeve_data = i_sleeve.update_ui(ns)
     //split in variables for readability
     const sleeve_headers = sleeve_data[0]
     const sleeve_values = sleeve_data[1]
