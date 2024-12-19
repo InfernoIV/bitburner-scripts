@@ -103,7 +103,7 @@ function determine_actions(ns, number_of_sleeves) {
         //get sleeve
         const sleeve = ns.sleeve.getSleeve(index)
         //check if we can do bladeburner work
-        const bladeburner_action = i_bladeburnerbladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
+        const bladeburner_action = i_bladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
 
         //if too much shock (round up for comparison)
         /*
