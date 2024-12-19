@@ -5,7 +5,7 @@ import * as config from "../../bladeburner/config.js"
 //bladeburner data
 import * as data from "../../bladeburner/data.js"
 //bladeburner functions
-import * as bladeburner from "../../bladeburner/bladeburner.js"
+import * as i_bladeburner from "../../bladeburner/bladeburner.js"
 
 
 
@@ -19,19 +19,25 @@ import * as bladeburner from "../../bladeburner/bladeburner.js"
  * @param {NS} ns
 **/
 export function determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned) {
+    //if no access
+    if(!i_bladeburner.get_access(ns)) {
+        //stop
+        return { type: "DENIED", value: "DENIED" }
+    }
+    
     //check if we have enough chance to recruit
     if (ns.bladeburner.getActionEstimatedSuccessChance(data.actions.type.general, data.actions.sleeve.recruitment, index)[0] >= config.bladeburner_success_chance_minimum_sleeve) {
         //set to recruit
         return { type: data.actions.sleeve.recruitment, value: data.actions.sleeve.recruitment } //bladeburner action
     }
     //if city chaos is over threshold (negatively impacts success chance)
-    else if (ns.bladeburner.getCityChaos(bladeburner.get_best_city(ns)) > config.bladeburner_chaos_threshold) {
+    else if (ns.bladeburner.getCityChaos(i_bladeburner.get_best_city(ns)) > config.bladeburner_chaos_threshold) {
         //lower chaos (todo: move sleeve???)
         return { type: data.actions.sleeve.diplomacy, value: data.actions.sleeve.diplomacy } //bladeburner action
     }
 
     //if action count is too low
-    else if ((bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) &&
+    else if ((i_bladeburner.get_lowest_action_count(ns) <= config.bladeburner_minimum_number_of_actions) &&
             (bladeburner_infiltrate_assigned == false)) {
         //set to infiltrate to raise action count
         //or to incite violence??
