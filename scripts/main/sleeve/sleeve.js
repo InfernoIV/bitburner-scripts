@@ -111,7 +111,7 @@ function determine_actions(ns, number_of_sleeves) {
             desired_actions.add_action(ns, index, { type: data.activities.recovery, value: " " })
         }
         //not reached target kills
-        /*else*/ if (player.numPeopleKilled < data.requirements.kills_for_factions) {
+        else if (player.numPeopleKilled < data.requirements.kills_for_factions) {
             //add action
             desired_actions.add_action(ns, index, { type: data.activities.crime, value: ns.enums.CrimeType.homicide })
         }
