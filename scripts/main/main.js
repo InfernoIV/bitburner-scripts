@@ -6,12 +6,7 @@ import { get_server_specific, get_servers, get_augmentations_installed } from "s
 import * as config from "./config.js"
 //data
 import * as data from "./data.js"
-//sleeve
-import * as i_sleeve from "/scripts/main/sleeve/sleeve.js"
-//bladeburner
-import * as i_bladeburner from "/scripts/main/bladeburner/bladeburner.js"
-//hacknet
-import * as i_hacknet from "/scripts/main/hacknet/hacknet.js"
+
 
 
 
@@ -45,8 +40,6 @@ export async function main(ns) {
 
     //initialize
     const bit_node_multipliers = init(ns) //1,5 GB
-    //sleeve
-    i_sleeve.init(ns)
     //keep track of launched scripts
     let launched_scripts = []
     //keep track of backdoored servers
@@ -70,11 +63,10 @@ export async function main(ns) {
         buy_augments(ns)  //10 GB
         
         //sleeve: ? GB
-        i_sleeve.manage_actions(ns)
-        i_sleeve.buy_augments(ns) //8 GB
+        manage_sleeve(ns)
         
         //servers: ? GB
-        i_hacknet.manage_network(ns) // GB
+        manage_network(ns)
 
         //reset & destruction: 0 GB
         manage_bit_node_destruction(ns)   //0 GB (exernal script)
@@ -135,12 +127,14 @@ function init(ns) {
         hook1.innerHTML = ''
     })
 
-    
     //get information from files
     //get reset info
     //const reset_info = common.get_reset_info(ns) 
     //get bitnode information from file
     const bit_node_multipliers = common.get_bit_node_multipliers(ns)
+
+    //init for sleeve
+    init_sleeve(ns)
 
     //give the information back
     return bit_node_multipliers
@@ -524,14 +518,16 @@ function manage_scripts(ns, launched_scripts, bit_node_multipliers) {
 
     //check if makes sense to launch gang manager
     if ((bit_node_multipliers.GangSoftcap > 0) && //and if the bitnode allows
-        (player.karma < data.requirements.karma_for_gang)) { //and if karma threshold is reached
+        (player.karma < data.requirements.karma_for_gang) && //and if karma threshold is reached
+        (common.get_availability_functionality(ns, common.functionality.gang))) { //and functionality is unlocked
         //add to list
         scripts_to_launch.push(common.scripts.gang)
     }
 
     //check if makes sense to launch corporation manager
     if ((bit_node_multipliers.CorporationSoftcap >= 0.15) && //and if the bitnode allows
-        (money_available > corporation_money_requirement)) { //and if money threshold is reached
+        (money_available > corporation_money_requirement) &&  //and if money threshold is reached
+        (common.get_availability_functionality(ns, common.functionality.corporation))) { //and corporation is unlocked
         //add to list
         scripts_to_launch.push(common.scripts.corporation)
     }
@@ -641,8 +637,6 @@ function manage_action_player(ns) {
     const player_activity = get_activity(ns)
     //set the default focus for actions (always false)
     const action_focus = false
-    //check if we joined bladeburner (default is false
-    const bladeburner_joined = i_bladeburner.get_access(ns)
     
     //variables to check
     const enough_hacking_skill = ns.getPlayer().skills.hacking >= config.stat_minimum_hacking
@@ -675,10 +669,13 @@ function manage_action_player(ns) {
         
     //hacking and karma are ok, start normally
     } else {
+         //check if we joined bladeburner (default is false
+        const bladeburner_joined = i_bladeburner.get_access(ns)
+
         //if bladeburner joined: work for bladeburner
         if (bladeburner_joined) {
             //check for bladeburner work
-            i_bladeburner.manage_action(ns)
+            manage_bladeburner_action(ns)
         }
 
         //if bladeburner is not joined or augment for dual work is installed
@@ -962,4 +959,110 @@ function update_ui(ns, bit_node_multipliers) {
     //send text to html element 
     hook0.innerText = headers.join("\n")
     hook1.innerText = values.join("\n")
+}
+
+
+
+/**
+ * Function that checks which function to use
+ */
+function init_sleeve(ns) {
+    //check if we can use sleeves
+    if(common.get_availability_functionality(ns, common.functionality.sleeve)) {
+        //conditionally import sleeve
+        import(common.scripts.i_sleeve)
+        //then use sleeve
+        .then((i_sleeve) => {
+            //init sleeve
+            i_sleeve.init(ns)
+        })
+    }
+}
+
+
+
+
+/**
+ * Function that manages the sleeve, if unlocked
+ */
+function manage_sleeve(ns) {
+    //check if we can use sleeves
+    if(common.get_availability_functionality(ns, common.functionality.sleeve)) {
+        //conditionally import sleeve
+        import(common.scripts.i_sleeve)
+        //then use sleeve
+        .then((i_sleeve) => {
+            //manage actions sleeve
+            i_sleeve.manage_actions(ns)
+            //buy augments sleeve
+            i_sleeve.buy_augments(ns) //8 GB
+        })
+    }
+}
+
+
+
+/**
+ * Function that manages network, if unlocked
+ */
+function manage_network(ns) {
+    //check if we can use hacknet
+    if(common.get_availability_functionality(ns, common.functionality.hacknet)) {
+        //conditionally import hacknet
+        import(common.scripts.i_hacknet)
+        //then use sleeve
+        .then((i_hacknet) => {
+            //manage hacknet network
+            i_hacknet.manage_network(ns) // GB
+        })
+    }
+    //otherwise use normal servers
+    else {
+        //TODO
+    }
+}
+
+
+
+/**
+ * Function that checks if we have access to bladeburner divion, if unlocked
+ * @param {NS} ns 
+ */
+function get_bladeburner_access(ns) {
+    //check if we can use bladeburner
+    if(common.get_availability_functionality(ns, common.functionality.bladeburner)) {
+        //conditionally import bladeburner
+        import(common.scripts.i_bladeburner)
+        //then use sleeve
+        .then((i_bladeburner) => {
+            //check if we have bladeburner access
+            return i_bladeburner.get_access(ns)
+        })
+    }
+    //functionality not unlocked
+    else {
+        //no access since not unlocked
+        return false
+    }
+}
+
+
+
+/**
+ * Function that manages bladeburner actions
+ * @param {NS} ns 
+ */
+function manage_bladeburner_action(ns) {
+        //check if we can use bladeburner
+        if(common.get_availability_functionality(ns, common.functionality.bladeburner)) {
+            //conditionally import bladeburner
+            import(common.scripts.i_bladeburner)
+            //then use sleeve
+            .then((i_bladeburner) => {
+                //manage bladeburner action
+                i_bladeburner.manage_action(ns)
+            })
+        }
+        //functionality not unlocked
+        //do nothing
 }

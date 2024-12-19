@@ -6,16 +6,6 @@ Exports:
   update_ui(ns)
 */
 
-/*
-File to use for import when sleeve functionality IS unlocked
-Functions and cost
-  0 GB  init
-  x GB  manage_actions
-  x GB  buy_augments_sleeve
-  x GB  get_number_of_sleeves
-  x GB  update_ui
-  4 GB  get_activity
-*/
 
 //imports
 import * as common from "scripts/common.js"
@@ -25,8 +15,6 @@ import { get_augmentations_installed } from "scripts/common_cost.js"
 import * as data from "../data.js"
 //config
 import * as config from "./config.js"
-//bladeburner
-import * as i_bladeburner from "./bladeburner/bladeburner.js"
 
 
 
@@ -103,7 +91,7 @@ function determine_actions(ns, number_of_sleeves) {
         //get sleeve
         const sleeve = ns.sleeve.getSleeve(index)
         //check if we can do bladeburner work
-        const bladeburner_action = i_bladeburnerbladeburner.determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
+        const bladeburner_action = bladeburner_determine_action(ns, index, desired_actions.bladeburner_contract_assigned, desired_actions.bladeburner_infiltrate_assigned)
 
         //if too much shock (round up for comparison)
         /*
@@ -278,7 +266,7 @@ function execute_actions(ns, desired_actions) {
                     //case data.activities.support:  //support as member of bladeburner? properties: type
                     //common.log(ns,1,common.info, index + " desired_action: " + JSON.stringify(desired_action))
                     //do bladeburner stuff
-                    i_bladeburner.execute_action(ns, index, desired_action)
+                    bladeburner_execute_action(ns, index, desired_action)
                     //stop looking
                     break
 
@@ -435,7 +423,7 @@ function get_activity(ns, index = -1) {
                 //bladeburner
                 case data.activities.bladeburner:
                 case data.activities.infiltrate:
-                    activity.value = i_bladeburner.get_activity(ns, sleeve_activity)
+                    activity.value = determine_bladeburner_activity(ns, sleeve_activity)
                     break //only type property
                 //case data.activities.support: activity.value = ""; break //only type property
                 //sleeve only
@@ -674,3 +662,68 @@ class action_list {
     }
 
 }
+
+
+
+/**
+ * Function that determines bladeburner actions
+ * @param {NS} ns 
+ */
+function bladeburner_determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned) {
+    //check if we can use bladeburner
+    if(common.get_availability_functionality(ns, common.functionality.bladeburner)) {
+        //conditionally import bladeburner
+        import(common.scripts.i_sleeve_bladeburner)
+        //then use sleeve
+        .then((i_sleeve_bladeburner) => {
+            //manage bladeburner action
+            return i_sleeve_bladeburner.determine_action(ns, index, bladeburner_contract_assigned, bladeburner_infiltrate_assigned)
+        })
+    }
+    //functionality not unlocked
+    return "DENIED"
+}
+
+
+
+/**
+ * Function that determines bladeburner activity
+ * @param {NS} ns 
+ */
+function bladeburner_determine_activity(ns, sleeve_activity) {
+    //check if we can use bladeburner
+    if(common.get_availability_functionality(ns, common.functionality.bladeburner)) {
+        //conditionally import bladeburner
+        import(common.scripts.i_sleeve_bladeburner)
+        //then use sleeve
+        .then((i_sleeve_bladeburner) => {
+            //manage bladeburner action
+            return i_sleeve_bladeburner.get_activity(ns, sleeve_activity)
+        })
+    }
+    //functionality not unlocked
+    //return blank
+    return ""
+}
+
+
+
+/**
+ * Function that executes bladeburner actions
+ * @param {NS} ns 
+ */
+function bladeburner_execute_action(ns, index, desired_action) {
+    //check if we can use bladeburner
+    if(common.get_availability_functionality(ns, common.functionality.bladeburner)) {
+        //conditionally import bladeburner
+        import(common.scripts.i_sleeve_bladeburner)
+        //then use sleeve
+        .then((i_sleeve_bladeburner) => {
+            //manage bladeburner action
+            i_sleeve_bladeburner.execute_action(ns, index, desired_action)
+        })
+    }
+    //functionality not unlocked
+    //do nothing
+}
+

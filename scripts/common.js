@@ -112,6 +112,14 @@ export const scripts = {
     //stanekBuy: "scripts/stanek/stanekBuy.js",
     //utility
     ram: "scripts/utility/ram.js",
+    //imports
+    //sleeve
+    i_sleeve: "/scripts/main/sleeve/sleeve.js", 
+    i_sleeve_bladeburner: "/scripts/main/sleeve/bladeburner/bladeburner.js",
+    //bladeburner
+    i_bladeburner: "/scripts/main/bladeburner/bladeburner.js",
+    //hacknet
+    i_hacknet: "/scripts/main/hacknet/hacknet.js",
 }
 
 
@@ -428,7 +436,6 @@ export function disable_logging(ns, log_topics) {
 
 
 //enum for checking features
-/*
 export const functionality = {
   //genesis: bit node 1: -
   gang: "gang", //bit node 2: namespace gang
@@ -443,7 +450,7 @@ export const functionality = {
   //Neuroflux: bit node 12: -
   stanek: "stanek", //bit node 13: namespace stanek
   ipvgo: "ipvgo", //bit node 14: namespace ipvgo
-}*/
+}
 
 
 
@@ -550,64 +557,36 @@ export function get_availability_functionality(ns, functionality) {
 
 
 
-/** 
- * Function that gets all servers
- * @param {NS} ns 
- 
-function getServers(ns) {
-    //create a list to save hostnames to
-    let scanList = []
-    //start scanning from home
-    scanServer(ns, servers.home, scanList)
-    //add purchased servers to the list
-    return scanList.concat(ns.getPurchasedServers())
+/**
+ * Function that checks if functionality is unlocked
+ */
+export function get_availability_functionality(ns, functionality) {
+  //check according to functionality
+  switch(functionality) {
+    //boot.js
+    case intelligence: //bit node 5: function bitnodeMultipliers, namespace formula's
+    case stanek: //bit node 13: namespace stanek
+
+    //main.js
+    case bladeburner: //bit node 6 & 7: namespace bladeburner
+    case hacknet: //bit node 9: namespace hacknet
+    case sleeve: //bit node 10: namespace sleeve, grafting
+
+    case gang: //bit node 2: namespace gang
+    case corporation: //bit node 3: namespace corporation
+    case stocks: //bit node 8: namespace Tix (short and limit orders)
+    case ipvgo: //bit node 14: namespace ipvgo
+
+    //singularity: bit node 4: namespace singularity
+    //Company: bit node 11: -
+    //Neuroflux: bit node 12: -
+
+    default: 
+      //stub
+      return true //false
+  }
+  export const functionality = {
+    //genesis: bit node 1: -
+    
 }
-*/
 
-
-/** @param {NS} ns 
-function scanServer(ns, hostname, scanList) {
-    //add this hostname to the list				
-    scanList.push(hostname)
-    //scan at this hostname				
-    let neighbours = ns.scan(hostname)
-    //for every neighbour				
-    for (let neighbour of neighbours) {
-        //if not yet performed a scan on this hostname			
-        if (scanList.indexOf(neighbour) == -1) {
-            //scan from this neighbour		
-            scanServer(ns, neighbour, scanList)
-        }
-    }
-}
-*/
-
-
-/** @param {NS} ns */
-/*
-function getExecuteServers(ns) {
-    let executeServers = []
-    const allServers = getServers(ns)
-    //TODO: WHY DO THEY FAIL?
-    const blackList = ["zb-institute", "univ-energy", "titan-labs"]
-    for (const server of allServers) {
-        //if not on the blacklist
-        //if (blackList.indexOf(server) != -1) {
-        //if root access and RAM
-        if ((ns.hasRootAccess(server)) &&
-            (ns.getServerMaxRam(server) > 0)) {
-            //if not yet in the executeServers list
-            if (executeServers.indexOf(server) == -1) {
-                //copy files to servers 
-                ns.scp(enum_scripts.workerWeaken, server)
-                ns.scp(enum_scripts.workerGrow, server)
-                ns.scp(enum_scripts.workerHack, server)
-                //push to list
-                executeServers.push(server)
-            }
-        }
-        //}
-    }
-    //log(ns,1,info,"executeServers: " + executeServers)
-    return executeServers
-}*/
