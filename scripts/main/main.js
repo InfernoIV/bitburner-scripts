@@ -7,11 +7,11 @@ import * as config from "./config.js"
 //data
 import * as data from "./data.js"
 //sleeve
-import * as sleeve from "/scripts/main/sleeve/sleeve.js"
+import * as i_sleeve from "/scripts/main/sleeve/sleeve.js"
 //bladeburner
-import * as bladeburner from "/scripts/main/bladeburner/bladeburner.js"
+import * as i_bladeburner from "/scripts/main/bladeburner/bladeburner.js"
 //hacknet
-import * as hacknet from "/scripts/main/hacknet/hacknet.js"
+import * as i_hacknet from "/scripts/main/hacknet/hacknet.js"
 
 
 
@@ -46,7 +46,7 @@ export async function main(ns) {
     //initialize
     const bit_node_multipliers = init(ns) //1,5 GB
     //sleeve
-    sleeve.init(ns)
+    i_sleeve.init(ns)
     //keep track of launched scripts
     let launched_scripts = []
     //keep track of backdoored servers
@@ -70,11 +70,11 @@ export async function main(ns) {
         buy_augments(ns)  //10 GB
         
         //sleeve: ? GB
-        sleeve.manage_actions(ns)
-        sleeve.buy_augments(ns) //8 GB
+        i_sleeve.manage_actions(ns)
+        i_sleeve.buy_augments(ns) //8 GB
         
         //servers: ? GB
-        hacknet.manage_network(ns) // GB
+        i_hacknet.manage_network(ns) // GB
 
         //reset & destruction: 0 GB
         manage_bit_node_destruction(ns)   //0 GB (exernal script)
@@ -196,7 +196,7 @@ function manage_bit_node_destruction(ns) {
     }
 
     //bladeburner condition met
-    if (bladeburner.has_completed_all_black_ops(ns)) {
+    if (i_bladeburner.has_completed_all_black_ops(ns)) {
             //proceed with destruction
             can_execute_destruction = true
     }
@@ -223,7 +223,7 @@ function manage_augment_installation(ns) {
     const augments_to_be_installed = get_number_of_augments_ready_for_installationation()
 
     //check if player is busy
-    if (bladeburner.is_performing_black_op(ns)) {
+    if (i_bladeburner.is_performing_black_op(ns)) {
         //do not proceed
         return
     }
@@ -642,7 +642,7 @@ function manage_action_player(ns) {
     //set the default focus for actions (always false)
     const action_focus = false
     //check if we joined bladeburner (default is false
-    const bladeburner_joined = bladeburner.get_access(ns)
+    const bladeburner_joined = i_bladeburner.get_access(ns)
     
     //variables to check
     const enough_hacking_skill = ns.getPlayer().skills.hacking >= config.stat_minimum_hacking
@@ -678,7 +678,7 @@ function manage_action_player(ns) {
         //if bladeburner joined: work for bladeburner
         if (bladeburner_joined) {
             //check for bladeburner work
-            bladeburner.manage_action(ns)
+            i_bladeburner.manage_action(ns)
         }
 
         //if bladeburner is not joined or augment for dual work is installed
