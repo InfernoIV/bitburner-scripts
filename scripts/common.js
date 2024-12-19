@@ -39,10 +39,11 @@ export const port = {
     ui_gang: 25, //port to provide information on gang status
     
     //hash communication
-    hash_bladeburner_skill_points: 30, //indication that skill points are still needed
-    hash_bladeburner_rank: 31, //indication that rank is still needed
-    hash_corporation_funds: 32, //indication that funds are still needed
-    hash_corporation_research: 33, //indication that research is still needed
+    hash_amount: 30, //number of hashes
+    hash_bladeburner_skill_points: 31, //indication that skill points are still needed
+    hash_bladeburner_rank: 32, //indication that rank is still needed
+    hash_corporation_funds: 33, //indication that funds are still needed
+    hash_corporation_research: 34, //indication that research is still needed
     
     //reset communication: indicate blockage to prevent reset before it is ready / up to speed
     block_reset_gang: 40, //all territory conquered
