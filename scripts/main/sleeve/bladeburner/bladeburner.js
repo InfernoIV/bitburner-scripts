@@ -83,26 +83,33 @@ export function determine_action(ns, index, bladeburner_contract_assigned, blade
  *   ns.sleeve.setToBladeburnerAction: 4 GB
 **/
 export function execute_action(ns, sleeve_index, sleeve_action) {
-    //check the type
-    switch (sleeve_action.type) {
-        case "Take on contracts":
-            //set to bladeburner operation
-            ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
-            //stop
-            break
-            
-        case "Recruitment":
-        case "Infiltrate synthoids":
-            //set to bladeburner general action
-            ns.sleeve.setToBladeburnerAction(sleeve_index, sleeve_action.type)
-            //stop
-            break
+    //ensure script not crashing
+    try {    
+        //check the type
+        switch (sleeve_action.type) {
+            case "Take on contracts":
+                //set to bladeburner operation
+                ns.sleeve.setToBladeburnerAction(sleeve_index, data.actions.sleeve.take_on_contracts, sleeve_action.value)
+                //stop
+                break
+                
+            case "Recruitment":
+            case "Infiltrate synthoids":
+                //set to bladeburner general action
+                ns.sleeve.setToBladeburnerAction(sleeve_index, sleeve_action.type)
+                //stop
+                break
 
-        default:
-            //do not handle, is a normal action
-            //log warning
-            common.log(ns, 1, common.warning, "bb - execute_action - uncaught condition: " + sleeve_index + " has action " + JSON.stringify(sleeve_action))
+            default:
+                //do not handle, is a normal action
+                //log warning
+                common.log(ns, 1, common.warning, "bb - execute_action - uncaught condition: " + sleeve_index + " has action " + JSON.stringify(sleeve_action))
 
+        }
+    }
+    catch (err) {
+        //log error, 
+        common.log(ns, 1, common.error, "bb - " + sleeve_index + " cannot execute action: " + JSON.stringify(sleeve_action) + ", resulting in: " + err)
     }
     /*
     //check if we want to handle it
