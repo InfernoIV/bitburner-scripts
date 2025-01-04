@@ -91,7 +91,7 @@
 - [ ] BN8: Challenge - *"Destroy BN8 without using 4S" (?)*
 - [ ] BN9: Challenge - *"Destroy BN9 without using hacknet servers" (?)*
 - [x] BN10: Challenge - Destroy BN10 without using sleeves
-- [ ] BN12: Challenge - *"Destroy BN12 without ???" (something with Neuroflux? get to BN level to 255?)*
+- [ ] BN12: Challenge - *"Destroy BN12 without ???" (something with Neuroflux? get to BN level to 255??)*
 - [x] BN13: Challenge - Destroy BN13 without Stanek's Gift
 
 # Exploits
