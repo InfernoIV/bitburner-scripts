@@ -11,3 +11,4 @@ A few handy aliases:
 `alias "boot=home; cls; killall; scripts/boot.js"` = command `boot` kills all scripts and starts the boot sequence
 
 `alias "update=home; cls; killall; git-pull.js"` = command `update` will get download / update the code from github
+
