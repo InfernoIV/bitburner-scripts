@@ -44,7 +44,7 @@ export const stat_minimum_hacking = 25//50 //?
 export const time_between_loops = 1 * 1000
 
 //minimum amount of augments before resetting
-export const augments_minimum_for_reset = 4 //to be set to 40 for achievement
+export const augments_minimum_for_reset = 5 //to be set to 40 for achievement
 
 //ports to read for ui information
 //data: [ header, port number ]
